@@ -48,12 +48,11 @@ flowchart TB
   scrapers --> Log
 
 %% --- 2. Folder structure (tree-style) ---
-flowchart LR
+flowchart TB
   subgraph root [Project root]
     guardrails[guardrails/]
-    prisma[prisma]
-    src[src]
-    config[prisma.config.ts\npackage.json]
+    prisma[prisma/]
+    config[prisma.config.ts and package.json]
   end
 
   subgraph src_content [src/]
@@ -85,23 +84,7 @@ flowchart LR
 
   root --> guardrails
   root --> prisma
-  root --> src
   root --> config
-  src --> server
-  src --> api
-  src --> bot
-  src --> channels
-  src --> scrapers
-  src --> log
-  src --> types
-  src --> utils
-  api --> routes
-  api --> controllers
-  api --> services
-  api --> models
-  api --> schemas
-  api --> middleware
-  api --> plugins
-  api --> fastify
-  channels --> whatsapp
-  channels --> discord
+  root --> src_content
+  api --> api_content
+  channels --> channels_content

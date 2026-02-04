@@ -85,7 +85,6 @@ flowchart TB
   subgraph root [Project root]
     guardrails[guardrails/]
     prisma_root[prisma/]
-    src[src/]
   end
 
   subgraph src_content [src/]
@@ -116,15 +115,7 @@ flowchart TB
 
   root --> guardrails
   root --> prisma_root
-  root --> src
-  src --> server
-  src --> api
-  src --> bot
-  src --> channels
-  src --> scrapers
-  src --> log
-  src --> types
-  src --> utils
+  root --> src_content
   api --> api_detail
   channels --> channels_detail
 ```
