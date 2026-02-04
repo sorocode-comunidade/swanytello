@@ -1,0 +1,97 @@
+%% Swanytello - Project structure and architecture
+%% Render at https://mermaid.live or in any Mermaid-compatible viewer
+
+%% --- 1. Monolith architecture (high-level) ---
+flowchart TB
+  subgraph external [External]
+    Frontends[Frontends]
+    Systems[External systems]
+    Users[Users]
+  end
+
+  subgraph monolith [Swanytello monolith]
+    subgraph api [REST API]
+      Fastify[Fastify]
+      Routes[Routes / Controllers / Services / Models]
+      Fastify --> Routes
+    end
+
+    subgraph bot [Bot]
+      RAG[RAG + LangChain]
+    end
+
+    subgraph channels [Channels]
+      WhatsApp[WhatsApp]
+      Discord[Discord]
+    end
+
+    subgraph shared [Shared]
+      Log[log]
+      Types[types]
+      Utils[utils]
+    end
+  end
+
+  Frontends --> api
+  Systems --> api
+  Users --> channels
+  channels --> api
+  channels --> bot
+  api --> Log
+  bot --> Log
+  channels --> Log
+
+%% --- 2. Folder structure (tree-style) ---
+flowchart LR
+  subgraph root [Project root]
+    prisma[prisma]
+    src[src]
+    config[prisma.config.ts\npackage.json]
+  end
+
+  subgraph src_content [src/]
+    server[server.ts]
+    api[api/]
+    bot[bot/]
+    channels[channels/]
+    log[log/]
+    types[types/]
+    utils[utils/]
+  end
+
+  subgraph api_content [api/]
+    routes[routes]
+    controllers[controllers]
+    services[services]
+    models[models]
+    schemas[schemas]
+    middleware[middleware]
+    plugins[plugins]
+    fastify[fastifyInstance.ts]
+  end
+
+  subgraph channels_content [channels/]
+    whatsapp[whatsapp/]
+    discord[discord/]
+  end
+
+  root --> prisma
+  root --> src
+  root --> config
+  src --> server
+  src --> api
+  src --> bot
+  src --> channels
+  src --> log
+  src --> types
+  src --> utils
+  api --> routes
+  api --> controllers
+  api --> services
+  api --> models
+  api --> schemas
+  api --> middleware
+  api --> plugins
+  api --> fastify
+  channels --> whatsapp
+  channels --> discord

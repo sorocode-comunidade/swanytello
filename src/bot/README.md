@@ -1,3 +1,3 @@
-# Bot implementations
+# Bot (RAG + LangChain)
 
-This folder holds bot implementations for the Swanytello project (e.g. SwanyBot, DonatelloBot).
+This folder holds **RAG and bot logic** using LangChain. It is where SwanyBot and DonatelloBot behavior is implemented (retrieval, generation, orchestration). User-facing communication happens through the **channels** (WhatsApp, Discord) in `src/channels`, which can call into this layer when a user message needs a RAG response.
