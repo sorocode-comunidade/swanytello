@@ -25,6 +25,10 @@ flowchart TB
       Discord[Discord]
     end
 
+    subgraph scrapers [Scrapers]
+      Scrape[Web scrapers]
+    end
+
     subgraph shared [Shared]
       Log[log]
       Types[types]
@@ -37,13 +41,16 @@ flowchart TB
   Users --> channels
   channels --> api
   channels --> bot
+  scrapers --> bot
   api --> Log
   bot --> Log
   channels --> Log
+  scrapers --> Log
 
 %% --- 2. Folder structure (tree-style) ---
 flowchart LR
   subgraph root [Project root]
+    guardrails[guardrails/]
     prisma[prisma]
     src[src]
     config[prisma.config.ts\npackage.json]
@@ -54,6 +61,7 @@ flowchart LR
     api[api/]
     bot[bot/]
     channels[channels/]
+    scrapers[scrapers/]
     log[log/]
     types[types/]
     utils[utils/]
@@ -75,6 +83,7 @@ flowchart LR
     discord[discord/]
   end
 
+  root --> guardrails
   root --> prisma
   root --> src
   root --> config
@@ -82,6 +91,7 @@ flowchart LR
   src --> api
   src --> bot
   src --> channels
+  src --> scrapers
   src --> log
   src --> types
   src --> utils

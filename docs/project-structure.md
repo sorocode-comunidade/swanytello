@@ -32,6 +32,10 @@ flowchart TB
       Discord[Discord]
     end
 
+    subgraph scrapers [Scrapers]
+      Scrape[Web scrapers]
+    end
+
     subgraph shared [Shared]
       Log[log]
       Types[types]
@@ -44,24 +48,33 @@ flowchart TB
   Users --> channels
   channels --> api
   channels --> bot
+  scrapers --> bot
   api --> Log
   bot --> Log
   channels --> Log
+  scrapers --> Log
 ```
 
 ---
 
 ## 2. Folder structure
 
-High-level layout under `src/`.
+Project root and `src/` layout. Guardrails live at root (for AI dev agents); RAG guardrails elsewhere.
 
 ```mermaid
 flowchart TB
-  subgraph src [src/]
+  subgraph root [Project root]
+    guardrails[guardrails/]
+    prisma_root[prisma/]
+    src[src/]
+  end
+
+  subgraph src_content [src/]
     server[server.ts]
     api[api/ REST API]
     bot[bot/ RAG LangChain]
     channels[channels/]
+    scrapers[scrapers/]
     log[log/]
     types[types/]
     utils[utils/]
@@ -82,10 +95,14 @@ flowchart TB
     discord[discord/]
   end
 
+  root --> guardrails
+  root --> prisma_root
+  root --> src
   src --> server
   src --> api
   src --> bot
   src --> channels
+  src --> scrapers
   src --> log
   src --> types
   src --> utils
