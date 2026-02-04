@@ -1,7 +1,12 @@
 import { PrismaClient } from "../../../generated/prisma/index.js";
 
-const prismaInstance = new PrismaClient({
-  log: ["query", "error", "warn"],
-});
+let prismaInstance: PrismaClient | Record<string, unknown>;
+try {
+  prismaInstance = new PrismaClient({
+    log: ["query", "error", "warn"],
+  });
+} catch {
+  prismaInstance = {};
+}
 
 export default prismaInstance;

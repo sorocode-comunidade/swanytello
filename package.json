@@ -5,7 +5,6 @@
   "homepage": "https://github.com/sorocode-comunidade/swanytello#readme",
   "bugs": { "url": "https://github.com/sorocode-comunidade/swanytello/issues" },
   "repository": { "type": "git", "url": "git+ssh://git@github.com/sorocode-comunidade/swanytello.git" },
-  "license": "ISC",
   "author": "akaNIO, PauloHenriqueOliveiradeAlmeida",
   "type": "module",
   "main": "dist/server.js",
@@ -14,7 +13,6 @@
     "dev": "nodemon",
     "start": "tsx src/server.ts",
     "type-check": "tsc --noEmit",
-    "seed": "tsx prisma/seed.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {

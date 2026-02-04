@@ -1,5 +1,19 @@
 import prismaInstance from "../api/plugins/prismaInstance.js";
-import { LogLevel, LogAction } from "../../generated/prisma/index.js";
+
+const LogLevel = {
+  INFO: "INFO",
+  WARNING: "WARNING",
+  ERROR: "ERROR",
+  SUCCESS: "SUCCESS",
+} as const;
+const LogAction = {
+  CREATE: "CREATE",
+  UPDATE: "UPDATE",
+  DELETE: "DELETE",
+  READ: "READ",
+} as const;
+
+const prismaLog = (prismaInstance as { log?: { create: (args: unknown) => Promise<unknown> } }).log;
 
 export async function logCreate(
   entity: string,
@@ -7,7 +21,8 @@ export async function logCreate(
   data?: Record<string, unknown>,
   userId?: string
 ) {
-  await prismaInstance.log.create({
+  if (!prismaLog) return;
+  await prismaLog.create({
     data: {
       level: LogLevel.SUCCESS,
       action: LogAction.CREATE,
@@ -25,7 +40,8 @@ export async function logUpdate(
   data?: Record<string, unknown>,
   userId?: string
 ) {
-  await prismaInstance.log.create({
+  if (!prismaLog) return;
+  await prismaLog.create({
     data: {
       level: LogLevel.INFO,
       action: LogAction.UPDATE,
@@ -43,7 +59,8 @@ export async function logDelete(
   data?: Record<string, unknown>,
   userId?: string
 ) {
-  await prismaInstance.log.create({
+  if (!prismaLog) return;
+  await prismaLog.create({
     data: {
       level: LogLevel.WARNING,
       action: LogAction.DELETE,
@@ -66,7 +83,8 @@ export async function logError(
       ? { message: error.message, stack: error.stack }
       : (error as Record<string, unknown>);
 
-  await prismaInstance.log.create({
+  if (!prismaLog) return;
+  await prismaLog.create({
     data: {
       level: LogLevel.ERROR,
       action: LogAction.READ,
