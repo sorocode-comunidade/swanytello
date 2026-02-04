@@ -1,0 +1,36 @@
+{
+  "name": "swanytello",
+  "version": "1.0.0",
+  "description": "Projeto desenvolvido para a comunidade Sorocode fazendo a união dos projetos SwanyBot e DonatelloBot.",
+  "homepage": "https://github.com/sorocode-comunidade/swanytello#readme",
+  "bugs": { "url": "https://github.com/sorocode-comunidade/swanytello/issues" },
+  "repository": { "type": "git", "url": "git+ssh://git@github.com/sorocode-comunidade/swanytello.git" },
+  "license": "ISC",
+  "author": "akaNIO, PauloHenriqueOliveiradeAlmeida",
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "nodemon",
+    "start": "tsx src/server.ts",
+    "type-check": "tsc --noEmit",
+    "seed": "tsx prisma/seed.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@fastify/jwt": "^9.0.1",
+    "@prisma/client": "^7.0.0",
+    "bcrypt": "^6.0.0",
+    "fastify": "^5.0.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/node": "^22.0.0",
+    "nodemon": "^3.1.0",
+    "prisma": "^7.0.0",
+    "dotenv": "^16.4.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
