@@ -26,7 +26,7 @@ Choose one based on product needs (official vs. unofficial, multi-device, etc.).
 Add when implementing:
 
 - **client/** – WhatsApp client/session setup and connection.
-- **handlers/** – Logic for incoming messages (e.g. forward to RAG in `src/bot`, call `src/api`).
+- **handlers/** – Logic for incoming messages (e.g. forward to RAG in `src/rag`, call `src/api`).
 - **webhooks/** – HTTP route(s) for webhook verification and incoming payloads.
 - **config.ts** – Load and expose env/config for this channel.
 

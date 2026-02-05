@@ -23,8 +23,8 @@ flowchart TB
       Fastify --> Routes
     end
 
-    subgraph bot [Bot]
-      RAG[RAG plus LangChain]
+    subgraph rag [RAG]
+      RAGLogic[RAG + LangChain]
     end
 
     subgraph channels [Channels]
@@ -32,8 +32,10 @@ flowchart TB
       Discord[Discord]
     end
 
-    subgraph scrapers [Scrapers]
-      Scrape[Web scrapers]
+    subgraph etl [ETL]
+      Extract[Extract]
+      Transform[Transform]
+      Load[Load]
     end
 
     subgraph shared [Shared]
@@ -47,12 +49,12 @@ flowchart TB
   Systems --> api
   Users --> channels
   channels --> api
-  channels --> bot
-  scrapers --> bot
+  channels --> rag
+  etl --> rag
   api --> Log
-  bot --> Log
+  rag --> Log
   channels --> Log
-  scrapers --> Log
+  etl --> Log
 ```
 
 ---
@@ -71,9 +73,9 @@ flowchart TB
   subgraph src_content [src/]
     server[server.ts]
     api[api/ REST API]
-    bot[bot/ RAG LangChain]
+    rag[rag/ RAG LangChain]
     channels[channels/]
-    scrapers[scrapers/]
+    etl[etl/]
     log[log/]
     types[types/]
     utils[utils/]
@@ -103,7 +105,7 @@ flowchart TB
 
 ---
 
-## 3. Data flow (channels → API / Bot)
+## 3. Data flow (channels → API / RAG)
 
 How messages from users reach the API and RAG.
 
@@ -112,12 +114,12 @@ sequenceDiagram
   participant User
   participant Channel as Channel (WhatsApp or Discord)
   participant API as REST API
-  participant Bot as Bot (RAG)
+  participant RAG as RAG
 
   User->>Channel: Message
-  Channel->>Bot: Need RAG response
-  Bot->>Bot: LangChain / RAG
-  Bot-->>Channel: Response content
+  Channel->>RAG: Need RAG response
+  RAG->>RAG: LangChain / RAG
+  RAG-->>Channel: Response content
   Channel->>API: Persist or query data (optional)
   API-->>Channel: Result
   Channel->>User: Reply

@@ -25,7 +25,7 @@ Technologies and version expectations for the Swanytello project.
 
 ## Bot and RAG
 
-- **LangChain**: For RAG and bot logic in `src/bot`. Versions and integrations (embeddings, vector store) to be set when implementing.
+- **LangChain**: For RAG logic in `src/rag`. Versions and integrations (embeddings, vector store) to be set when implementing.
 
 ## Channels
 

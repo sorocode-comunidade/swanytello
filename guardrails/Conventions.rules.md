@@ -15,10 +15,11 @@ Rules for naming, folder usage, and layering in the Swanytello monolith.
 
 ## Folders
 
-- **API** (`src/api/`): Keep routes, controllers, services, models, schemas, middleware, plugins in their respective subfolders. Do not add business logic in routes or controllers.
-- **Bot** (`src/bot/`): RAG and LangChain logic; no HTTP or channel code here.
+- **API** (`src/api/`): Keep routes, controllers, services, schemas, middleware in their respective subfolders. Do not add business logic in routes or controllers.
+- **Database Operations** (`src/db_operations/`): All database models and Prisma operations. Contains `models/` subfolder for entity models and `prismaInstance.ts` for Prisma client. This is the only place for database access.
+- **RAG** (`src/rag/`): RAG and LangChain logic; no HTTP or channel code here.
 - **Channels** (`src/channels/`): One subfolder per channel (e.g. `whatsapp/`, `discord/`). Shared channel types/utils can go in `channels/shared/` if needed.
-- **Scrapers** (`src/scrapers/`): One module or subfolder per source or scraper type.
+- **ETL** (`src/etl/`): Extract, Transform, Load operations. Contains `extract/` for data extraction (web scrapers, API calls), `transform/` for data transformation and cleaning, and `load/` for data publishing (database storage, API delivery, indexing). One module or subfolder per source or extractor type within `extract/`.
 - **Log** (`src/log/`): Central logging only; no business logic.
 - **Types** (`src/types/`): TypeScript types and declaration files (e.g. `.d.ts`).
 - **Utils** (`src/utils/`): Pure helpers; no API, DB, or channel coupling.
@@ -28,7 +29,7 @@ Rules for naming, folder usage, and layering in the Swanytello monolith.
 - **Routes**: Handle HTTP only (params, query, body, reply). Call controllers; handle route-level errors (e.g. 400, 404, 409).
 - **Controllers**: Thin pass-through; delegate to services. No business logic, no direct DB access.
 - **Services**: Business logic, validation (Zod), logging, calls to models.
-- **Models**: Data access only (Prisma). No business rules.
+- **Models** (`src/db_operations/models/`): Data access only (Prisma). No business rules. Import from `db_operations` module.
 
 ## Imports
 

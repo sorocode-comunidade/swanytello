@@ -6,7 +6,7 @@ This folder holds **guardrails** that guide **AI coding agents** (e.g. Cursor AI
 
 - Guide AI agents (Cursor, Copilot, etc.) on how to write and structure code in this repo.
 - Encode project conventions, architecture boundaries, and do/don’t rules.
-- Keep development-time suggestions aligned with the monolith layout (api, bot, channels, scrapers, etc.).
+- Keep development-time suggestions aligned with the monolith layout (api, rag, channels, etl, db_operations, etc.).
 
 This is **not** for runtime guardrails (e.g. RAG input/output validation). Those will live elsewhere (e.g. under `src/` when implemented).
 
@@ -20,7 +20,7 @@ This is **not** for runtime guardrails (e.g. RAG input/output validation). Those
 | File | Purpose |
 |------|---------|
 | [Conventions.rules.md](Conventions.rules.md) | Naming, folder usage, layering (e.g. no business logic in controllers). |
-| [architecture.rules.md](architecture.rules.md) | What lives in `src/api`, `src/bot`, `src/channels`, `src/scrapers`; how they interact. |
+| [architecture.rules.md](architecture.rules.md) | What lives in `src/api`, `src/rag`, `src/channels`, `src/etl`, `src/db_operations`; how they interact. |
 | [stack.rules.md](stack.rules.md) | TypeScript, Fastify, Prisma, LangChain, etc., and version expectations. |
 | [do.rules.md](do.rules.md) | Patterns to follow: validation, auth, logging, structure, security. |
 | [dont.rules.md](dont.rules.md) | Patterns to avoid: logic in wrong layers, secrets, bypassing auth, etc. |

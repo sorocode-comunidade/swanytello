@@ -5,7 +5,7 @@ Patterns and practices to avoid when writing or suggesting code.
 ## API layer
 
 - **Don't** put business logic in **routes** or **controllers**; only in services.
-- **Don't** access the database (Prisma) from routes or controllers; use models via services.
+- **Don't** access the database (Prisma) from routes or controllers; use models from `src/db_operations/models/` via services.
 - **Don't** skip Zod validation in the service layer for user-provided input (body, query, params where applicable).
 - **Don't** return raw Prisma entities that include `password` or other secrets; always sanitize or omit before sending.
 - **Don't** invent new HTTP status codes or generic 500 for validation or business errors; use 400, 404, 409 etc. as appropriate.
@@ -20,9 +20,11 @@ Patterns and practices to avoid when writing or suggesting code.
 ## Structure and boundaries
 
 - **Don't** add channel-specific logic (e.g. Discord events, WhatsApp webhooks) inside `src/api`; keep them in `src/channels`.
-- **Don't** add HTTP route definitions or Fastify plugins inside `src/bot` or `src/channels`; the API is the only HTTP surface.
-- **Don't** put RAG or LangChain pipelines in `src/channels` or `src/api`; they belong in `src/bot`.
-- **Don't** let scrapers call the REST API or post to channels; they only produce data for the bot/RAG.
+- **Don't** add HTTP route definitions or Fastify plugins inside `src/rag` or `src/channels`; the API is the only HTTP surface.
+- **Don't** put RAG or LangChain pipelines in `src/channels` or `src/api`; they belong in `src/rag`.
+- **Don't** let ETL operations call the REST API or post to channels; they only produce data for the RAG pipeline.
+- **Don't** let RAG access `src/db_operations` directly; RAG must use the API for database operations.
+- **Don't** put database models or Prisma operations outside `src/db_operations`; this is the only place for database access.
 - **Don't** add runtime guardrails (e.g. RAG input/output validation) under `guardrails/` at project root; that folder is for AI dev-agent rules only.
 
 ## Code quality

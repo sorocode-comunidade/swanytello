@@ -1,6 +1,6 @@
 # Channels
 
-This folder holds **communication channel implementations** for WhatsApp and Discord. Each channel is responsible for receiving and sending messages on its platform; business logic (e.g. RAG, persistence) lives in `src/api` and `src/bot`.
+This folder holds **communication channel implementations** for WhatsApp and Discord. Each channel is responsible for receiving and sending messages on its platform; business logic (e.g. RAG, persistence) lives in `src/api` and `src/rag`.
 
 ## Subfolders
 
@@ -12,7 +12,7 @@ This folder holds **communication channel implementations** for WhatsApp and Dis
 
 - Put **client/session setup** and **config** (env vars, tokens) in each channel’s folder.
 - Put **handlers** (incoming messages/events) and **webhooks** (WhatsApp) in the same channel folder.
-- Channels can call the **REST API** (`src/api`) or use **RAG** in `src/bot` instead of duplicating logic.
+- Channels can call the **REST API** (`src/api`) or use **RAG** in `src/rag` instead of duplicating logic.
 - Use `src/log` for logging where useful.
 
 ## Links

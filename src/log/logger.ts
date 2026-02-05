@@ -1,4 +1,4 @@
-import prismaInstance from "../api/plugins/prismaInstance.js";
+import prismaInstance from "../db_operations/prismaInstance.js";
 
 const LogLevel = {
   INFO: "INFO",
