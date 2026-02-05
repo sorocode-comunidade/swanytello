@@ -4,9 +4,31 @@ This folder holds **all database operations and models** for the Swanytello mono
 
 ## Purpose
 
-- **Centralized database access**: All Prisma models and database operations live here.
-- **Module structure**: Provides a clean module interface for other parts of the application (API, ETL, etc.).
-- **Isolation**: Prevents direct database access from certain modules (e.g. RAG) for security and architectural boundaries.
+### Why Centralize Database Operations?
+
+1. **Single Source of Truth**: All database operations are handled in one place (`src/db_operations/`), preventing multiple independent functions from doing the same thing. This eliminates code duplication and ensures consistency across the entire project.
+
+2. **RAG Security Through Tool Functions**: 
+   - RAG agents **never** directly access database functions from `db_operations`
+   - Instead, RAG uses **tool functions** exposed through the API
+   - These tool functions wrap database operations, so RAG only sees the **results**, not the functions themselves
+   - Database functions are **not exposed** to the RAG agent's context
+   - This ensures security and prevents RAG agents from executing arbitrary database queries
+
+3. **Consistency and Maintainability**:
+   - Consistent error handling across all database operations
+   - Uniform logging patterns
+   - Standardized data access patterns
+   - Easier maintenance and updates (change once, affects everywhere)
+
+### Key Architectural Decision
+
+**RAG agents use tool functions, not direct database access.** This means:
+- ✅ RAG calls API tool functions when it needs database operations
+- ✅ Tool functions internally use `db_operations` models
+- ✅ RAG only receives the **results** of database operations
+- ❌ RAG **cannot** import or directly call `db_operations` functions
+- ❌ Database functions are **never** exposed to RAG context
 
 ## Structure
 
@@ -33,9 +55,31 @@ import * as entityModel from "../../db_operations/models/entity.model.js";
 
 ## Access Control
 
-- **API** (`src/api/`) – Can access `db_operations` directly.
-- **ETL** (`src/etl/`) – Can access `db_operations` for loading data.
-- **RAG** (`src/rag/`) – **Cannot** access `db_operations` directly. Must go through API.
-- **Channels** (`src/channels/`) – **Cannot** access `db_operations` directly. Must go through API.
+- **API** (`src/api/`) – ✅ Can access `db_operations` directly. Services import models from here.
+- **ETL** (`src/etl/`) – ✅ Can access `db_operations` for loading data (persisting scraped/transformed data).
+- **RAG** (`src/rag/`) – ❌ **Cannot** access `db_operations` directly. Must use API tool functions.
+- **Channels** (`src/channels/`) – ❌ **Cannot** access `db_operations` directly. Must use API.
+
+## RAG Tool Function Pattern
+
+When RAG needs database operations, it follows this pattern:
+
+```
+RAG Agent → API Tool Function → Service → db_operations Model → Database
+                                    ↓
+                              Returns result only
+```
+
+**Example**:
+1. RAG agent needs to get user information
+2. RAG calls API tool function `getUserById(id)`
+3. Tool function internally uses `db_operations/models/user.model.js`
+4. Only the **result** (user data) is returned to RAG
+5. RAG never sees the database function itself
 
 This ensures proper architectural boundaries and prevents RAG agents from directly accessing the database.
+
+## See Also
+
+- [Architecture Documentation](../../docs/architecture.md) – Detailed architectural explanation
+- [API README](../api/README.md) – How API uses db_operations

@@ -2,6 +2,8 @@
 
 Render these diagrams at [mermaid.live](https://mermaid.live) or in any editor/docs tool that supports Mermaid.
 
+**See also**: [Architecture Documentation](architecture.md) for detailed explanations of architectural decisions and component purposes.
+
 ---
 
 ## 1. Architecture (monolith)

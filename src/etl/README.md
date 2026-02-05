@@ -4,10 +4,36 @@ This folder holds **ETL operations** that fetch, process, and store data for the
 
 ## Purpose
 
-- **Extract**: Fetch data from websites or APIs for use as RAG knowledge sources.
-- **Transform**: Normalize, format, and clean scraped content (e.g. sanitization, deduplication, structuring).
-- **Load**: Persist processed content to the database (e.g. for embedding, indexing, or direct querying).
-- Run on a schedule or on demand; **RAG** consumes this data when answering user questions.
+### Why ETL is the Single Data Ingestion Path
+
+**Web scraping is the ONLY way to retrieve information from the internet in this project.** All external data must go through the ETL pipeline:
+
+1. **Extract**: Web scrapers fetch raw data from websites and APIs
+   - This is the **only** method for retrieving internet information
+   - No other modules directly fetch data from external sources
+   - Ensures consistent data retrieval patterns
+
+2. **Transform**: Data standardization, cleaning, and formatting
+   - Normalize data formats across different sources
+   - Clean and sanitize scraped content
+   - Remove duplicates and noise
+   - Structure data for optimal storage and retrieval
+
+3. **Load**: Persist processed content to the database
+   - Store cleaned data using `db_operations` models
+   - Index data for RAG consumption
+   - Ensure data is ready for retrieval by RAG agents
+
+### Key Architectural Decision
+
+**ETL is the single source of truth for internet data ingestion.** This means:
+- ✅ All web scraping happens in `src/etl/extract/`
+- ✅ All data transformation happens in `src/etl/transform/`
+- ✅ All data storage happens in `src/etl/load/`
+- ❌ No other modules directly scrape or fetch internet data
+- ❌ ETL does not call API or channels (it only stores data)
+
+**RAG consumes the stored data** but never performs web scraping itself.
 
 ## Structure
 

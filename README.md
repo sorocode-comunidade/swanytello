@@ -19,13 +19,23 @@ Projeto desenvolvido para a comunidade Sorocode, unindo os projetos SwanyBot e D
 
 ## Architecture
 
-This repository is a **monolith** with three main areas:
+This repository is a **monolith** with clear architectural boundaries and centralized operations. See [Architecture Documentation](docs/architecture.md) for detailed explanations.
 
-- **api** – REST API (Fastify). Entry point for external systems and frontends; used by channels and RAG when they need to persist or query data. See [API](src/api/README.md).
-- **rag** – RAG logic using LangChain (under `src/rag`). User-facing communication goes through the channels; channels call into this layer when a message needs a RAG response. See [RAG](src/rag/README.md).
-- **channels** – Communication implementations: WhatsApp and Discord (under `src/channels`). Each channel receives and sends messages on its platform and delegates business logic to the API or RAG. See [Channels](src/channels/README.md).
-- **etl** – Extract, Transform, Load operations. Contains `extract/` for data extraction (web scrapers, API calls), `transform/` for data transformation and cleaning, and `load/` for data publishing (database storage, API delivery, indexing) for the RAG in `src/rag`. See [ETL](src/etl/README.md).
+### Key Components
+
+- **db_operations** – Centralized database access layer. All database operations happen here to prevent duplication. RAG uses tool functions (not direct access) for security. See [Database Operations](src/db_operations/README.md).
+- **etl** – Single data ingestion path. Web scraping is the ONLY way to retrieve internet information. All external data goes through Extract → Transform → Load pipeline. See [ETL](src/etl/README.md).
+- **api** – REST API (Fastify). Entry point for external systems and frontends. Provides tool functions for RAG agents. See [API](src/api/README.md).
+- **rag** – RAG logic using LangChain. Uses API tool functions for database operations (never direct access). See [RAG](src/rag/README.md).
+- **channels** – Communication implementations: WhatsApp and Discord. Pure communication layer that delegates to API or RAG. See [Channels](src/channels/README.md).
 - **guardrails** – (At project root.) Guidelines for AI development agents (e.g. Cursor) when writing code in this repo. RAG runtime guardrails live elsewhere. See [Guardrails](guardrails/README.md).
+
+### Architectural Principles
+
+1. **Centralized DB Operations**: All database operations in `db_operations/` prevent duplication
+2. **RAG Security**: RAG uses tool functions, never direct database access
+3. **Single ETL Path**: Web scraping is the only way to retrieve internet data
+4. **Clear Boundaries**: Each component has well-defined responsibilities
 
 ### Visual overview
 
@@ -188,11 +198,20 @@ sequenceDiagram
 
 ## Documentation
 
-- **[API](src/api/README.md)** – REST API (Fastify); routes, controllers, services, schemas.
-- **[Database Operations](src/db_operations/README.md)** – Database models and Prisma operations.
-- **[RAG](src/rag/README.md)** – RAG logic using LangChain.
+### Architecture & Design
+
+- **[Architecture](docs/architecture.md)** – Detailed explanation of architectural decisions, component purposes, and design patterns.
+- **[Project Structure (Visual)](docs/project-structure.md)** – Mermaid diagrams for architecture and folder structure.
+
+### Components
+
+- **[Database Operations](src/db_operations/README.md)** – Centralized database access layer. Why all DB operations are here and how RAG uses tool functions.
+- **[ETL](src/etl/README.md)** – Extract, Transform, Load operations. Why web scraping is the only way to retrieve internet data.
+- **[API](src/api/README.md)** – REST API (Fastify); routes, controllers, services, schemas. Tool functions for RAG.
+- **[RAG](src/rag/README.md)** – RAG logic using LangChain. Tool-based database access pattern.
 - **[Channels](src/channels/README.md)** – WhatsApp and Discord communication implementations.
-- **[ETL](src/etl/README.md)** – Extract, Transform, Load operations: data extraction, transformation, and publishing for the RAG.
-- **[Guardrails](guardrails/README.md)** – Guidelines for AI development agents (e.g. Cursor); RAG guardrails live elsewhere.
+
+### Development
+
+- **[Guardrails](guardrails/README.md)** – Guidelines for AI development agents (e.g. Cursor); RAG runtime guardrails live elsewhere.
 - **[Logging](src/log/README.md)** – Logging utilities; how to use `logCreate`, `logUpdate`, `logDelete`, and `logError`.
-- **[Project structure (visual)](docs/project-structure.md)** – Mermaid diagrams for architecture and folder structure.
