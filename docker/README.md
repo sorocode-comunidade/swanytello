@@ -17,13 +17,13 @@ alias dcp='docker compose -f docker/docker-compose.yml'
 All Docker Compose commands should reference this folder. Examples show both full command and alias:
 
 ```bash
-# Start PostgreSQL
-docker compose -f docker/docker-compose.yml up -d postgres
-# Or with alias: dcp up -d postgres
-
-# Check status
+# Check if PostgreSQL is already running (do this first!)
 docker compose -f docker/docker-compose.yml ps
 # Or with alias: dcp ps
+
+# Start PostgreSQL (only if not already running)
+docker compose -f docker/docker-compose.yml up -d postgres
+# Or with alias: dcp up -d postgres
 
 # View logs
 docker compose -f docker/docker-compose.yml logs -f postgres
@@ -32,7 +32,13 @@ docker compose -f docker/docker-compose.yml logs -f postgres
 # Stop PostgreSQL
 docker compose -f docker/docker-compose.yml stop postgres
 # Or with alias: dcp stop postgres
+
+# Remove container (if you get "name already in use" error)
+docker compose -f docker/docker-compose.yml down
+# Or with alias: dcp down
 ```
+
+**Note**: If you get a "container name already in use" error, check if the container is already running with `dcp ps`. If it shows "healthy", you can use it as-is!
 
 ## See Also
 

@@ -181,9 +181,17 @@ sequenceDiagram
 
 1. **Start PostgreSQL with Docker Compose** (required first step):
    ```bash
+   # First, check if PostgreSQL is already running
+   docker ps | grep swanytello-postgres
+   
+   # If not running, start it:
    docker compose -f docker/docker-compose.yml up -d postgres
+   
+   # Or if you get "container name already in use" error, the container exists.
+   # Check if it's healthy:
+   docker inspect swanytello-postgres --format '{{.State.Health.Status}}'
    ```
-   Wait for PostgreSQL to be ready (check with `docker compose -f docker/docker-compose.yml ps` - should show "healthy").
+   Wait for PostgreSQL to be ready (should show "healthy").
 
 2. Copy `.env.example` to `.env` and set `DATABASE_URL`:
    ```bash
@@ -221,7 +229,16 @@ After creating the alias, you can use shorter commands like `dcp up -d postgres`
 All commands use the `docker/` folder configuration:
 
 ```bash
-# Start PostgreSQL
+# Check if PostgreSQL is already running (direct docker command - works always)
+docker ps -a --filter "name=swanytello-postgres"
+# Or check health:
+docker inspect swanytello-postgres --format '{{.State.Health.Status}}'
+
+# Check with docker compose (only shows containers it manages)
+docker compose -f docker/docker-compose.yml ps
+# Or with alias: dcp ps
+
+# Start PostgreSQL (if not already running)
 docker compose -f docker/docker-compose.yml up -d postgres
 # Or with alias: dcp up -d postgres
 
@@ -237,9 +254,9 @@ docker compose -f docker/docker-compose.yml logs -f postgres
 docker compose -f docker/docker-compose.yml down -v
 # Or with alias: dcp down -v
 
-# Check PostgreSQL health
-docker compose -f docker/docker-compose.yml ps
-# Or with alias: dcp ps
+# Restart PostgreSQL
+docker compose -f docker/docker-compose.yml restart postgres
+# Or with alias: dcp restart postgres
 ```
 
 **Note**: To make the alias persistent, add it to your `~/.bashrc` or `~/.zshrc`:
@@ -247,6 +264,11 @@ docker compose -f docker/docker-compose.yml ps
 echo "alias dcp='docker compose -f docker/docker-compose.yml'" >> ~/.bashrc
 source ~/.bashrc
 ```
+
+**Troubleshooting**: 
+- If you get "container name already in use" error, the container is already running. Check with `docker ps -a --filter "name=swanytello-postgres"` - if it shows "healthy", you're good to go!
+- If `docker compose ps` shows empty but the container exists, it was created with a different docker-compose.yml file. Use `docker ps` to check it directly.
+- See [Docker Troubleshooting](docs/docker.md#troubleshooting) for more details.
 
 ---
 

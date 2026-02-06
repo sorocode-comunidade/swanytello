@@ -28,10 +28,19 @@ alias dcp='docker compose -f docker/docker-compose.yml'
 
 1. **Start PostgreSQL** (required first step):
    ```bash
+   # First, check if PostgreSQL is already running
+   docker ps -a --filter "name=swanytello-postgres"
+   
+   # If container exists and is healthy, you can skip this step!
+   # If not running, start it:
    docker compose -f docker/docker-compose.yml up -d postgres
    ```
    Wait for PostgreSQL to be ready. Check status with:
    ```bash
+   # Check health directly (works even if container was created with old docker-compose.yml)
+   docker inspect swanytello-postgres --format '{{.State.Health.Status}}'
+   
+   # Or check with docker compose (only shows containers it manages)
    docker compose -f docker/docker-compose.yml ps
    ```
    The container should show "healthy" status before proceeding.
@@ -134,10 +143,21 @@ docker compose -f docker/docker-compose.yml logs -f postgres
 ```
 
 ### Check Status
+
+**Using docker compose** (only shows containers created with this docker-compose.yml):
 ```bash
 docker compose -f docker/docker-compose.yml ps
 # Or with alias: dcp ps
 ```
+
+**Direct docker command** (shows all containers, including ones created with old docker-compose.yml):
+```bash
+docker ps -a --filter "name=swanytello-postgres"
+# Or check health status:
+docker inspect swanytello-postgres --format '{{.State.Health.Status}}'
+```
+
+**Note**: If `docker compose ps` shows empty but the container exists, it was likely created with a different docker-compose.yml file. You can still use the existing container if it's healthy!
 
 ### Remove Container and Volumes
 ⚠️ **Warning**: This will delete all database data!
@@ -193,15 +213,66 @@ docker compose -f docker/docker-compose.yml exec -T postgres psql -U swanytello 
 
 The PostgreSQL service includes a health check that verifies the database is ready to accept connections. You can check the health status:
 
+**Using docker compose** (only shows containers created with this docker-compose.yml):
 ```bash
 docker compose -f docker/docker-compose.yml ps
 ```
 
+**Direct docker command** (works even if container was created with old docker-compose.yml):
+```bash
+docker ps -a --filter "name=swanytello-postgres"
+docker inspect swanytello-postgres --format '{{.State.Health.Status}}'
+```
+
 The health check runs every 10 seconds and will show as "healthy" when PostgreSQL is ready.
+
+**Note**: If `docker compose ps` shows empty but the container exists and is healthy (checked with `docker ps`), the container was created with a different docker-compose.yml file. You can still use it - it's working correctly!
 
 ---
 
 ## Troubleshooting
+
+### Container Name Already in Use
+
+**Error**: `Error response from daemon: Conflict. The container name "/swanytello-postgres" is already in use`
+
+**Cause**: A container with this name already exists (possibly from a previous docker-compose run or manual creation).
+
+**Solution**: You have three options:
+
+**Option 1: Use the existing container** (if it's running and healthy):
+```bash
+# Check if container is running directly
+docker ps | grep swanytello-postgres
+
+# Check container health
+docker inspect swanytello-postgres --format '{{.State.Health.Status}}'
+
+# If it shows "healthy", you can use it! The container is already running.
+# Just verify your DATABASE_URL matches the container settings.
+# No need to run 'docker compose up' - proceed with your application setup!
+```
+
+**Option 2: Remove and recreate with docker compose**:
+```bash
+# Stop and remove the existing container (keeps volumes)
+docker stop swanytello-postgres
+docker rm swanytello-postgres
+
+# Then start with docker compose
+docker compose -f docker/docker-compose.yml up -d postgres
+```
+
+**Option 3: Use docker compose down** (if container was created with docker compose):
+```bash
+# This will stop and remove containers created by docker compose
+docker compose -f docker/docker-compose.yml down
+
+# Then start fresh
+docker compose -f docker/docker-compose.yml up -d postgres
+```
+
+**Quick check**: If the container is already running and healthy, you can skip the `up` command and proceed with your application setup!
 
 ### Port Already in Use
 
@@ -217,10 +288,19 @@ Then update your `DATABASE_URL` to use the new port.
 
 **Common cause**: PostgreSQL is not running or not ready yet.
 
-1. **Verify PostgreSQL is running**: `docker compose -f docker/docker-compose.yml ps`
+1. **Verify PostgreSQL is running**: 
+   ```bash
+   # Check with docker compose (only shows containers it manages)
+   docker compose -f docker/docker-compose.yml ps
+   
+   # Or check directly (shows all containers)
+   docker ps -a --filter "name=swanytello-postgres"
+   docker inspect swanytello-postgres --format '{{.State.Health.Status}}'
+   ```
    - Container should exist and show "healthy" status
    - If not running, start it: `docker compose -f docker/docker-compose.yml up -d postgres`
    - Wait for health check to pass (may take 10-30 seconds)
+   - **Note**: If `docker compose ps` is empty but container exists and is healthy, it was created with a different docker-compose.yml. You can use it!
 
 2. **Check logs**: `docker compose -f docker/docker-compose.yml logs postgres`
    - Look for any error messages

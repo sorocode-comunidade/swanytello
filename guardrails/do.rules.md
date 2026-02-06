@@ -43,3 +43,7 @@ Patterns and practices to follow when writing or suggesting code.
 - **Do** use TypeScript strictly; avoid `any` unless necessary and then narrow or document.
 - **Do** handle errors in services (log and rethrow) and in routes (map to HTTP responses); do not swallow errors silently.
 - **Do** add or update READMEs under the affected area (e.g. `src/api/README.md`, `guardrails/README.md`) when adding new patterns or modules.
+
+## db
+
+- **Do** create a mermaid graph and show it to the user, human in the loop intereaction, to receive an approve answer before implement prisma schema EVERYTIME the user gives you a picture of a UML diagram or any other DB diagram related picture.

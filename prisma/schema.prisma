@@ -1,4 +1,4 @@
-// prisma/schema.prisma - Initial schema (no models yet)
+// prisma/schema.prisma
 generator client {
   provider   = "prisma-client-js"
   output     = "../generated/prisma"
@@ -7,4 +7,32 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+model OpenPosition {
+  id          String   @id @default(uuid())
+  title       String
+  link        String
+  companyName String   @map("company_name")
+  region      String
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  tagAnalisys TagAnalisys?
+
+  @@map("open_position")
+}
+
+model TagAnalisys {
+  id             String   @id @default(uuid())
+  openPositionId String   @unique @map("open_position_id")
+  tier1          String?  @map("tier_1")
+  tier2          String?  @map("tier_2")
+  tier3          String?  @map("tier_3")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  openPosition OpenPosition @relation(fields: [openPositionId], references: [id], onDelete: Cascade)
+
+  @@map("tag_analisys")
 }
