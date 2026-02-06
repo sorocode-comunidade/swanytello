@@ -200,9 +200,15 @@ sequenceDiagram
 
 3. Install dependencies: `npm install`
 
-4. Generate Prisma client: `npx prisma generate`
-
-5. Run migrations: `npx prisma migrate dev`
+4. **Set up Prisma** (database schema and migrations):
+   ```bash
+   # Generate Prisma Client
+   npx prisma generate
+   
+   # Create and apply initial migrations
+   npx prisma migrate dev
+   ```
+   See [Prisma Guide](docs/prisma.md) for detailed workflow and commands.
 
 6. **Start the API** (only after PostgreSQL is running):
    ```bash
@@ -249,6 +255,16 @@ docker compose -f docker/docker-compose.yml stop postgres
 # View PostgreSQL logs
 docker compose -f docker/docker-compose.yml logs -f postgres
 # Or with alias: dcp logs -f postgres
+
+# Get PostgreSQL connection information
+# For .env file (Prisma format):
+docker exec swanytello-postgres sh -c 'echo "DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}?schema=public"'
+
+# For DBeaver/pgAdmin (clean format):
+docker exec swanytello-postgres sh -c 'echo "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}"'
+
+# Get all connection details formatted:
+docker exec swanytello-postgres sh -c 'echo "Host: localhost\nPort: 5432\nDatabase: ${POSTGRES_DB}\nUsername: ${POSTGRES_USER}\nPassword: ${POSTGRES_PASSWORD}"'
 
 # Remove PostgreSQL container and volumes (⚠️ deletes data)
 docker compose -f docker/docker-compose.yml down -v
@@ -326,6 +342,8 @@ source ~/.bashrc
 
 ### Development
 
+- **[Prisma Guide](docs/prisma.md)** – **Database schema workflow**: How to modify schema, generate Prisma Client, create migrations, and common commands.
 - **[Docker Setup](docs/docker.md)** – Docker Compose setup for PostgreSQL and development environment.
+- **[Troubleshooting](docs/troubleshooting.md)** – Common issues and solutions: Prisma extension, DBeaver connection, database issues.
 - **[Guardrails](guardrails/README.md)** – Guidelines for AI development agents (e.g. Cursor); RAG runtime guardrails live elsewhere.
 - **[Logging](src/log/README.md)** – Logging utilities; how to use `logCreate`, `logUpdate`, `logDelete`, and `logError`.

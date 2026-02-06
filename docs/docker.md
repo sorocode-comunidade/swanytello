@@ -47,7 +47,12 @@ alias dcp='docker compose -f docker/docker-compose.yml'
 
 2. **Configure environment**:
    - Copy `.env.example` to `.env`
-   - Set `DATABASE_URL` to match docker-compose settings:
+   - Set `DATABASE_URL` to match docker-compose settings. You can retrieve it automatically:
+     ```bash
+     # Get connection string from running container
+     docker exec swanytello-postgres sh -c 'echo "DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}?schema=public"'
+     ```
+     Or manually set it to:
      ```
      DATABASE_URL="postgresql://swanytello:swanytello_password@localhost:5432/swanytello?schema=public"
      ```
@@ -158,6 +163,71 @@ docker inspect swanytello-postgres --format '{{.State.Health.Status}}'
 ```
 
 **Note**: If `docker compose ps` shows empty but the container exists, it was likely created with a different docker-compose.yml file. You can still use the existing container if it's healthy!
+
+### Get Connection Information
+
+**Retrieve PostgreSQL connection details** from the running container:
+
+```bash
+# Get formatted connection string (DATABASE_URL) - ready to copy to .env (Prisma format)
+docker exec swanytello-postgres sh -c 'echo "DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}?schema=public"'
+
+# Get clean connection string (for DBeaver, pgAdmin, etc. - without Prisma-specific parameters)
+docker exec swanytello-postgres sh -c 'echo "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}"'
+
+# Get individual connection details
+docker exec swanytello-postgres printenv | grep POSTGRES
+
+# Get port mapping
+docker port swanytello-postgres
+```
+
+**Example output**:
+```
+DATABASE_URL=postgresql://swanytello:swanytello_password@localhost:5432/swanytello?schema=public
+postgresql://swanytello:swanytello_password@localhost:5432/swanytello
+POSTGRES_USER=swanytello
+POSTGRES_PASSWORD=swanytello_password
+POSTGRES_DB=swanytello
+5432/tcp -> 0.0.0.0:5432
+```
+
+**💡 Tip**: 
+- Use the first command for `.env` file (Prisma format with `?schema=public`)
+- Use the second command for database tools like DBeaver, pgAdmin, etc. (clean format)
+
+### Connect with DBeaver (or other database tools)
+
+**Connection details**:
+- **Host**: `localhost`
+- **Port**: `5432`
+- **Database**: `swanytello` (or get it with: `docker exec swanytello-postgres printenv POSTGRES_DB`)
+- **Username**: `swanytello` (or get it with: `docker exec swanytello-postgres printenv POSTGRES_USER`)
+- **Password**: `swanytello_password` (or get it with: `docker exec swanytello-postgres printenv POSTGRES_PASSWORD`)
+
+**Quick command to get all DBeaver connection details**:
+```bash
+docker exec swanytello-postgres sh -c 'echo "Host: localhost
+Port: 5432
+Database: ${POSTGRES_DB}
+Username: ${POSTGRES_USER}
+Password: ${POSTGRES_PASSWORD}
+Connection String: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}"'
+```
+
+**DBeaver setup steps**:
+1. Open DBeaver → New Database Connection
+2. Select **PostgreSQL**
+3. Enter connection details:
+   - Host: `localhost`
+   - Port: `5432`
+   - Database: `swanytello`
+   - Username: `swanytello`
+   - Password: `swanytello_password`
+4. Click **Test Connection** to verify
+5. Click **Finish** to save
+
+**Note**: Make sure PostgreSQL container is running before connecting!
 
 ### Remove Container and Volumes
 ⚠️ **Warning**: This will delete all database data!
@@ -273,6 +343,64 @@ docker compose -f docker/docker-compose.yml up -d postgres
 ```
 
 **Quick check**: If the container is already running and healthy, you can skip the `up` command and proceed with your application setup!
+
+### Cannot Connect with DBeaver (or other database tools)
+
+**Error**: Connection refused, timeout, or authentication failed in DBeaver
+
+**Common causes and solutions**:
+
+1. **Container is not running**:
+   ```bash
+   # Check if container is running
+   docker ps -a --filter "name=swanytello-postgres"
+   
+   # If not running, start it
+   docker compose -f docker/docker-compose.yml up -d postgres
+   
+   # Wait for health check
+   docker inspect swanytello-postgres --format '{{.State.Health.Status}}'
+   # Should output: healthy
+   ```
+
+2. **Wrong connection string format**:
+   - ❌ **Don't use**: `postgresql://user:pass@localhost:5432/db?schema=public` (Prisma format)
+   - ✅ **Use**: `postgresql://user:pass@localhost:5432/db` (clean format)
+   - Or use individual fields in DBeaver:
+     - Host: `localhost`
+     - Port: `5432`
+     - Database: `swanytello`
+     - Username: `swanytello`
+     - Password: `swanytello_password`
+
+3. **Get correct connection details**:
+   ```bash
+   # Get all connection details formatted
+   docker exec swanytello-postgres sh -c 'echo "Host: localhost\nPort: 5432\nDatabase: ${POSTGRES_DB}\nUsername: ${POSTGRES_USER}\nPassword: ${POSTGRES_PASSWORD}"'
+   ```
+
+4. **Verify port is accessible**:
+   ```bash
+   # Check port mapping
+   docker port swanytello-postgres
+   # Should show: 5432/tcp -> 0.0.0.0:5432
+   
+   # Test connection from host
+   docker exec swanytello-postgres pg_isready -U swanytello
+   # Should output: swanytello-postgres:5432 - accepting connections
+   ```
+
+5. **Check firewall/network**:
+   - Ensure Docker is running and container is accessible
+   - On WSL2: Make sure port forwarding is working
+   - Try connecting with `127.0.0.1` instead of `localhost` if `localhost` doesn't work
+
+**Quick test connection**:
+```bash
+# Test PostgreSQL connection from host (requires psql client)
+psql -h localhost -p 5432 -U swanytello -d swanytello
+# Password: swanytello_password
+```
 
 ### Port Already in Use
 

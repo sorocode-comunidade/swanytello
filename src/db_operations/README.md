@@ -95,6 +95,7 @@ See [Docker Setup](../../docs/docker.md) for detailed instructions.
 
 ## See Also
 
+- [Prisma Guide](../../docs/prisma.md) – **Start here!** Complete guide for schema changes, migrations, and Prisma commands
 - [Architecture Documentation](../../docs/architecture.md) – Detailed architectural explanation
 - [API README](../api/README.md) – How API uses db_operations
 - [Docker Setup](../../docs/docker.md) – PostgreSQL setup with Docker Compose
