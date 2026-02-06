@@ -1,0 +1,52 @@
+# Dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Build outputs
+dist
+build
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Documentation (optional - remove if you want docs in image)
+docs
+*.md
+!README.md
+
+# Testing
+coverage
+.nyc_output
+
+# Logs
+logs
+*.log
+
+# Prisma generated
+generated
+
+# Docker
+docker-compose.yml
+Dockerfile
+.dockerignore

@@ -79,7 +79,22 @@ RAG Agent → API Tool Function → Service → db_operations Model → Database
 
 This ensures proper architectural boundaries and prevents RAG agents from directly accessing the database.
 
+## Prerequisites
+
+**⚠️ Database must be running**: Before using `db_operations` or starting the application, ensure PostgreSQL is running:
+
+```bash
+# Start PostgreSQL with Docker Compose
+docker compose up -d postgres
+
+# Verify it's healthy
+docker compose ps
+```
+
+See [Docker Setup](../../docs/docker.md) for detailed instructions.
+
 ## See Also
 
 - [Architecture Documentation](../../docs/architecture.md) – Detailed architectural explanation
 - [API README](../api/README.md) – How API uses db_operations
+- [Docker Setup](../../docs/docker.md) – PostgreSQL setup with Docker Compose

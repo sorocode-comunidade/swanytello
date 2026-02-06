@@ -154,11 +154,58 @@ sequenceDiagram
 
 ## Getting started
 
+### Option 1: Using Docker Compose (Recommended)
+
+**⚠️ Important**: You **must** start PostgreSQL with Docker Compose **before** running `npm run dev`. The application requires a running database connection.
+
+1. **Start PostgreSQL with Docker Compose** (required first step):
+   ```bash
+   docker compose up -d postgres
+   ```
+   Wait for PostgreSQL to be ready (check with `docker compose ps` - should show "healthy").
+
+2. Copy `.env.example` to `.env` and set `DATABASE_URL`:
+   ```bash
+   DATABASE_URL="postgresql://swanytello:swanytello_password@localhost:5432/swanytello?schema=public"
+   ```
+
+3. Install dependencies: `npm install`
+
+4. Generate Prisma client: `npx prisma generate`
+
+5. Run migrations: `npx prisma migrate dev`
+
+6. **Start the API** (only after PostgreSQL is running):
+   ```bash
+   npm run dev
+   ```
+
+### Option 2: Local PostgreSQL
+
 1. Copy `.env.example` to `.env` and set `DATABASE_URL` and other variables.
 2. Install dependencies: `npm install`
 3. Generate Prisma client: `npx prisma generate`
 4. Run migrations (when you have a database): `npx prisma migrate dev`
 5. Start the API: `npm run dev`
+
+### Docker Compose Commands
+
+```bash
+# Start PostgreSQL
+docker compose up -d postgres
+
+# Stop PostgreSQL
+docker compose stop postgres
+
+# View PostgreSQL logs
+docker compose logs -f postgres
+
+# Remove PostgreSQL container and volumes (⚠️ deletes data)
+docker compose down -v
+
+# Check PostgreSQL health
+docker compose ps
+```
 
 ---
 
@@ -213,5 +260,6 @@ sequenceDiagram
 
 ### Development
 
+- **[Docker Setup](docs/docker.md)** – Docker Compose setup for PostgreSQL and development environment.
 - **[Guardrails](guardrails/README.md)** – Guidelines for AI development agents (e.g. Cursor); RAG runtime guardrails live elsewhere.
 - **[Logging](src/log/README.md)** – Logging utilities; how to use `logCreate`, `logUpdate`, `logDelete`, and `logError`.
