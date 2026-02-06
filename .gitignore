@@ -11,3 +11,4 @@ dist/
 *.swo
 uploads/
 generated/
+docker/.env

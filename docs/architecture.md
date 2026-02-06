@@ -147,6 +147,14 @@ Internet → ETL Extract → ETL Transform → ETL Load → db_operations → Da
                                                     RAG consumes
 ```
 
+### Database Access Flow
+
+```
+API Services → db_operations/models → Prisma → PostgreSQL
+ETL Load     → db_operations/models → Prisma → PostgreSQL
+RAG          → API Tool Functions → API Services → db_operations/models → Prisma → PostgreSQL
+```
+
 ---
 
 ## Architectural Principles

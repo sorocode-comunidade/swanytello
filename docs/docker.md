@@ -6,7 +6,11 @@ This document explains how to use Docker Compose with Swanytello.
 
 ## Overview
 
-The project includes a `docker-compose.yml` file that sets up PostgreSQL for local development. The application itself runs on your host machine, while PostgreSQL runs in a Docker container.
+The project includes Docker configuration files in the `docker/` folder:
+- `docker/docker-compose.yml` – PostgreSQL service configuration
+- `docker/.dockerignore` – Docker build ignore patterns
+
+The application itself runs on your host machine, while PostgreSQL runs in a Docker container.
 
 **⚠️ Critical**: PostgreSQL **must** be running before starting the application with `npm run dev`. The application will fail to start if it cannot connect to the database.
 
@@ -16,13 +20,19 @@ The project includes a `docker-compose.yml` file that sets up PostgreSQL for loc
 
 **⚠️ Important**: You **must** start PostgreSQL with Docker Compose **before** running `npm run dev`. The application requires a running database connection to start successfully.
 
+**💡 Tip**: To avoid typing the full path every time, you can create an alias or run commands from the project root:
+```bash
+alias dcp='docker compose -f docker/docker-compose.yml'
+# Then use: dcp up -d postgres
+```
+
 1. **Start PostgreSQL** (required first step):
    ```bash
-   docker compose up -d postgres
+   docker compose -f docker/docker-compose.yml up -d postgres
    ```
    Wait for PostgreSQL to be ready. Check status with:
    ```bash
-   docker compose ps
+   docker compose -f docker/docker-compose.yml ps
    ```
    The container should show "healthy" status before proceeding.
 
@@ -47,7 +57,7 @@ The project includes a `docker-compose.yml` file that sets up PostgreSQL for loc
 ### Startup Order
 
 Always follow this order:
-1. ✅ Start PostgreSQL: `docker compose up -d postgres`
+1. ✅ Start PostgreSQL: `docker compose -f docker/docker-compose.yml up -d postgres`
 2. ✅ Wait for PostgreSQL to be healthy
 3. ✅ Configure `.env` file
 4. ✅ Run Prisma migrations
@@ -63,7 +73,7 @@ This project uses **Docker Compose v2**, which is the current standard and is in
 - **Command syntax**: `docker compose` (with space, not hyphen)
 - **Your version**: Check with `docker compose version`
 
-The `docker-compose.yml` file is compatible with Docker Compose v2 and doesn't require a version field.
+The `docker/docker-compose.yml` file is compatible with Docker Compose v2 and doesn't require a version field.
 
 ---
 
@@ -81,7 +91,7 @@ The `docker-compose.yml` file is compatible with Docker Compose v2 and doesn't r
 
 ### Environment Variables
 
-You can customize PostgreSQL settings by setting these environment variables before running `docker compose up`:
+You can customize PostgreSQL settings by setting these environment variables before running `docker compose -f docker/docker-compose.yml up`:
 
 - `POSTGRES_USER` - PostgreSQL username (default: `swanytello`)
 - `POSTGRES_PASSWORD` - PostgreSQL password (default: `swanytello_password`)
@@ -91,42 +101,71 @@ You can customize PostgreSQL settings by setting these environment variables bef
 **Example**:
 ```bash
 export POSTGRES_PASSWORD=my_secure_password
-docker compose up -d postgres
+docker compose -f docker/docker-compose.yml up -d postgres
 ```
 
 ---
 
 ## Common Commands
 
+**💡 Tip**: Create an alias to avoid typing the full path every time:
+```bash
+alias dcp='docker compose -f docker/docker-compose.yml'
+```
+
+After creating the alias, you can use shorter commands. Examples are shown with both the full command and the alias version.
+
 ### Start Services
 ```bash
-docker compose up -d postgres
+docker compose -f docker/docker-compose.yml up -d postgres
+# Or with alias: dcp up -d postgres
 ```
 
 ### Stop Services
 ```bash
-docker compose stop postgres
+docker compose -f docker/docker-compose.yml stop postgres
+# Or with alias: dcp stop postgres
 ```
 
 ### View Logs
 ```bash
-docker compose logs -f postgres
+docker compose -f docker/docker-compose.yml logs -f postgres
+# Or with alias: dcp logs -f postgres
 ```
 
 ### Check Status
 ```bash
-docker compose ps
+docker compose -f docker/docker-compose.yml ps
+# Or with alias: dcp ps
 ```
 
 ### Remove Container and Volumes
 ⚠️ **Warning**: This will delete all database data!
 ```bash
-docker compose down -v
+docker compose -f docker/docker-compose.yml down -v
+# Or with alias: dcp down -v
 ```
 
 ### Restart PostgreSQL
 ```bash
-docker compose restart postgres
+docker compose -f docker/docker-compose.yml restart postgres
+# Or with alias: dcp restart postgres
+```
+
+### Making the Alias Persistent
+
+To make the alias available in all new terminal sessions, add it to your shell configuration:
+
+**For Bash**:
+```bash
+echo "alias dcp='docker compose -f docker/docker-compose.yml'" >> ~/.bashrc
+source ~/.bashrc
+```
+
+**For Zsh**:
+```bash
+echo "alias dcp='docker compose -f docker/docker-compose.yml'" >> ~/.zshrc
+source ~/.zshrc
 ```
 
 ---
@@ -140,12 +179,12 @@ PostgreSQL data is stored in a Docker volume named `postgres_data`. This means:
 
 To backup your data:
 ```bash
-docker compose exec postgres pg_dump -U swanytello swanytello > backup.sql
+docker compose -f docker/docker-compose.yml exec postgres pg_dump -U swanytello swanytello > backup.sql
 ```
 
 To restore:
 ```bash
-docker compose exec -T postgres psql -U swanytello swanytello < backup.sql
+docker compose -f docker/docker-compose.yml exec -T postgres psql -U swanytello swanytello < backup.sql
 ```
 
 ---
@@ -155,7 +194,7 @@ docker compose exec -T postgres psql -U swanytello swanytello < backup.sql
 The PostgreSQL service includes a health check that verifies the database is ready to accept connections. You can check the health status:
 
 ```bash
-docker compose ps
+docker compose -f docker/docker-compose.yml ps
 ```
 
 The health check runs every 10 seconds and will show as "healthy" when PostgreSQL is ready.
@@ -169,7 +208,7 @@ The health check runs every 10 seconds and will show as "healthy" when PostgreSQ
 If port 5432 is already in use, change it in your `.env` or environment:
 ```bash
 export POSTGRES_PORT=5433
-docker compose up -d postgres
+docker compose -f docker/docker-compose.yml up -d postgres
 ```
 
 Then update your `DATABASE_URL` to use the new port.
@@ -178,12 +217,12 @@ Then update your `DATABASE_URL` to use the new port.
 
 **Common cause**: PostgreSQL is not running or not ready yet.
 
-1. **Verify PostgreSQL is running**: `docker compose ps`
+1. **Verify PostgreSQL is running**: `docker compose -f docker/docker-compose.yml ps`
    - Container should exist and show "healthy" status
-   - If not running, start it: `docker compose up -d postgres`
+   - If not running, start it: `docker compose -f docker/docker-compose.yml up -d postgres`
    - Wait for health check to pass (may take 10-30 seconds)
 
-2. **Check logs**: `docker compose logs postgres`
+2. **Check logs**: `docker compose -f docker/docker-compose.yml logs postgres`
    - Look for any error messages
    - Verify PostgreSQL started successfully
 
@@ -191,7 +230,7 @@ Then update your `DATABASE_URL` to use the new port.
    - Default: `postgresql://swanytello:swanytello_password@localhost:5432/swanytello?schema=public`
    - Check `.env` file has correct values
 
-4. **Ensure container is healthy**: `docker compose ps` should show "healthy"
+4. **Ensure container is healthy**: `docker compose -f docker/docker-compose.yml ps` should show "healthy"
    - If showing "starting" or "unhealthy", wait a bit longer
    - Health check runs every 10 seconds
 
@@ -201,8 +240,8 @@ Then update your `DATABASE_URL` to use the new port.
 
 To completely reset the database:
 ```bash
-docker compose down -v
-docker compose up -d postgres
+docker compose -f docker/docker-compose.yml down -v
+docker compose -f docker/docker-compose.yml up -d postgres
 npx prisma migrate dev
 ```
 
@@ -210,7 +249,7 @@ npx prisma migrate dev
 
 ## Production Considerations
 
-⚠️ **This docker-compose.yml is for development only.**
+⚠️ **The `docker/docker-compose.yml` file is for development only.**
 
 For production:
 - Use strong passwords (set via environment variables)

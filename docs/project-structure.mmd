@@ -12,7 +12,7 @@ flowchart TB
   subgraph monolith [Swanytello monolith]
     subgraph api [REST API]
       Fastify[Fastify]
-      Routes[Routes / Controllers / Services / Models]
+      Routes[Routes / Controllers / Services]
       Fastify --> Routes
     end
 
@@ -31,6 +31,10 @@ flowchart TB
       Load[Load]
     end
 
+    subgraph db_ops [Database Operations]
+      Models[Models / Prisma]
+    end
+
     subgraph shared [Shared]
       Log[log]
       Types[types]
@@ -44,16 +48,21 @@ flowchart TB
   channels --> api
   channels --> rag
   etl --> rag
+  api --> db_ops
+  etl --> db_ops
+  rag -.->|tool functions| api
   api --> Log
   rag --> Log
   channels --> Log
   etl --> Log
+  db_ops --> Log
 
 %% --- 2. Folder structure (tree-style) ---
 flowchart TB
   subgraph root [Project root]
     guardrails[guardrails/]
     prisma[prisma/]
+    docker[docker/]
     config[prisma.config.ts and package.json]
   end
 
@@ -63,6 +72,7 @@ flowchart TB
     rag[rag/]
     channels[channels/]
     etl[etl/]
+    db_ops[db_operations/]
     log[log/]
     types[types/]
     utils[utils/]
@@ -72,10 +82,8 @@ flowchart TB
     routes[routes]
     controllers[controllers]
     services[services]
-    models[models]
     schemas[schemas]
     middleware[middleware]
-    plugins[plugins]
     fastify[fastifyInstance.ts]
   end
 
@@ -84,9 +92,22 @@ flowchart TB
     discord[discord/]
   end
 
+  subgraph db_ops_content [db_operations/]
+    models[models/]
+    prisma_instance[prismaInstance.ts]
+  end
+
+  subgraph docker_content [docker/]
+    compose[docker-compose.yml]
+    dockerignore[.dockerignore]
+  end
+
   root --> guardrails
   root --> prisma
+  root --> docker
   root --> config
   root --> src_content
   api --> api_content
   channels --> channels_content
+  db_ops --> db_ops_content
+  docker --> docker_content

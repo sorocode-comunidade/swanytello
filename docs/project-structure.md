@@ -21,7 +21,7 @@ flowchart TB
   subgraph monolith [Swanytello monolith]
     subgraph api [REST API]
       Fastify[Fastify]
-      Routes[Routes / Controllers / Services / Models]
+      Routes[Routes / Controllers / Services]
       Fastify --> Routes
     end
 
@@ -40,6 +40,10 @@ flowchart TB
       Load[Load]
     end
 
+    subgraph db_ops [Database Operations]
+      Models[Models / Prisma]
+    end
+
     subgraph shared [Shared]
       Log[log]
       Types[types]
@@ -53,10 +57,14 @@ flowchart TB
   channels --> api
   channels --> rag
   etl --> rag
+  api --> db_ops
+  etl --> db_ops
+  rag -.->|tool functions| api
   api --> Log
   rag --> Log
   channels --> Log
   etl --> Log
+  db_ops --> Log
 ```
 
 ---
@@ -70,6 +78,7 @@ flowchart TB
   subgraph root [Project root]
     guardrails[guardrails/]
     prisma_root[prisma/]
+    docker[docker/]
   end
 
   subgraph src_content [src/]
@@ -78,6 +87,7 @@ flowchart TB
     rag[rag/ RAG LangChain]
     channels[channels/]
     etl[etl/]
+    db_ops[db_operations/]
     log[log/]
     types[types/]
     utils[utils/]
@@ -87,10 +97,8 @@ flowchart TB
     routes[routes]
     controllers[controllers]
     services[services]
-    models[models]
     schemas[schemas]
     middleware[middleware]
-    plugins[plugins]
   end
 
   subgraph channels_detail [channels/]
@@ -98,11 +106,24 @@ flowchart TB
     discord[discord/]
   end
 
+  subgraph db_ops_detail [db_operations/]
+    models[models/]
+    prisma[prismaInstance.ts]
+  end
+
+  subgraph docker_detail [docker/]
+    compose[docker-compose.yml]
+    dockerignore[.dockerignore]
+  end
+
   root --> guardrails
   root --> prisma_root
+  root --> docker
   root --> src_content
   api --> api_detail
   channels --> channels_detail
+  db_ops --> db_ops_detail
+  docker --> docker_detail
 ```
 
 ---

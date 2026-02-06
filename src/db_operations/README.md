@@ -85,10 +85,10 @@ This ensures proper architectural boundaries and prevents RAG agents from direct
 
 ```bash
 # Start PostgreSQL with Docker Compose
-docker compose up -d postgres
+docker compose -f docker/docker-compose.yml up -d postgres
 
 # Verify it's healthy
-docker compose ps
+docker compose -f docker/docker-compose.yml ps
 ```
 
 See [Docker Setup](../../docs/docker.md) for detailed instructions.

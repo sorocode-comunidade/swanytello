@@ -49,10 +49,10 @@ flowchart TB
     Users[Users]
   end
 
-  subgraph monolith [Swanytello monolith]
+    subgraph monolith [Swanytello monolith]
     subgraph api [REST API]
       Fastify[Fastify]
-      Routes[Routes / Controllers / Services / Models]
+      Routes[Routes / Controllers / Services]
       Fastify --> Routes
     end
 
@@ -71,6 +71,10 @@ flowchart TB
       Load[Load]
     end
 
+    subgraph db_ops [Database Operations]
+      Models[Models / Prisma]
+    end
+
     subgraph shared [Shared]
       Log[log]
       Types[types]
@@ -84,10 +88,14 @@ flowchart TB
   channels --> api
   channels --> rag
   etl --> rag
+  api --> db_ops
+  etl --> db_ops
+  rag -.->|tool functions| api
   api --> Log
   rag --> Log
   channels --> Log
   etl --> Log
+  db_ops --> Log
 ```
 
 **Folder structure**
@@ -97,6 +105,7 @@ flowchart TB
   subgraph root [Project root]
     guardrails[guardrails/]
     prisma_root[prisma/]
+    docker[docker/]
   end
 
   subgraph src_content [src/]
@@ -105,6 +114,7 @@ flowchart TB
     rag[rag/ RAG LangChain]
     channels[channels/]
     etl[etl/]
+    db_ops[db_operations/]
     log[log/]
     types[types/]
     utils[utils/]
@@ -114,10 +124,8 @@ flowchart TB
     routes[routes]
     controllers[controllers]
     services[services]
-    models[models]
     schemas[schemas]
     middleware[middleware]
-    plugins[plugins]
   end
 
   subgraph channels_detail [channels/]
@@ -125,11 +133,24 @@ flowchart TB
     discord[discord/]
   end
 
+  subgraph db_ops_detail [db_operations/]
+    models[models/]
+    prisma[prismaInstance.ts]
+  end
+
+  subgraph docker_detail [docker/]
+    compose[docker-compose.yml]
+    dockerignore[.dockerignore]
+  end
+
   root --> guardrails
   root --> prisma_root
+  root --> docker
   root --> src_content
   api --> api_detail
   channels --> channels_detail
+  db_ops --> db_ops_detail
+  docker --> docker_detail
 ```
 
 **Data flow (channels → API / RAG)**
@@ -160,9 +181,9 @@ sequenceDiagram
 
 1. **Start PostgreSQL with Docker Compose** (required first step):
    ```bash
-   docker compose up -d postgres
+   docker compose -f docker/docker-compose.yml up -d postgres
    ```
-   Wait for PostgreSQL to be ready (check with `docker compose ps` - should show "healthy").
+   Wait for PostgreSQL to be ready (check with `docker compose -f docker/docker-compose.yml ps` - should show "healthy").
 
 2. Copy `.env.example` to `.env` and set `DATABASE_URL`:
    ```bash
@@ -190,21 +211,41 @@ sequenceDiagram
 
 ### Docker Compose Commands
 
+**💡 Tip**: Create an alias to avoid typing the full path every time:
+```bash
+alias dcp='docker compose -f docker/docker-compose.yml'
+```
+
+After creating the alias, you can use shorter commands like `dcp up -d postgres` instead of the full path.
+
+All commands use the `docker/` folder configuration:
+
 ```bash
 # Start PostgreSQL
-docker compose up -d postgres
+docker compose -f docker/docker-compose.yml up -d postgres
+# Or with alias: dcp up -d postgres
 
 # Stop PostgreSQL
-docker compose stop postgres
+docker compose -f docker/docker-compose.yml stop postgres
+# Or with alias: dcp stop postgres
 
 # View PostgreSQL logs
-docker compose logs -f postgres
+docker compose -f docker/docker-compose.yml logs -f postgres
+# Or with alias: dcp logs -f postgres
 
 # Remove PostgreSQL container and volumes (⚠️ deletes data)
-docker compose down -v
+docker compose -f docker/docker-compose.yml down -v
+# Or with alias: dcp down -v
 
 # Check PostgreSQL health
-docker compose ps
+docker compose -f docker/docker-compose.yml ps
+# Or with alias: dcp ps
+```
+
+**Note**: To make the alias persistent, add it to your `~/.bashrc` or `~/.zshrc`:
+```bash
+echo "alias dcp='docker compose -f docker/docker-compose.yml'" >> ~/.bashrc
+source ~/.bashrc
 ```
 
 ---
@@ -223,6 +264,9 @@ docker compose ps
 ## Project structure
 
 ```
+├── docker/           # Docker configuration files
+│   ├── docker-compose.yml
+│   └── .dockerignore
 ├── guardrails/       # Guidelines for AI dev agents (e.g. Cursor); RAG guardrails elsewhere
 ├── prisma/           # Schema, migrations
 ├── src/
