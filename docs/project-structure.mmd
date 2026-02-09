@@ -64,7 +64,8 @@ flowchart TB
     guardrails[guardrails/]
     prisma[prisma/]
     docker[docker/]
-    config[prisma.config.ts and package.json]
+    tests[tests/]
+    config[prisma.config.ts, package.json, vitest.config.ts]
   end
 
   subgraph src_content [src/]
@@ -112,9 +113,16 @@ flowchart TB
     dockerignore[.dockerignore]
   end
 
+  subgraph tests_content [tests/]
+    tests_setup[setup.ts]
+    tests_helpers[helpers/]
+    tests_db_ops[db_operations/]
+  end
+
   root --> guardrails
   root --> prisma
   root --> docker
+  root --> tests
   root --> config
   root --> src_content
   api --> api_content
@@ -122,3 +130,4 @@ flowchart TB
   db_ops --> db_ops_content
   etl --> etl_content
   docker --> docker_content
+  tests --> tests_content

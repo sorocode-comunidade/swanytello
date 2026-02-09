@@ -12,6 +12,7 @@ Where code lives and how the main areas interact.
 - **`src/log/`** – Logging utilities. Can be used by api, rag, channels, etl, db_operations.
 - **`src/types/`** – Shared TypeScript types and declarations.
 - **`src/utils/`** – Shared utilities (e.g. sanitizers). No API/DB/channel dependencies.
+- **`tests/`** – Test suite (Vitest). Contains test files for database operations and models. Uses `helpers/` for test utilities and `db_operations/` for model tests.
 
 ## Boundaries
 

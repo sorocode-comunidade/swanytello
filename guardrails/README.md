@@ -6,7 +6,7 @@ This folder holds **guardrails** that guide **AI coding agents** (e.g. Cursor AI
 
 - Guide AI agents (Cursor, Copilot, etc.) on how to write and structure code in this repo.
 - Encode project conventions, architecture boundaries, and do/don’t rules.
-- Keep development-time suggestions aligned with the monolith layout (api, rag, channels, etl, db_operations, etc.).
+- Keep development-time suggestions aligned with the monolith layout (api, rag, channels, etl, db_operations, tests, etc.).
 
 This is **not** for runtime guardrails (e.g. RAG input/output validation). Those will live elsewhere (e.g. under `src/` when implemented).
 

@@ -183,8 +183,36 @@ RAG          → API Tool Functions → API Services → db_operations/models �
 
 ---
 
+---
+
+## Testing (`tests/`)
+
+**Purpose**: Test suite for database operations and models using Vitest.
+
+**Why this architecture?**
+
+1. **Test Isolation**: Tests are located at the project root, separate from source code, ensuring clear separation of concerns
+2. **Database Testing**: Tests verify all CRUD operations, validation, and edge cases for database models
+3. **Test Utilities**: Helper functions in `tests/helpers/` provide reusable test data creation and cleanup
+4. **Coverage**: Comprehensive test coverage for `OpenPosition` and `TagAnalisys` models including:
+   - CRUD operations
+   - Cold delete functionality
+   - Input validation with Zod schemas
+   - Array-to-JSON conversion
+   - Error handling
+
+**Structure**:
+- `helpers/testDb.ts` – Database test utilities (clean, create test data, disconnect)
+- `db_operations/` – Test files for database models
+- `setup.ts` – Test environment configuration
+
+**See**: [Tests README](../tests/README.md)
+
+---
+
 ## See Also
 
 - [Project Structure (Visual)](project-structure.md) – Mermaid diagrams
 - [Guardrails](../guardrails/README.md) – Development guidelines
+- [Tests](../tests/README.md) – Testing documentation
 - Component-specific READMEs in each `src/` folder

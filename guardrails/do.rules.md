@@ -38,6 +38,14 @@ Patterns and practices to follow when writing or suggesting code.
 - **Do** import database models from `src/db_operations/models/` in API services and ETL load operations.
 - **Do** prevent RAG from directly accessing `src/db_operations`; RAG must use the API for database operations.
 
+## Testing
+
+- **Do** write tests for database operations in `tests/db_operations/` using Vitest.
+- **Do** use test helpers from `tests/helpers/testDb.ts` for creating test data and cleaning up.
+- **Do** clean the database in `beforeEach` and disconnect in `afterAll` to ensure test isolation.
+- **Do** test both success and failure cases, including edge cases and validation errors.
+- **Do** follow the existing test structure: `tests/db_operations/{model}.test.ts` for model tests.
+
 ## General
 
 - **Do** use TypeScript strictly; avoid `any` unless necessary and then narrow or document.

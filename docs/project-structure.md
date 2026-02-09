@@ -80,6 +80,7 @@ flowchart TB
     guardrails[guardrails/]
     prisma_root[prisma/]
     docker[docker/]
+    tests[tests/]
   end
 
   subgraph src_content [src/]
@@ -126,15 +127,23 @@ flowchart TB
     dockerignore[.dockerignore]
   end
 
+  subgraph tests_detail [tests/]
+    tests_setup[setup.ts]
+    tests_helpers[helpers/]
+    tests_db_ops[db_operations/]
+  end
+
   root --> guardrails
   root --> prisma_root
   root --> docker
+  root --> tests
   root --> src_content
   api --> api_detail
   channels --> channels_detail
   db_ops --> db_ops_detail
   etl --> etl_detail
   docker --> docker_detail
+  tests --> tests_detail
 ```
 
 ---
