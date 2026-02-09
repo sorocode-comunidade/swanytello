@@ -67,6 +67,19 @@ alias dcp='docker compose -f docker/docker-compose.yml'
    ```bash
    npm run dev
    ```
+   
+   The application will automatically check the database connection on startup:
+   ```
+   🔍 Checking database connection...
+   
+   ✅ Docker container: Running and healthy
+   ✅ Database connection: Connected
+      🎉 Ready to start application!
+   
+   🚀 Server listening at http://0.0.0.0:3000
+   ```
+   
+   If the database is not connected, you'll see a warning with helpful instructions.
 
 ### Startup Order
 

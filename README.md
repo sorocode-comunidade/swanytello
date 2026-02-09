@@ -225,6 +225,19 @@ sequenceDiagram
    ```bash
    npm run dev
    ```
+   
+   The application will automatically check the database connection on startup and display the status:
+   ```
+   🔍 Checking database connection...
+   
+   ✅ Docker container: Running and healthy
+   ✅ Database connection: Connected
+      🎉 Ready to start application!
+   
+   🚀 Server listening at http://0.0.0.0:3000
+   ```
+   
+   If the database is not connected, you'll see a warning with instructions.
 
 ### Option 2: Local PostgreSQL
 
@@ -233,6 +246,8 @@ sequenceDiagram
 3. Generate Prisma client: `npx prisma generate`
 4. Run migrations (when you have a database): `npx prisma migrate dev`
 5. Start the API: `npm run dev`
+   
+   The application will automatically check the database connection on startup and display the status in the terminal.
 
 ### Docker Compose Commands
 
@@ -307,6 +322,27 @@ source ~/.bashrc
 | `npm run start` | Start the server (tsx) |
 | `npm run build` | Compile TypeScript to `dist/` |
 | `npm run type-check` | Run TypeScript type checking |
+| `npm test` | Run tests (Vitest) |
+| `npm run test:run` | Run tests once |
+| `npm run test:watch` | Run tests in watch mode |
+| `npm run test:coverage` | Run tests with coverage report |
+
+---
+
+## Testing
+
+Tests are located in the `tests/` folder and use **Vitest** for testing database operations.
+
+**Prerequisites**:
+- PostgreSQL must be running (via Docker Compose)
+- Environment variables configured (`.env` file)
+
+**Run tests**:
+```bash
+npm test
+```
+
+See [Tests Documentation](tests/README.md) for detailed information on writing and running tests.
 
 ---
 
@@ -318,6 +354,9 @@ source ~/.bashrc
 │   └── .dockerignore
 ├── guardrails/       # Guidelines for AI dev agents (e.g. Cursor); RAG guardrails elsewhere
 ├── prisma/           # Schema, migrations
+├── tests/            # Test suite (Vitest)
+│   ├── helpers/      # Test utilities and helpers
+│   └── db_operations/ # Database operation tests
 ├── src/
 │   ├── api/          # REST API (Fastify)
 │   ├── rag/          # RAG logic (LangChain)
@@ -331,6 +370,7 @@ source ~/.bashrc
 │   ├── utils/        # Shared utilities
 │   └── server.ts     # Entry point
 ├── prisma.config.ts
+├── vitest.config.ts  # Vitest configuration
 └── package.json
 ```
 

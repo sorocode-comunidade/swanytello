@@ -12,3 +12,5 @@ dist/
 uploads/
 generated/
 docker/.env
+coverage/
+.nyc_output/
