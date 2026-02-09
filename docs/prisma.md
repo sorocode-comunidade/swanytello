@@ -69,6 +69,7 @@ generated/
 
 src/db_operations/
 ├── models/               # Database model operations (use Prisma Client)
+├── db_types/             # Zod schemas and TypeScript types
 └── prismaInstance.ts     # Prisma client instance
 ```
 
@@ -88,16 +89,45 @@ When you modify `prisma/schema.prisma`, follow this workflow:
 Edit `prisma/schema.prisma` to add/modify models, fields, or relationships:
 
 ```prisma
-model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+model OpenPosition {
+  id          String   @id @default(uuid())
+  title       String
+  link        String
+  companyName String   @map("company_name")
+  region      String
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
-  @@map("users")
+  tagAnalisys TagAnalisys?
+
+  @@map("open_position")
+}
+
+model TagAnalisys {
+  id             String   @id @default(uuid())
+  openPositionId String   @unique @map("open_position_id")
+  tier1          String?  @map("tier_1")  // JSON array of tags
+  tier2          String?  @map("tier_2")  // JSON array of tags
+  tier3          String?  @map("tier_3")  // JSON array of tags
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  openPosition OpenPosition @relation(fields: [openPositionId], references: [id], onDelete: Cascade)
+
+  @@map("tag_analisys")
 }
 ```
+
+**Current Models in Schema**:
+- `OpenPosition` – Job openings/positions with title, link, company name, and region
+- `TagAnalisys` – Tag analysis for positions (one-to-one with OpenPosition). Contains three tiers (`tier1`, `tier2`, `tier3`) each storing arrays of tag words as JSON strings
+- `ColdDeleted` – Soft-deleted records (cold delete functionality). Stores deleted OpenPosition records
+
+**Model Relationships**:
+- `OpenPosition` ↔ `TagAnalisys`: One-to-one (each position can have one tag analysis)
+- `OpenPosition` → `ColdDeleted`: One-to-many (deleted positions are moved here)
+
+**Note**: TagAnalisys tiers are stored as JSON strings in the database but handled as arrays in code. Helper functions convert between formats automatically.
 
 ### Step 2: Generate Prisma Client
 
@@ -491,9 +521,33 @@ npx prisma db execute --stdin <<< "SELECT 1;"
 
 ---
 
+## Current Database Models
+
+The project currently has the following models defined in `prisma/schema.prisma`:
+
+- **`OpenPosition`** – Job openings/positions with title, link, company name, and region
+  - CRUD operations: `createOpenPosition`, `getOpenPositionById`, `getAllOpenPositions`, `updateOpenPosition`, `deleteOpenPosition`, `coldDeleteOpenPosition`
+  - See [OpenPosition Model](../src/db_operations/models/open_position.model.ts)
+
+- **`TagAnalisys`** – Tag analysis for positions (one-to-one relationship with OpenPosition)
+  - Contains three tiers (`tier1`, `tier2`, `tier3`) each storing arrays of tag words as JSON strings
+  - CRUD operations: `createTagAnalisys`, `getTagAnalisysById`, `getTagAnalisysByOpenPositionId`, `getAllTagAnalisys`, `updateTagAnalisys`, `deleteTagAnalisys`
+  - Tiers are handled as arrays in code but stored as JSON strings in the database
+  - See [TagAnalisys Model](../src/db_operations/models/tag_analisys.model.ts)
+
+- **`ColdDeleted`** – Soft-deleted records (used for cold delete functionality)
+  - Stores deleted `OpenPosition` records with `deletedAt` timestamp
+  - Used by `coldDeleteOpenPosition` function
+
+**Model Relationships**:
+- `OpenPosition` ↔ `TagAnalisys`: One-to-one (each position can have one tag analysis)
+- `OpenPosition` → `ColdDeleted`: One-to-many (deleted positions are moved here)
+
+See [Database Operations](../src/db_operations/README.md) for complete CRUD operations and usage examples.
+
 ## See Also
 
-- [Database Operations](../src/db_operations/README.md) – How to use Prisma in code
+- [Database Operations](../src/db_operations/README.md) – How to use Prisma in code, including cold delete functionality
 - [Docker Setup](docker.md) – PostgreSQL setup
 - [Prisma Documentation](https://www.prisma.io/docs) – Official Prisma docs
 - [Prisma 7 Migration Guide](https://www.prisma.io/docs/guides/upgrade-guides/upgrading-versions/upgrading-to-prisma-7) – Prisma 7 specifics
