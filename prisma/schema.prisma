@@ -36,3 +36,17 @@ model TagAnalisys {
 
   @@map("tag_analisys")
 }
+
+model ColdDeleted {
+  id          String   @id @default(uuid())
+  originalId  String   @unique @map("original_id")
+  title       String
+  link        String
+  companyName String   @map("company_name")
+  region      String
+  deletedAt   DateTime @default(now()) @map("deleted_at")
+  createdAt   DateTime @map("created_at")
+  updatedAt   DateTime @map("updated_at")
+
+  @@map("cold_deleted")
+}

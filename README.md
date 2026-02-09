@@ -73,6 +73,7 @@ flowchart TB
 
     subgraph db_ops [Database Operations]
       Models[Models / Prisma]
+      Types[Types / Schemas]
     end
 
     subgraph shared [Shared]
@@ -134,8 +135,17 @@ flowchart TB
   end
 
   subgraph db_ops_detail [db_operations/]
+    db_ops_index[index.ts]
     models[models/]
+    db_types[db_types/]
     prisma[prismaInstance.ts]
+  end
+
+  subgraph etl_detail [etl/]
+    etl_index[index.ts]
+    extract[extract/]
+    transform[transform/]
+    load[load/]
   end
 
   subgraph docker_detail [docker/]
@@ -150,6 +160,7 @@ flowchart TB
   api --> api_detail
   channels --> channels_detail
   db_ops --> db_ops_detail
+  etl --> etl_detail
   docker --> docker_detail
 ```
 
@@ -344,6 +355,8 @@ source ~/.bashrc
 
 - **[Prisma Guide](docs/prisma.md)** – **Database schema workflow**: How to modify schema, generate Prisma Client, create migrations, and common commands.
 - **[Docker Setup](docs/docker.md)** – Docker Compose setup for PostgreSQL and development environment.
+- **[Understanding Promises](docs/promises.md)** – **Beginner-friendly guide**: Why we use Promises and async/await in JavaScript/TypeScript.
+- **[Understanding `index.ts` Files](docs/index-files.md)** – **Beginner-friendly guide**: How and why we use `index.ts` files for clean imports and module organization.
 - **[Troubleshooting](docs/troubleshooting.md)** – Common issues and solutions: Prisma extension, DBeaver connection, database issues.
 - **[Guardrails](guardrails/README.md)** – Guidelines for AI development agents (e.g. Cursor); RAG runtime guardrails live elsewhere.
 - **[Logging](src/log/README.md)** – Logging utilities; how to use `logCreate`, `logUpdate`, `logDelete`, and `logError`.

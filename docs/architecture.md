@@ -42,6 +42,22 @@ Swanytello is a **monolithic application** that combines multiple communication 
 - ❌ **RAG** (`src/rag/`) – **Cannot** access `db_operations` directly. Must use API tool functions
 - ❌ **Channels** (`src/channels/`) – **Cannot** access `db_operations` directly. Must use API
 
+**Structure**:
+- `models/` – CRUD operations for database entities (e.g., `open_position.model.ts`, `tag_analisys.model.ts`)
+- `db_types/` – Zod schemas and TypeScript types for validation
+- `prismaInstance.ts` – Prisma client instance
+
+**Features**:
+- All operations use Zod schemas for input validation
+- Cold delete functionality for soft-deleting records
+- Transaction support for atomic operations
+- Type-safe database access with Prisma
+- Array-to-JSON conversion helpers for complex data types (e.g., tag tiers)
+
+**Available Models**:
+- **OpenPosition** – Job positions with full CRUD and cold delete support
+- **TagAnalisys** – Tag analysis with three tiers, each storing arrays of tag words
+
 **See**: [Database Operations README](../src/db_operations/README.md)
 
 ---

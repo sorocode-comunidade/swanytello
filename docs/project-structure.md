@@ -42,6 +42,7 @@ flowchart TB
 
     subgraph db_ops [Database Operations]
       Models[Models / Prisma]
+      Types[Types / Schemas]
     end
 
     subgraph shared [Shared]
@@ -107,8 +108,17 @@ flowchart TB
   end
 
   subgraph db_ops_detail [db_operations/]
+    db_ops_index[index.ts]
     models[models/]
+    db_types[db_types/]
     prisma[prismaInstance.ts]
+  end
+
+  subgraph etl_detail [etl/]
+    etl_index[index.ts]
+    extract[extract/]
+    transform[transform/]
+    load[load/]
   end
 
   subgraph docker_detail [docker/]
@@ -123,6 +133,7 @@ flowchart TB
   api --> api_detail
   channels --> channels_detail
   db_ops --> db_ops_detail
+  etl --> etl_detail
   docker --> docker_detail
 ```
 
