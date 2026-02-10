@@ -26,6 +26,7 @@
   "dependencies": {
     "@fastify/jwt": "^9.0.1",
     "@langchain/core": "^1.1.19",
+    "@langchain/ollama": "^1.2.0",
     "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "^7.0.0",
     "bcrypt": "^6.0.0",

@@ -50,8 +50,21 @@ User Message → Channel → RAG Agent
 - **tools/** – Define tools the agent can call; they use the API, not `db_operations`.
 - **chains/** – Compose LLMs, tools, and retrieval into the RAG pipeline.
 
+## Usage
+
+- **Endpoint**: POST `/api/rag/test` (JWT required). Body: `{ "message": "..." }` (1–16384 chars). Response: `{ reply, timestamp }`.
+- **Env (Ollama)**: `OLLAMA_BASE_URL` (default `http://localhost:11434`), `OLLAMA_MODEL` (default `llama3.2`). Ollama must be running.
+- Full details, examples, and request-flow diagram: **[RAG documentation](../../docs/rag.md)**.
+
+## Changing the LLM
+
+- **Ollama**: Set `OLLAMA_BASE_URL` and `OLLAMA_MODEL` in `.env`; no code change.
+- **Other providers (OpenAI, Claude)**: Add a new module in `src/rag/llms/` (e.g. `openai.ts`) that exports a LangChain-compatible chat model, then use it in `src/rag/chains/chat.chain.ts` (or switch by env, e.g. `RAG_LLM_PROVIDER`). Document new env vars in [llms/README.md](llms/README.md) and `.env.example`.
+- Step-by-step: **[RAG documentation – How to change the LLM](../../docs/rag.md#how-to-change-the-llm)**.
+
 ## See Also
 
+- [RAG documentation](../../docs/rag.md) – Usage, request flow, and how to change the LLM
 - [Architecture Documentation](../../docs/project_structure/architecture.md) – Detailed architectural explanation
 - [Database Operations](../db_operations/README.md) – Why RAG uses tool functions
-- [API README](../api/README.md) – Tool function implementation
+- [API README](../api/README.md) – Tool function implementation and endpoint table

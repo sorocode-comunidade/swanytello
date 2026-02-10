@@ -176,3 +176,33 @@ sequenceDiagram
   API-->>Channel: Result
   Channel->>User: Reply
 ```
+
+---
+
+## 4. RAG request flow (POST /api/rag/test)
+
+When a client calls the RAG test endpoint, the request flows through the API into the chat chain and Ollama.
+
+```mermaid
+sequenceDiagram
+  participant Client
+  participant Route as rag.routes
+  participant Controller as rag.controller
+  participant Service as rag.service
+  participant Chain as chat.chain
+  participant LLM as llms/ollama
+
+  Client->>Route: POST /api/rag/test body: { message }
+  Route->>Controller: testRag(body, userId)
+  Controller->>Service: runRagChat(body)
+  Service->>Service: Zod parse body
+  Service->>Chain: runChatChain(message)
+  Chain->>LLM: getOllamaChat().invoke(message)
+  LLM->>Chain: AIMessage content
+  Chain->>Service: reply string
+  Service->>Controller: { reply, timestamp }
+  Controller->>Route: result
+  Route->>Client: 200 + { reply, timestamp }
+```
+
+**See**: [RAG documentation](../rag.md) for usage, env vars, and how to change the LLM.

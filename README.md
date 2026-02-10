@@ -400,6 +400,7 @@ See [Tests Documentation](tests/README.md) for detailed information on writing a
 - **[ETL](src/etl/README.md)** – Extract, Transform, Load operations. Why web scraping is the only way to retrieve internet data.
 - **[API](src/api/README.md)** – REST API (Fastify); routes, controllers, services, schemas. Tool functions for RAG.
 - **[RAG](src/rag/README.md)** – RAG logic using LangChain. Tool-based database access pattern.
+- **[RAG (docs)](docs/rag.md)** – RAG usage (POST `/api/rag/test`), request flow diagram, and how to change the LLM (Ollama env, adding providers).
 - **[Channels](src/channels/README.md)** – WhatsApp and Discord communication implementations.
 
 ### Development

@@ -11,6 +11,13 @@ This folder holds **LLM (Large Language Model) integrations** used by RAG. Each 
 
 Implementations should expose a LangChain-compatible chat model or LLM instance (or a factory that returns one) so chains can use them without caring about the provider. Configuration (API keys, base URLs, model names) should come from environment variables or a shared config module.
 
+### Ollama
+
+- **OLLAMA_BASE_URL** – Optional. Default `http://localhost:11434`.
+- **OLLAMA_MODEL** – Optional. Default `llama3.2`.
+
+Ollama must be running locally (or at the configured base URL) when using this provider.
+
 ## See Also
 
 - [Chains](../chains/README.md) – Where LLMs are used in RAG chains
