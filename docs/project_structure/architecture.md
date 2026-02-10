@@ -58,7 +58,7 @@ Swanytello is a **monolithic application** that combines multiple communication 
 - **OpenPosition** – Job positions with full CRUD and cold delete support
 - **TagAnalisys** – Tag analysis with three tiers, each storing arrays of tag words
 
-**See**: [Database Operations README](../src/db_operations/README.md)
+**See**: [Database Operations README](../../src/db_operations/README.md)
 
 ---
 
@@ -89,7 +89,7 @@ Swanytello is a **monolithic application** that combines multiple communication 
 - **`transform/`** – Data standardization, cleaning, and formatting
 - **`load/`** – Database storage and indexing
 
-**See**: [ETL README](../src/etl/README.md)
+**See**: [ETL README](../../src/etl/README.md)
 
 ---
 
@@ -112,7 +112,7 @@ Swanytello is a **monolithic application** that combines multiple communication 
 
 3. **Channel Integration**: RAG receives requests from channels and returns responses, but never directly interacts with channels.
 
-**See**: [RAG README](../src/rag/README.md)
+**See**: [RAG README](../../src/rag/README.md)
 
 ---
 
@@ -127,7 +127,7 @@ Swanytello is a **monolithic application** that combines multiple communication 
 3. **Tool Functions**: Provides tool functions for RAG agents to access database operations safely
 4. **Service Layer**: Business logic lives in services, which use `db_operations` for data access
 
-**See**: [API README](../src/api/README.md)
+**See**: [API README](../../src/api/README.md)
 
 ---
 
@@ -141,7 +141,7 @@ Swanytello is a **monolithic application** that combines multiple communication 
 2. **Delegation**: Channels delegate to API or RAG for business operations
 3. **No Direct DB Access**: Channels cannot access `db_operations` directly; they must use the API
 
-**See**: [Channels README](../src/channels/README.md)
+**See**: [Channels README](../../src/channels/README.md)
 
 ---
 
@@ -206,13 +206,13 @@ RAG          → API Tool Functions → API Services → db_operations/models �
 - `db_operations/` – Test files for database models
 - `setup.ts` – Test environment configuration
 
-**See**: [Tests README](../tests/README.md)
+**See**: [Tests README](../../tests/README.md)
 
 ---
 
 ## See Also
 
 - [Project Structure (Visual)](project-structure.md) – Mermaid diagrams
-- [Guardrails](../guardrails/README.md) – Development guidelines
-- [Tests](../tests/README.md) – Testing documentation
+- [Guardrails](../../guardrails/README.md) – Development guidelines
+- [Tests](../../tests/README.md) – Testing documentation
 - Component-specific READMEs in each `src/` folder

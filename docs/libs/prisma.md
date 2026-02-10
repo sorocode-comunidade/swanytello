@@ -12,6 +12,7 @@ Complete guide for working with Prisma in the Swanytello project.
 - [Workflow: Making Schema Changes](#workflow-making-schema-changes)
 - [Common Commands](#common-commands)
 - [Prisma 7 Specifics](#prisma-7-specifics)
+- [Driver Adapter (PrismaPg)](#driver-adapter-prismapg)
 - [Best Practices](#best-practices)
 - [Troubleshooting](#troubleshooting)
 
@@ -26,7 +27,7 @@ This project uses **Prisma 7** with PostgreSQL as the database. Prisma provides:
 - **Database migrations** for version control
 - **Custom client output** to `generated/prisma` directory
 
-All database operations are centralized in `src/db_operations/`. See [Database Operations](../src/db_operations/README.md) for architectural details.
+All database operations are centralized in `src/db_operations/`. See [Database Operations](../../src/db_operations/README.md) for architectural details.
 
 ---
 
@@ -328,6 +329,77 @@ This means Prisma Client is generated in `generated/prisma/`, not the default `n
 import { PrismaClient } from "../../generated/prisma/index.js";
 ```
 
+### Driver Adapter (PrismaPg)
+
+In **Prisma 7**, the default client uses the **“client” engine**, which does not connect to the database by itself. You must pass either a **driver adapter** or an **Accelerate URL**. This project uses the **`@prisma/adapter-pg`** adapter so that Prisma uses the Node.js **`pg`** driver to talk to PostgreSQL.
+
+**Why use the adapter?**
+
+- Prisma 7’s client engine is Rust-free and relies on a JavaScript driver for the actual connection.
+- The **pg** adapter gives direct TCP connections to PostgreSQL, works in Node.js and tests, and keeps behavior consistent between app and test runs.
+
+**Dependencies** (already in the project):
+
+- `@prisma/adapter-pg` – Prisma’s adapter for the `pg` driver  
+- `pg` – Node.js PostgreSQL client  
+
+**Application usage** (`src/db_operations/prismaInstance.ts`):
+
+When `DATABASE_URL` is set, the app creates a single shared client using the adapter:
+
+```typescript
+import "dotenv/config";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient } from "../../generated/prisma/index.js";
+
+if (process.env.DATABASE_URL) {
+  const adapter = new PrismaPg({
+    connectionString: process.env.DATABASE_URL,
+  });
+  prismaInstance = new PrismaClient({
+    adapter,
+    log: ["query", "error", "warn"],
+  });
+} else {
+  prismaInstance = {};  // Fallback when no DB (e.g. build-only environments)
+}
+```
+
+All model code in `src/db_operations/models/` uses this `prismaInstance`; they never construct `PrismaClient` themselves.
+
+**Test usage** (`tests/helpers/testDb.ts`):
+
+Tests use a **separate** Prisma client instance so that:
+
+- Setup/teardown (`cleanDatabase`, `disconnectDatabase`) and test helpers (`createTestOpenPosition`, `createTestTagAnalisys`) work even if the app’s `prismaInstance` is not used in the test process.
+- Tests can rely on a real database connection with the same adapter.
+
+```typescript
+import "dotenv/config";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient } from "../../generated/prisma/index.js";
+
+const connectionString =
+  process.env.DATABASE_URL ||
+  "postgresql://swanytello:swanytello_password@localhost:5432/swanytello?schema=public";
+const adapter = new PrismaPg({ connectionString });
+const prisma = new PrismaClient({
+  adapter,
+  ...(process.env.VITEST_DEBUG ? { log: ["query", "error", "warn"] } : {}),
+});
+```
+
+Test helpers (`cleanDatabase`, `createTestOpenPosition`, `createTestTagAnalisys`, `disconnectDatabase`) use this `prisma` client. The code under test (e.g. `createOpenPosition`, `getTagAnalisysById`) still uses the app’s `prismaInstance`; both connect to the same database, so data written by one is visible to the other.
+
+**Summary**
+
+| Context   | File                     | Client        | Purpose                                      |
+|----------|---------------------------|---------------|----------------------------------------------|
+| App      | `src/db_operations/prismaInstance.ts` | Single shared | All DB operations in models                  |
+| Tests    | `tests/helpers/testDb.ts`| Dedicated     | Clean DB, create test data, disconnect       |
+
+Both use `PrismaPg` with `connectionString` (from `DATABASE_URL` or the default test URL). Do not instantiate `PrismaClient` without passing the `adapter`; in Prisma 7 that will throw.
+
 ---
 
 ## Best Practices
@@ -379,7 +451,7 @@ npx prisma migrate dev --name update
 
 ### 6. Keep Models in `db_operations/models/`
 
-All database operations should be in `src/db_operations/models/`. See [Database Operations](../src/db_operations/README.md).
+All database operations should be in `src/db_operations/models/`. See [Database Operations](../../src/db_operations/README.md).
 
 ### 7. Use TypeScript Types from Prisma Client
 
@@ -527,13 +599,13 @@ The project currently has the following models defined in `prisma/schema.prisma`
 
 - **`OpenPosition`** – Job openings/positions with title, link, company name, and region
   - CRUD operations: `createOpenPosition`, `getOpenPositionById`, `getAllOpenPositions`, `updateOpenPosition`, `deleteOpenPosition`, `coldDeleteOpenPosition`
-  - See [OpenPosition Model](../src/db_operations/models/open_position.model.ts)
+  - See [OpenPosition Model](../../src/db_operations/models/open_position.model.ts)
 
 - **`TagAnalisys`** – Tag analysis for positions (one-to-one relationship with OpenPosition)
   - Contains three tiers (`tier1`, `tier2`, `tier3`) each storing arrays of tag words as JSON strings
   - CRUD operations: `createTagAnalisys`, `getTagAnalisysById`, `getTagAnalisysByOpenPositionId`, `getAllTagAnalisys`, `updateTagAnalisys`, `deleteTagAnalisys`
   - Tiers are handled as arrays in code but stored as JSON strings in the database
-  - See [TagAnalisys Model](../src/db_operations/models/tag_analisys.model.ts)
+  - See [TagAnalisys Model](../../src/db_operations/models/tag_analisys.model.ts)
 
 - **`ColdDeleted`** – Soft-deleted records (used for cold delete functionality)
   - Stores deleted `OpenPosition` records with `deletedAt` timestamp
@@ -543,11 +615,11 @@ The project currently has the following models defined in `prisma/schema.prisma`
 - `OpenPosition` ↔ `TagAnalisys`: One-to-one (each position can have one tag analysis)
 - `OpenPosition` → `ColdDeleted`: One-to-many (deleted positions are moved here)
 
-See [Database Operations](../src/db_operations/README.md) for complete CRUD operations and usage examples.
+See [Database Operations](../../src/db_operations/README.md) for complete CRUD operations and usage examples.
 
 ## See Also
 
-- [Database Operations](../src/db_operations/README.md) – How to use Prisma in code, including cold delete functionality
-- [Docker Setup](docker.md) – PostgreSQL setup
+- [Database Operations](../../src/db_operations/README.md) – How to use Prisma in code, including cold delete functionality
+- [Docker Setup](../infrastructure/docker.md) – PostgreSQL setup
 - [Prisma Documentation](https://www.prisma.io/docs) – Official Prisma docs
 - [Prisma 7 Migration Guide](https://www.prisma.io/docs/guides/upgrade-guides/upgrading-versions/upgrading-to-prisma-7) – Prisma 7 specifics

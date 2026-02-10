@@ -19,7 +19,7 @@ Projeto desenvolvido para a comunidade Sorocode, unindo os projetos SwanyBot e D
 
 ## Architecture
 
-This repository is a **monolith** with clear architectural boundaries and centralized operations. See [Architecture Documentation](docs/architecture.md) for detailed explanations.
+This repository is a **monolith** with clear architectural boundaries and centralized operations. See [Architecture Documentation](docs/project_structure/architecture.md) for detailed explanations.
 
 ### Key Components
 
@@ -228,7 +228,7 @@ sequenceDiagram
    # Create and apply initial migrations
    npx prisma migrate dev
    ```
-   See [Prisma Guide](docs/prisma.md) for detailed workflow and commands.
+   See [Prisma Guide](docs/libs/prisma.md) for detailed workflow and commands.
 
 6. **Start the API** (only after PostgreSQL is running):
    ```bash
@@ -319,7 +319,7 @@ source ~/.bashrc
 **Troubleshooting**: 
 - If you get "container name already in use" error, the container is already running. Check with `docker ps -a --filter "name=swanytello-postgres"` - if it shows "healthy", you're good to go!
 - If `docker compose ps` shows empty but the container exists, it was created with a different docker-compose.yml file. Use `docker ps` to check it directly.
-- See [Docker Troubleshooting](docs/docker.md#troubleshooting) for more details.
+- See [Docker Troubleshooting](docs/infrastructure/docker.md#troubleshooting) for more details.
 
 ---
 
@@ -389,8 +389,8 @@ See [Tests Documentation](tests/README.md) for detailed information on writing a
 
 ### Architecture & Design
 
-- **[Architecture](docs/architecture.md)** – Detailed explanation of architectural decisions, component purposes, and design patterns.
-- **[Project Structure (Visual)](docs/project-structure.md)** – Mermaid diagrams for architecture and folder structure.
+- **[Architecture](docs/project_structure/architecture.md)** – Detailed explanation of architectural decisions, component purposes, and design patterns.
+- **[Project Structure (Visual)](docs/project_structure/project-structure.md)** – Mermaid diagrams for architecture and folder structure.
 
 ### Components
 
@@ -402,10 +402,10 @@ See [Tests Documentation](tests/README.md) for detailed information on writing a
 
 ### Development
 
-- **[Prisma Guide](docs/prisma.md)** – **Database schema workflow**: How to modify schema, generate Prisma Client, create migrations, and common commands.
-- **[Docker Setup](docs/docker.md)** – Docker Compose setup for PostgreSQL and development environment.
-- **[Understanding Promises](docs/promises.md)** – **Beginner-friendly guide**: Why we use Promises and async/await in JavaScript/TypeScript.
-- **[Understanding `index.ts` Files](docs/index-files.md)** – **Beginner-friendly guide**: How and why we use `index.ts` files for clean imports and module organization.
-- **[Troubleshooting](docs/troubleshooting.md)** – Common issues and solutions: Prisma extension, DBeaver connection, database issues.
+- **[Prisma Guide](docs/libs/prisma.md)** – **Database schema workflow**: How to modify schema, generate Prisma Client, create migrations, and common commands.
+- **[Docker Setup](docs/infrastructure/docker.md)** – Docker Compose setup for PostgreSQL and development environment.
+- **[Understanding Promises](docs/libs/promises.md)** – **Beginner-friendly guide**: Why we use Promises and async/await in JavaScript/TypeScript.
+- **[Understanding `index.ts` Files](docs/libs/index-files.md)** – **Beginner-friendly guide**: How and why we use `index.ts` files for clean imports and module organization.
+- **[Troubleshooting](docs/infrastructure/troubleshooting.md)** – Common issues and solutions: Prisma extension, DBeaver connection, database issues.
 - **[Guardrails](guardrails/README.md)** – Guidelines for AI development agents (e.g. Cursor); RAG runtime guardrails live elsewhere.
 - **[Logging](src/log/README.md)** – Logging utilities; how to use `logCreate`, `logUpdate`, `logDelete`, and `logError`.

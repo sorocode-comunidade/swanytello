@@ -41,5 +41,5 @@ The API provides a unified interface for:
 
 ## See Also
 
-- [Architecture Documentation](../../docs/architecture.md) – Detailed architectural explanation
+- [Architecture Documentation](../../docs/project_structure/architecture.md) – Detailed architectural explanation
 - [Database Operations](../db_operations/README.md) – How API uses db_operations

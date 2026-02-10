@@ -47,7 +47,7 @@ This folder holds **all database operations and models** for the Swanytello mono
 - Keep models focused on data access only; no business logic here.
 - **All model functions are `async` and return Promises** (e.g., `Promise<OpenPosition>`).
   - Always use `await` when calling model functions in `async` functions.
-  - See [Understanding Promises](../../docs/promises.md) for a beginner-friendly guide.
+  - See [Understanding Promises](../../docs/libs/promises.md) for a beginner-friendly guide.
 - **Schema files go in `db_types/` folder** (`db_types/{entity}.schema.ts`) with Zod schemas for:
   - Input validation (create, update, query parameters)
   - Return type inference
@@ -139,7 +139,7 @@ if (deleted) {
 }
 ```
 
-**Note**: All model functions return Promises. Always use `await` when calling them in `async` functions. See [Understanding Promises](../../docs/promises.md) for a beginner-friendly explanation.
+**Note**: All model functions return Promises. Always use `await` when calling them in `async` functions. See [Understanding Promises](../../docs/libs/promises.md) for a beginner-friendly explanation.
 
 ## Access Control
 
@@ -179,7 +179,7 @@ docker compose -f docker/docker-compose.yml up -d postgres
 docker compose -f docker/docker-compose.yml ps
 ```
 
-See [Docker Setup](../../docs/docker.md) for detailed instructions.
+See [Docker Setup](../../docs/infrastructure/docker.md) for detailed instructions.
 
 ## Available Models
 
@@ -300,8 +300,8 @@ See [TagAnalisys Model](./models/tag_analisys.model.ts) for implementation detai
 
 ## See Also
 
-- [Prisma Guide](../../docs/prisma.md) – **Start here!** Complete guide for schema changes, migrations, and Prisma commands
-- [Understanding Promises](../../docs/promises.md) – **Beginner-friendly guide** to Promises and async/await (why we use them)
-- [Architecture Documentation](../../docs/architecture.md) – Detailed architectural explanation
+- [Prisma Guide](../../docs/libs/prisma.md) – **Start here!** Complete guide for schema changes, migrations, and Prisma commands
+- [Understanding Promises](../../docs/libs/promises.md) – **Beginner-friendly guide** to Promises and async/await (why we use them)
+- [Architecture Documentation](../../docs/project_structure/architecture.md) – Detailed architectural explanation
 - [API README](../api/README.md) – How API uses db_operations
-- [Docker Setup](../../docs/docker.md) – PostgreSQL setup with Docker Compose
+- [Docker Setup](../../docs/infrastructure/docker.md) – PostgreSQL setup with Docker Compose

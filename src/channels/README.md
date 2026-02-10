@@ -43,7 +43,7 @@ User → Channel → RAG (for AI responses)
 
 ## See Also
 
-- [Architecture Documentation](../../docs/architecture.md) – Detailed architectural explanation
+- [Architecture Documentation](../../docs/project_structure/architecture.md) – Detailed architectural explanation
 
 ## Links
 

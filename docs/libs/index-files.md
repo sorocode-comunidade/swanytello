@@ -519,6 +519,6 @@ export * from "./open_position.model.js";
 
 ## See Also
 
-- [Project Structure](project-structure.md) – Visual folder structure
-- [Database Operations](../src/db_operations/README.md) – Example of `index.ts` usage
+- [Project Structure](../project_structure/project-structure.md) – Visual folder structure
+- [Database Operations](../../src/db_operations/README.md) – Example of `index.ts` usage
 - [Understanding Promises](promises.md) – Async/await patterns used with modules

@@ -40,6 +40,6 @@ User Message → Channel → RAG Agent
 
 ## See Also
 
-- [Architecture Documentation](../../docs/architecture.md) – Detailed architectural explanation
+- [Architecture Documentation](../../docs/project_structure/architecture.md) – Detailed architectural explanation
 - [Database Operations](../db_operations/README.md) – Why RAG uses tool functions
 - [API README](../api/README.md) – Tool function implementation

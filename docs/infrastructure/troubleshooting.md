@@ -255,5 +255,5 @@ docker exec swanytello-postgres pg_isready -U swanytello
 ## See Also
 
 - [Docker Setup](docker.md) – PostgreSQL setup and connection
-- [Prisma Guide](prisma.md) – Prisma workflow and commands
-- [Database Operations](../src/db_operations/README.md) – Database operations documentation
+- [Prisma Guide](../libs/prisma.md) – Prisma workflow and commands
+- [Database Operations](../../src/db_operations/README.md) – Database operations documentation

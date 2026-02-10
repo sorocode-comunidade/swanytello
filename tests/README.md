@@ -171,5 +171,5 @@ describe("Your Module", () => {
 ## See Also
 
 - [Database Operations](../src/db_operations/README.md) – Database operations documentation
-- [Prisma Guide](../docs/prisma.md) – Prisma setup and usage
-- [Docker Setup](../docs/docker.md) – PostgreSQL setup with Docker Compose
+- [Prisma Guide](../docs/libs/prisma.md) – Prisma setup and usage
+- [Docker Setup](../docs/infrastructure/docker.md) – PostgreSQL setup with Docker Compose

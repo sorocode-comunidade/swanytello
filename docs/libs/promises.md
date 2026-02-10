@@ -561,6 +561,6 @@ async function createPositionService(data: CreatePositionInput) {
 
 ## See Also
 
-- [Database Operations](../src/db_operations/README.md) – How we use Promises in database operations
+- [Database Operations](../../src/db_operations/README.md) – How we use Promises in database operations
 - [Prisma Guide](prisma.md) – Database operations with Prisma
-- [Architecture Documentation](architecture.md) – Overall project architecture
+- [Architecture Documentation](../project_structure/architecture.md) – Overall project architecture

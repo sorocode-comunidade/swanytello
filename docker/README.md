@@ -58,5 +58,5 @@ After that, `dcp ps`, `dcp stop postgres`, and `dcp up -d postgres` will work co
 
 ## See Also
 
-- [Docker Setup Documentation](../docs/docker.md) – Complete Docker setup guide
+- [Docker Setup Documentation](../docs/infrastructure/docker.md) – Complete Docker setup guide
 - [Getting Started](../README.md#getting-started) – Project setup instructions
