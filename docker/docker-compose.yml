@@ -1,3 +1,6 @@
+# Fixed project name so Compose always finds the same container from any directory
+name: swanytello
+
 services:
   postgres:
     image: postgres:16-alpine

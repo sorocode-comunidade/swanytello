@@ -1,12 +1,21 @@
+import "dotenv/config";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../../generated/prisma/index.js";
-import prismaInstance from "../../src/db_operations/prismaInstance.js";
 
 /**
  * Test Database Utilities
  * Helper functions for setting up and cleaning up test database
+ * Uses a dedicated Prisma client for tests so setup/teardown work even when
+ * the app's prismaInstance is not yet initialized or uses a fallback.
  */
-
-const prisma = prismaInstance as PrismaClient;
+const connectionString =
+  process.env.DATABASE_URL ||
+  "postgresql://swanytello:swanytello_password@localhost:5432/swanytello?schema=public";
+const adapter = new PrismaPg({ connectionString });
+const prisma = new PrismaClient({
+  adapter,
+  ...(process.env.VITEST_DEBUG ? { log: ["query", "error", "warn"] } : {}),
+});
 
 /**
  * Clean all test data from database

@@ -38,7 +38,23 @@ docker compose -f docker/docker-compose.yml down
 # Or with alias: dcp down
 ```
 
-**Note**: If you get a "container name already in use" error, check if the container is already running with `dcp ps`. If it shows "healthy", you can use it as-is!
+**Important**: Always run Compose commands from the **project root** (e.g. `~/projects/sorocode_community/swanytello`), or use the `-f docker/docker-compose.yml` path. The compose file sets a fixed project name (`swanytello`) so that `dcp ps`, `dcp stop`, and `dcp up` always see the same container no matter where you run them.
+
+### If "container name already in use" or Compose says no container exists
+
+This happens when a container named `swanytello-postgres` already exists but was created with a different Compose project (e.g. run from another directory). One-time fix:
+
+```bash
+# From project root - stop and remove the existing container (data is in a volume and will persist)
+docker stop swanytello-postgres
+docker rm swanytello-postgres
+
+# Start again with Compose (it will create a new container with the correct project)
+docker compose -f docker/docker-compose.yml up -d postgres
+# Or: dcp up -d postgres
+```
+
+After that, `dcp ps`, `dcp stop postgres`, and `dcp up -d postgres` will work consistently.
 
 ## See Also
 

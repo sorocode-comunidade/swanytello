@@ -319,7 +319,7 @@ The health check runs every 10 seconds and will show as "healthy" when PostgreSQ
 
 **Error**: `Error response from daemon: Conflict. The container name "/swanytello-postgres" is already in use`
 
-**Cause**: A container with this name already exists (possibly from a previous docker-compose run or manual creation).
+**Cause**: A container with this name already exists (possibly from a previous docker-compose run or manual creation). If `docker compose ps` is empty but the container exists, it was created with a different Compose project (e.g. run from another directory). The compose file now sets a fixed project name (`name: swanytello`) so this stays consistent.
 
 **Solution**: You have three options:
 
@@ -336,13 +336,13 @@ docker inspect swanytello-postgres --format '{{.State.Health.Status}}'
 # No need to run 'docker compose up' - proceed with your application setup!
 ```
 
-**Option 2: Remove and recreate with docker compose**:
+**Option 2: Remove and recreate with docker compose** (recommended so `dcp ps` / stop / up work consistently):
 ```bash
-# Stop and remove the existing container (keeps volumes)
+# From project root - stop and remove the existing container (data is in a volume and will persist)
 docker stop swanytello-postgres
 docker rm swanytello-postgres
 
-# Then start with docker compose
+# Then start with docker compose (creates container with the correct project name)
 docker compose -f docker/docker-compose.yml up -d postgres
 ```
 
