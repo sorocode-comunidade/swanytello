@@ -32,6 +32,16 @@ The API provides a unified interface for:
 
 **Note**: Database models are in `src/db_operations/models/`, not in this folder. Services import models from there.
 
+## Protected endpoints (require JWT)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET /api/user | Query users (optional `?id=`) | |
+| POST /api/user | Create user | |
+| PUT /api/user/:id | Update user | |
+| DELETE /api/user/:id | Delete user | |
+| **POST /api/rag/test** | **RAG test endpoint** | Placeholder for testing RAG implementation. Returns `{ ok, message, timestamp }`. Requires `Authorization: Bearer <token>`. See [tests/api/rag.test.ts](../../tests/api/rag.test.ts) for usage. |
+
 ## Access Patterns
 
 - **Channels** → Call API endpoints or use internal modules

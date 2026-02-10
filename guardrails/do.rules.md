@@ -41,10 +41,11 @@ Patterns and practices to follow when writing or suggesting code.
 ## Testing
 
 - **Do** write tests for database operations in `tests/db_operations/` using Vitest.
+- **Do** write API endpoint tests in `tests/api/` using `tests/helpers/buildTestApp.ts` when adding or changing protected routes.
 - **Do** use test helpers from `tests/helpers/testDb.ts` for creating test data and cleaning up.
 - **Do** clean the database in `beforeEach` and disconnect in `afterAll` to ensure test isolation.
 - **Do** test both success and failure cases, including edge cases and validation errors.
-- **Do** follow the existing test structure: `tests/db_operations/{model}.test.ts` for model tests.
+- **Do** follow the existing test structure: `tests/db_operations/{model}.test.ts` for model tests; `tests/api/{area}.test.ts` for API tests.
 
 ## General
 

@@ -157,6 +157,7 @@ flowchart TB
   subgraph tests_detail [tests/]
     tests_setup[setup.ts]
     tests_helpers[helpers/]
+    tests_api[api/]
     tests_db_ops[db_operations/]
   end
 
@@ -340,7 +341,7 @@ source ~/.bashrc
 
 ## Testing
 
-Tests are located in the `tests/` folder and use **Vitest** for testing database operations.
+Tests are located in the `tests/` folder and use **Vitest** for database operations and API endpoint tests (e.g. RAG).
 
 **Prerequisites**:
 - PostgreSQL must be running (via Docker Compose)
@@ -364,7 +365,8 @@ See [Tests Documentation](tests/README.md) for detailed information on writing a
 ├── guardrails/       # Guidelines for AI dev agents (e.g. Cursor); RAG guardrails elsewhere
 ├── prisma/           # Schema, migrations
 ├── tests/            # Test suite (Vitest)
-│   ├── helpers/      # Test utilities and helpers
+│   ├── helpers/      # Test utilities (testDb, buildTestApp for API tests)
+│   ├── api/          # API endpoint tests (e.g. RAG)
 │   └── db_operations/ # Database operation tests
 ├── src/
 │   ├── api/          # REST API (Fastify)

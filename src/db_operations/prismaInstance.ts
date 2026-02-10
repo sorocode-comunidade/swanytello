@@ -10,7 +10,8 @@ if (process.env.DATABASE_URL) {
   });
   prismaInstance = new PrismaClient({
     adapter,
-    log: ["query", "error", "warn"],
+    // No query logging during tests (VITEST) so console stays readable
+    log: process.env.VITEST ? ["error"] : ["query", "error", "warn"],
   });
 } else {
   prismaInstance = {};

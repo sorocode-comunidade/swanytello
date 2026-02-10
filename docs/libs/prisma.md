@@ -358,7 +358,8 @@ if (process.env.DATABASE_URL) {
   });
   prismaInstance = new PrismaClient({
     adapter,
-    log: ["query", "error", "warn"],
+    // No query logging during tests (VITEST) so console stays readable
+    log: process.env.VITEST ? ["error"] : ["query", "error", "warn"],
   });
 } else {
   prismaInstance = {};  // Fallback when no DB (e.g. build-only environments)
@@ -366,6 +367,8 @@ if (process.env.DATABASE_URL) {
 ```
 
 All model code in `src/db_operations/models/` uses this `prismaInstance`; they never construct `PrismaClient` themselves.
+
+**Logging in tests**: When `VITEST` is set (Vitest runs tests), the app client only logs `error`, not `query` or `warn`, so test output stays clear. The test helper (`testDb.ts`) does not enable query logging unless `VITEST_DEBUG` is set.
 
 **Test usage** (`tests/helpers/testDb.ts`):
 

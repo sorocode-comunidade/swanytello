@@ -23,7 +23,7 @@ Rules for naming, folder usage, and layering in the Swanytello monolith.
 - **Log** (`src/log/`): Central logging only; no business logic.
 - **Types** (`src/types/`): TypeScript types and declaration files (e.g. `.d.ts`).
 - **Utils** (`src/utils/`): Pure helpers; no API, DB, or channel coupling.
-- **Tests** (`tests/`): Test suite using Vitest. Contains `helpers/` for test utilities and `db_operations/` for model tests. Test files follow the pattern `{model}.test.ts`.
+- **Tests** (`tests/`): Test suite using Vitest. Contains `helpers/` (testDb, buildTestApp for API tests), `api/` for API endpoint tests (e.g. RAG), and `db_operations/` for model tests. Test files follow the pattern `{model}.test.ts` or `{area}.test.ts`.
 
 ## Layering (API)
 

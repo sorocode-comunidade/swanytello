@@ -187,22 +187,23 @@ RAG          → API Tool Functions → API Services → db_operations/models �
 
 ## Testing (`tests/`)
 
-**Purpose**: Test suite for database operations and models using Vitest.
+**Purpose**: Test suite for database operations, models, and API endpoints using Vitest.
 
 **Why this architecture?**
 
 1. **Test Isolation**: Tests are located at the project root, separate from source code, ensuring clear separation of concerns
 2. **Database Testing**: Tests verify all CRUD operations, validation, and edge cases for database models
-3. **Test Utilities**: Helper functions in `tests/helpers/` provide reusable test data creation and cleanup
-4. **Coverage**: Comprehensive test coverage for `OpenPosition` and `TagAnalisys` models including:
-   - CRUD operations
-   - Cold delete functionality
-   - Input validation with Zod schemas
-   - Array-to-JSON conversion
-   - Error handling
+3. **API Testing**: Endpoint tests (e.g. RAG) use `buildTestApp()` and `app.inject()`; no running server or DB required for auth/response tests
+4. **Test Utilities**: Helper functions in `tests/helpers/` provide reusable test data and app building:
+   - `testDb.ts` – Database utilities (clean, create test data, disconnect)
+   - `buildTestApp.ts` – Fastify app with JWT and protected routes for API tests
+5. **Coverage**: Comprehensive test coverage for `OpenPosition` and `TagAnalisys` models, plus API (e.g. POST `/api/rag/test` with JWT and 401 cases)
+6. **Readable output**: Prisma query logging is disabled during tests (when `VITEST` is set) so the console stays clear
 
 **Structure**:
 - `helpers/testDb.ts` – Database test utilities (clean, create test data, disconnect)
+- `helpers/buildTestApp.ts` – Build Fastify app for API tests (JWT + protected routes)
+- `api/` – API endpoint tests (e.g. `rag.test.ts` for POST `/api/rag/test`)
 - `db_operations/` – Test files for database models
 - `setup.ts` – Test environment configuration
 

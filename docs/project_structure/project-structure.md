@@ -130,6 +130,7 @@ flowchart TB
   subgraph tests_detail [tests/]
     tests_setup[setup.ts]
     tests_helpers[helpers/]
+    tests_api[api/]
     tests_db_ops[db_operations/]
   end
 
