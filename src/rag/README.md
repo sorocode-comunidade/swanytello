@@ -38,6 +38,18 @@ User Message → Channel → RAG Agent
 - ❌ RAG **cannot** perform web scraping (ETL handles that)
 - ❌ RAG **cannot** directly interact with channels
 
+## Structure
+
+| Folder | Purpose |
+|--------|---------|
+| **tools/** | Tool definitions for the agent (API-backed, no direct DB access). |
+| **chains/** | LangChain chains and agent orchestration (retrieval, generation, tool use). |
+| **llms/** | LLM integrations: OpenAI, Claude, Ollama, etc. |
+
+- **llms/** – Implement provider-specific chat models (env-based config, LangChain-compatible).
+- **tools/** – Define tools the agent can call; they use the API, not `db_operations`.
+- **chains/** – Compose LLMs, tools, and retrieval into the RAG pipeline.
+
 ## See Also
 
 - [Architecture Documentation](../../docs/project_structure/architecture.md) – Detailed architectural explanation

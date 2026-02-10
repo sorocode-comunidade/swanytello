@@ -89,6 +89,13 @@ flowchart TB
     fastify[fastifyInstance.ts]
   end
 
+  subgraph rag_content [rag/]
+    rag_index[index.ts]
+    rag_tools[tools/]
+    rag_chains[chains/]
+    rag_llms[llms/]
+  end
+
   subgraph channels_content [channels/]
     whatsapp[whatsapp/]
     discord[discord/]
@@ -127,6 +134,7 @@ flowchart TB
   root --> config
   root --> src_content
   api --> api_content
+  rag --> rag_content
   channels --> channels_content
   db_ops --> db_ops_content
   etl --> etl_content

@@ -103,6 +103,13 @@ flowchart TB
     middleware[middleware]
   end
 
+  subgraph rag_detail [rag/]
+    rag_index[index.ts]
+    rag_tools[tools/]
+    rag_chains[chains/]
+    rag_llms[llms/]
+  end
+
   subgraph channels_detail [channels/]
     whatsapp[whatsapp/]
     discord[discord/]
@@ -140,6 +147,7 @@ flowchart TB
   root --> tests
   root --> src_content
   api --> api_detail
+  rag --> rag_detail
   channels --> channels_detail
   db_ops --> db_ops_detail
   etl --> etl_detail

@@ -1,3 +1,3 @@
 // RAG (Retrieval-Augmented Generation) module
-// Add RAG implementations here.
-export { };
+// Structure: tools/ (agent tools), chains/ (orchestration), llms/ (OpenAI, Claude, Ollama, etc.)
+export {};

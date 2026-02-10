@@ -5,7 +5,7 @@ Where code lives and how the main areas interact.
 ## Layout
 
 - **`src/api/`** – REST API (Fastify). Entry point for external systems and frontends. Used by channels and RAG when they need to persist or query data.
-- **`src/rag/`** – RAG logic (LangChain). User-facing communication goes through channels; channels call into RAG when a message needs a RAG response.
+- **`src/rag/`** – RAG logic (LangChain). Contains `tools/` (agent tools), `chains/` (orchestration), `llms/` (OpenAI, Claude, Ollama, etc.). User-facing communication goes through channels; channels call into RAG when a message needs a RAG response.
 - **`src/channels/`** – Communication implementations (WhatsApp, Discord). Receive and send messages; delegate business logic to the API or RAG.
 - **`src/etl/`** – Extract, Transform, Load operations. Contains `extract/` for data extraction (web scrapers, API calls), `transform/` for data transformation and cleaning, and `load/` for data publishing (database storage, API delivery, indexing). Output is consumed by RAG; ETL operations do not call the API or channels.
 - **`src/db_operations/`** – Database operations and models. Contains `models/` for Prisma model operations and `prismaInstance.ts` for Prisma client. This is the only place for database access.

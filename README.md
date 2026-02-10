@@ -370,7 +370,7 @@ See [Tests Documentation](tests/README.md) for detailed information on writing a
 │   └── db_operations/ # Database operation tests
 ├── src/
 │   ├── api/          # REST API (Fastify)
-│   ├── rag/          # RAG logic (LangChain)
+│   ├── rag/          # RAG logic (LangChain): tools/, chains/, llms/
 │   ├── channels/     # WhatsApp and Discord
 │   │   ├── whatsapp/
 │   │   └── discord/

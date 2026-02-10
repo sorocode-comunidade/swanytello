@@ -52,6 +52,7 @@ Patterns and practices to follow when writing or suggesting code.
 - **Do** use TypeScript strictly; avoid `any` unless necessary and then narrow or document.
 - **Do** handle errors in services (log and rethrow) and in routes (map to HTTP responses); do not swallow errors silently.
 - **Do** add or update READMEs under the affected area (e.g. `src/api/README.md`, `guardrails/README.md`) when adding new patterns or modules.
+- **Do** always document new features and implement any necessary doc file under docs folder. 
 
 ## db
 
