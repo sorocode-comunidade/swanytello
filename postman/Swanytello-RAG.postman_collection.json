@@ -1,0 +1,92 @@
+{
+  "info": {
+    "name": "Swanytello RAG API",
+    "description": "RAG endpoints for Swanytello.\n\n**Auth:** POST /api/rag/test and POST /api/rag/chat require JWT when AUTH_STATUS=on.\n- **Option A (local dev):** Set AUTH_STATUS=off in .env and restart the server — then you can leave the Authorization header empty.\n- **Option B:** Set the collection variable `token` to a valid JWT (e.g. from scripts/dev-token.js) and use Authorization: Bearer {{token}}.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "token", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET /api/health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health",
+            "description": "Server health check. No auth."
+          }
+        },
+        {
+          "name": "GET /api/rag/health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/rag/health",
+            "description": "RAG/LLM reachability (Ollama or OpenAI). No auth. If this returns 200, POST RAG endpoints should work if auth is satisfied."
+          }
+        }
+      ]
+    },
+    {
+      "name": "RAG",
+      "item": [
+        {
+          "name": "POST /api/rag/test",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}", "disabled": true }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Hello, reply in one short sentence.\"\n}"
+            },
+            "url": "{{baseUrl}}/api/rag/test",
+            "description": "Chat with JSON body only. Requires JWT unless AUTH_STATUS=off.\n\n- Enable the Authorization header and set {{token}} when AUTH_STATUS=on.\n- When AUTH_STATUS=off, leave Authorization disabled or delete the header."
+          }
+        },
+        {
+          "name": "POST /api/rag/chat (message only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "disabled": true }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "message", "value": "Hello, reply in one short sentence.", "type": "text" }
+              ]
+            },
+            "url": "{{baseUrl}}/api/rag/chat",
+            "description": "Chat with multipart form. Message required; pdf optional. Requires JWT unless AUTH_STATUS=off."
+          }
+        },
+        {
+          "name": "POST /api/rag/chat (message + PDF)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "disabled": true }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "message", "value": "Summarize this PDF in one sentence.", "type": "text" },
+                { "key": "pdf", "type": "file", "src": "" }
+              ]
+            },
+            "url": "{{baseUrl}}/api/rag/chat",
+            "description": "Chat with message + optional PDF. In the 'pdf' row, choose a file. Requires JWT unless AUTH_STATUS=off."
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -38,16 +38,30 @@ function getLLMErrorMessage(error: unknown): string {
       "Call GET /api/rag/health to verify key status."
     );
   }
+  if (combined.includes("429") || combined.includes("rate limit")) {
+    return "OpenAI rate limit exceeded. Wait a moment and retry, or check your usage at platform.openai.com.";
+  }
   if (combined.includes("fetch failed") || combined.includes("econnrefused") || combined.includes("network")) {
     return "LLM service is unreachable. Check that your configured provider (Ollama or OpenAI) is running and reachable. Call GET /api/rag/health to verify.";
   }
+  if (combined.includes("model") && (combined.includes("not found") || combined.includes("does not exist") || combined.includes("invalid"))) {
+    return "OpenAI model not available. Set OPENAI_MODEL in .env to a model your account can use (e.g. gpt-4o-mini, gpt-4o). Check platform.openai.com.";
+  }
   if (combined.includes("openai")) {
     return (
-      "OpenAI API error. Check OPENAI_API_KEY in .env and your account at platform.openai.com. " +
-      "Call GET /api/rag/health to verify connection."
+      "OpenAI API error. Check OPENAI_API_KEY and OPENAI_MODEL in .env and your account at platform.openai.com. " +
+      "The 'details' field in this response has the exact error from OpenAI."
     );
   }
   return "LLM service temporarily unavailable. Please try again or check your RAG provider configuration. Call GET /api/rag/health to verify.";
+}
+
+/** One-line summary of the raw error for 503 details (helps debug OpenAI/LangChain errors). */
+function getRawErrorSummary(error: unknown): string {
+  const msg = error instanceof Error ? error.message : String(error);
+  const cause = error instanceof Error && error.cause instanceof Error ? error.cause.message : "";
+  if (cause && msg !== cause) return `${msg}; cause: ${cause}`;
+  return msg;
 }
 
 export default async function ragRoutes(fastifyInstance: FastifyInstance) {
@@ -76,6 +90,7 @@ export default async function ragRoutes(fastifyInstance: FastifyInstance) {
             statusCode: 503,
             error: "Service Unavailable",
             message: getLLMErrorMessage(error),
+            details: getRawErrorSummary(error),
           });
         }
         throw error;
@@ -160,6 +175,7 @@ export default async function ragRoutes(fastifyInstance: FastifyInstance) {
             statusCode: 503,
             error: "Service Unavailable",
             message: getLLMErrorMessage(error),
+            details: getRawErrorSummary(error),
           });
         }
         throw error;

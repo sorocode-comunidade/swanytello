@@ -21,7 +21,8 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:watch": "vitest watch",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "dev-token": "node -r dotenv/config scripts/dev-token.mjs"
   },
   "dependencies": {
     "@fastify/jwt": "^9.0.1",
