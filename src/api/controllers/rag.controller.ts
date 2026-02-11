@@ -1,3 +1,4 @@
+import type { RagChatPayload } from "../schemas/rag.schema.js";
 import * as ragService from "../services/rag.service.js";
 
 /**
@@ -17,4 +18,19 @@ export async function testRag(
   _requestUserId?: string
 ) {
   return ragService.runRagChat(body);
+}
+
+/**
+ * Runs the RAG chat chain with message and optional PDF attachment.
+ * PDF is passed through for future tag-extraction tooling.
+ *
+ * @param payload – Message and optional PDF buffer/filename
+ * @param _requestUserId – Authenticated user id (from JWT), for future use.
+ * @returns Reply from the chain and timestamp.
+ */
+export async function chatRag(
+  payload: RagChatPayload,
+  _requestUserId?: string
+) {
+  return ragService.runRagChatWithPdf(payload);
 }

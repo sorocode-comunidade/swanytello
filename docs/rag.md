@@ -8,7 +8,9 @@ This document describes the RAG module in Swanytello: structure, usage, how to c
 
 RAG logic lives in **`src/rag/`** and uses **LangChain** for chains and LLM integrations. It is consumed by:
 
-- The **REST API** (e.g. POST `/api/rag/test`) for testing and driving RAG from clients.
+- The **REST API** for testing and driving RAG from clients:
+  - **POST `/api/rag/test`** – JSON body with `message` only.
+  - **POST `/api/rag/chat`** – Multipart form with `message` and optional **PDF** attachment (for future tag-extraction tooling).
 - **Channels** (WhatsApp, Discord), which can call into RAG when a user message needs an AI response.
 
 RAG **never** accesses the database directly; it uses **API tool functions** when it needs data. See [Architecture](project_structure/architecture.md) for the full picture.
@@ -36,7 +38,7 @@ src/rag/
 
 ## RAG request flow (current)
 
-When a client calls POST `/api/rag/test` with a message, the flow is:
+When a client calls POST `/api/rag/test` (JSON) or POST `/api/rag/chat` (multipart, optional PDF) with a message, the flow is:
 
 ```mermaid
 sequenceDiagram
@@ -47,11 +49,11 @@ sequenceDiagram
   participant Chain as chat.chain
   participant LLM as llms (Ollama/OpenAI)
 
-  Client->>Route: POST /api/rag/test body: { message }
-  Route->>Controller: testRag(body, userId)
-  Controller->>Service: runRagChat(body)
-  Service->>Service: Zod parse body
-  Service->>Chain: runChatChain(message)
+  Client->>Route: POST /api/rag/test or /api/rag/chat (message [+ PDF])
+  Route->>Controller: testRag(body) or chatRag(payload, userId)
+  Controller->>Service: runRagChat(body) or runRagChatWithPdf(payload)
+  Service->>Service: Parse body / multipart
+  Service->>Chain: runChatChain(message [, attachment])
   Chain->>LLM: getChatModel().invoke(message)
   LLM->>Chain: AIMessage content
   Chain->>Service: reply string
@@ -64,13 +66,16 @@ sequenceDiagram
 
 ## Usage
 
-### Endpoint
+### Endpoints
 
-- **Method/URL**: `POST /api/rag/test`
-- **Auth**: Required. Send `Authorization: Bearer <JWT>` (or use `AUTH_STATUS=off` for local dev to bypass).
-- **Body**: JSON with a required `message` field (string, 1–16384 characters).
+| Endpoint | Content-Type | Use case |
+|----------|--------------|----------|
+| **POST /api/rag/test** | `application/json` | Message only. Body: `{ "message": "string" }`. |
+| **POST /api/rag/chat** | `multipart/form-data` | Message + optional PDF. Fields: `message` (required), `pdf` (optional file). For future tag extraction from PDF. |
 
-**Example request**
+**Auth**: Both require `Authorization: Bearer <JWT>` (or use `AUTH_STATUS=off` for local dev to bypass).
+
+**Example – message only (test)**
 
 ```bash
 curl -X POST http://localhost:3000/api/rag/test \
@@ -79,7 +84,16 @@ curl -X POST http://localhost:3000/api/rag/test \
   -d '{"message": "Hello, how are you?"}'
 ```
 
-**Example response (200)**
+**Example – message + PDF (chat)**
+
+```bash
+curl -X POST http://localhost:3000/api/rag/chat \
+  -H "Authorization: Bearer YOUR_JWT" \
+  -F "message=Extract tags from this PDF" \
+  -F "pdf=@/path/to/file.pdf"
+```
+
+**Example response (200)** – Same for both endpoints:
 
 ```json
 {
@@ -88,7 +102,7 @@ curl -X POST http://localhost:3000/api/rag/test \
 }
 ```
 
-**Validation error (400)** – Missing or invalid `message`:
+**Validation error (400)** – Missing/invalid `message`, or (chat only) invalid/non-PDF file:
 
 ```json
 {
@@ -96,6 +110,8 @@ curl -X POST http://localhost:3000/api/rag/test \
   "details": [{ "path": ["message"], "message": "Required" }]
 }
 ```
+
+Full request/response details, error cases, and examples: **[API Endpoints – RAG](API/endpoints/rag-test.md)** and **[API Endpoints – RAG Chat](API/endpoints/rag-chat.md)**.
 
 ### Prerequisites
 
@@ -140,4 +156,5 @@ Set **RAG_LLM_PROVIDER** in `.env` to choose the chat model. The chain uses `get
 - [RAG folder README](../src/rag/README.md) – Structure and principles.
 - [Architecture](project_structure/architecture.md) – Where RAG fits and tool-based DB access.
 - [Project structure (visual)](project_structure/project-structure.md) – Mermaid diagrams.
-- [API README](../src/api/README.md) – Protected endpoints including `/api/rag/test`.
+- [API Documentation](API/README.md) – Index of all API endpoints; [rag-test](API/endpoints/rag-test.md) and [rag-chat](API/endpoints/rag-chat.md) for RAG.
+- [API README](../src/api/README.md) – Protected endpoints and code structure.

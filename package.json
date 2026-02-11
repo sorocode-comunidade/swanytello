@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@fastify/jwt": "^9.0.1",
+    "@fastify/multipart": "^9.4.0",
     "@langchain/core": "^1.1.19",
     "@langchain/ollama": "^1.2.0",
     "@langchain/openai": "^1.2.7",

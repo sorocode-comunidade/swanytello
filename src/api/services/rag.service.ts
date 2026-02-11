@@ -1,4 +1,8 @@
-import { ragTestBodySchema, type RagTestBody } from "../schemas/rag.schema.js";
+import {
+  ragTestBodySchema,
+  type RagTestBody,
+  type RagChatPayload,
+} from "../schemas/rag.schema.js";
 import { runChatChain } from "../../rag/chains/chat.chain.js";
 
 /**
@@ -11,6 +15,24 @@ export async function runRagChat(body: unknown): Promise<{
 }> {
   const parsed = ragTestBodySchema.parse(body) as RagTestBody;
   const reply = await runChatChain(parsed.message);
+  return {
+    reply,
+    timestamp: new Date().toISOString(),
+  };
+}
+
+/**
+ * Runs the RAG chat chain with message and optional PDF.
+ * PDF is passed to the chain for future tag-extraction tooling (e.g. extract tags from PDF).
+ */
+export async function runRagChatWithPdf(payload: RagChatPayload): Promise<{
+  reply: string;
+  timestamp: string;
+}> {
+  const reply = await runChatChain(payload.message, {
+    pdfBuffer: payload.pdfBuffer,
+    pdfFilename: payload.pdfFilename,
+  });
   return {
     reply,
     timestamp: new Date().toISOString(),

@@ -40,7 +40,8 @@ The API provides a unified interface for:
 | POST /api/user | Create user | |
 | PUT /api/user/:id | Update user | |
 | DELETE /api/user/:id | Delete user | |
-| **POST /api/rag/test** | **RAG test endpoint** | Body: `{ "message": "string" }`. Runs the chat chain (Ollama) and returns `{ reply, timestamp }`. Requires `Authorization: Bearer <token>`. Ollama must be running when using this endpoint. See [tests/api/rag.test.ts](../../tests/api/rag.test.ts) for usage. |
+| **POST /api/rag/test** | **RAG test** | JSON body: `{ "message": "string" }`. Runs the chat chain and returns `{ reply, timestamp }`. See [docs/API/endpoints/rag-test.md](../../docs/API/endpoints/rag-test.md). |
+| **POST /api/rag/chat** | **RAG chat (with optional PDF)** | Multipart: `message` (required), `pdf` (optional). For message + PDF flows (e.g. future tag extraction). See [docs/API/endpoints/rag-chat.md](../../docs/API/endpoints/rag-chat.md). |
 
 ## Access Patterns
 
@@ -51,5 +52,6 @@ The API provides a unified interface for:
 
 ## See Also
 
+- [API Endpoints Documentation](../../docs/API/README.md) – Index and per-endpoint docs (usage, request/response, examples)
 - [Architecture Documentation](../../docs/project_structure/architecture.md) – Detailed architectural explanation
 - [Database Operations](../db_operations/README.md) – How API uses db_operations
