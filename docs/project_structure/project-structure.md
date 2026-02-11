@@ -129,6 +129,12 @@ flowchart TB
     load[load/]
   end
 
+  subgraph utils_detail [utils/]
+    utils_index[index.ts]
+    utils_db_ping[dbPing.ts]
+    utils_file_storage[fileStorage.ts]
+  end
+
   subgraph docker_detail [docker/]
     compose[docker-compose.yml]
     dockerignore[.dockerignore]
@@ -151,6 +157,7 @@ flowchart TB
   channels --> channels_detail
   db_ops --> db_ops_detail
   etl --> etl_detail
+  utils --> utils_detail
   docker --> docker_detail
   tests --> tests_detail
 ```
