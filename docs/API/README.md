@@ -31,7 +31,8 @@ See **[endpoints/README.md](endpoints/README.md)** for the full list and links t
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| GET | [/api/health](endpoints/health.md) | No | Health check |
+| GET | [/api/health](endpoints/health.md) | No | Server health check |
+| GET | [/api/rag/health](endpoints/rag-health.md) | No | RAG/LLM reachability (Ollama or OpenAI) |
 | POST | [/api/rag/test](endpoints/rag-test.md) | Yes | RAG chat (JSON body, message only) |
 | POST | [/api/rag/chat](endpoints/rag-chat.md) | Yes | RAG chat with optional PDF attachment |
 | GET | [/api/user](endpoints/user.md) | Yes | List users or get user by id |

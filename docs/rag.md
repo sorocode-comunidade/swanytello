@@ -9,6 +9,7 @@ This document describes the RAG module in Swanytello: structure, usage, how to c
 RAG logic lives in **`src/rag/`** and uses **LangChain** for chains and LLM integrations. It is consumed by:
 
 - The **REST API** for testing and driving RAG from clients:
+  - **GET `/api/rag/health`** (public) – Checks that the configured LLM (Ollama or OpenAI) is reachable. Same check runs at startup.
   - **POST `/api/rag/test`** – JSON body with `message` only.
   - **POST `/api/rag/chat`** – Multipart form with `message` and optional **PDF** attachment (for future tag-extraction tooling).
 - **Channels** (WhatsApp, Discord), which can call into RAG when a user message needs an AI response.
@@ -111,12 +112,15 @@ curl -X POST http://localhost:3000/api/rag/chat \
 }
 ```
 
+**LLM unavailable (503)** – When the configured LLM is unreachable (e.g. Ollama not running, OpenAI API key invalid or network error), the API returns **503 Service Unavailable** with a short, actionable message instead of a generic 500. See [API endpoint docs](API/endpoints/rag-test.md#503-service-unavailable--llm-unreachable) for the response body.
+
 Full request/response details, error cases, and examples: **[API Endpoints – RAG](API/endpoints/rag-test.md)** and **[API Endpoints – RAG Chat](API/endpoints/rag-chat.md)**.
 
 ### Prerequisites
 
-- **Ollama** (default): when `RAG_LLM_PROVIDER` is unset or `ollama`, Ollama must be running (e.g. `http://localhost:11434`). Install and start Ollama, then e.g. `ollama pull llama3.2`.
-- **OpenAI**: when `RAG_LLM_PROVIDER=openai`, set `OPENAI_API_KEY` in `.env`. No local server needed.
+- **Environment**: `.env` is loaded at startup (`dotenv/config` in `server.ts`). Set your provider and keys there.
+- **Ollama**: used when `RAG_LLM_PROVIDER=ollama` (default when `OPENAI_API_KEY` is not set). Ollama must be running (e.g. `http://localhost:11434`). Install and start Ollama, then e.g. `ollama pull llama3.2`.
+- **OpenAI**: used when `RAG_LLM_PROVIDER=openai` **or** when `RAG_LLM_PROVIDER` is unset and `OPENAI_API_KEY` is set in `.env`. No local server needed; set `OPENAI_API_KEY` (and optionally `OPENAI_MODEL`).
 
 ---
 
@@ -124,12 +128,18 @@ Full request/response details, error cases, and examples: **[API Endpoints – R
 
 ### Switch provider via .env (recommended)
 
-Set **RAG_LLM_PROVIDER** in `.env` to choose the chat model. The chain uses `getChatModel()` from `src/rag/llms/` and needs no code change.
+The chain uses `getChatModel()` from `src/rag/llms/` and needs no code change. Provider is chosen as follows:
 
-| Value | Provider | Required env |
-|-------|----------|----------------|
-| `ollama` (default) | Local Ollama | Optional: **OLLAMA_BASE_URL**, **OLLAMA_MODEL** |
-| `openai` | OpenAI API | **OPENAI_API_KEY** (required). Optional: **OPENAI_MODEL** |
+1. If **RAG_LLM_PROVIDER** is set in `.env`, that value is used (`openai` or `ollama`).
+2. If **RAG_LLM_PROVIDER** is not set and **OPENAI_API_KEY** is set, **OpenAI** is used.
+3. Otherwise **Ollama** is used (default).
+
+So you can use OpenAI by either setting `RAG_LLM_PROVIDER=openai` or by only setting `OPENAI_API_KEY` (no need to set `RAG_LLM_PROVIDER`).
+
+| Value / condition | Provider | Required env |
+|-------------------|----------|----------------|
+| `ollama` or unset and no OPENAI_API_KEY | Local Ollama | Optional: **OLLAMA_BASE_URL**, **OLLAMA_MODEL** |
+| `openai` or unset with OPENAI_API_KEY | OpenAI API | **OPENAI_API_KEY** (required). Optional: **OPENAI_MODEL** |
 
 **Ollama** – `OLLAMA_BASE_URL` (default `http://localhost:11434`), `OLLAMA_MODEL` (default `llama3.2`).
 

@@ -236,18 +236,15 @@ sequenceDiagram
    npm run dev
    ```
    
-   The application will automatically check the database connection on startup and display the status:
+   The application loads `.env`, then checks the database and RAG/LLM connection on startup:
    ```
    🔍 Checking database connection...
-   
-   ✅ Docker container: Running and healthy
    ✅ Database connection: Connected
-      🎉 Ready to start application!
-   
+   🔍 Checking RAG/LLM connection...
+   ✅ RAG (OpenAI): API key valid and reachable   (or: RAG (Ollama): Connected)
    🚀 Server listening at http://0.0.0.0:3000
    ```
-   
-   If the database is not connected, you'll see a warning with instructions.
+   If the database or RAG is not connected, you'll see a warning. For RAG, set `OPENAI_API_KEY` in `.env` to use OpenAI, or start Ollama for local LLM. Call **GET /api/rag/health** to verify RAG status.
 
 ### Option 2: Local PostgreSQL
 
@@ -378,8 +375,8 @@ See [Tests Documentation](tests/README.md) for detailed information on writing a
 │   ├── db_operations/ # Database models and Prisma operations
 │   ├── log/          # Logging utilities
 │   ├── types/        # TypeScript types
-│   ├── utils/        # Shared utilities
-│   └── server.ts     # Entry point
+│   ├── utils/        # Shared utilities (dbPing, ragPing, fileStorage)
+│   └── server.ts     # Entry point (loads .env, runs DB + RAG checks)
 ├── prisma.config.ts
 ├── vitest.config.ts  # Vitest configuration
 └── package.json
@@ -392,7 +389,7 @@ See [Tests Documentation](tests/README.md) for detailed information on writing a
 ### Architecture & Design
 
 - **[Architecture](docs/project_structure/architecture.md)** – Detailed explanation of architectural decisions, component purposes, and design patterns.
-- **[Project Structure (Visual)](docs/project_structure/project-structure.md)** – Mermaid diagrams for architecture and folder structure.
+- **[Project Structure (Visual)](docs/project_structure/project-structure.md)** – Mermaid diagrams: architecture, folder structure, RAG request flow, and startup sequence (DB + RAG checks).
 
 ### Components
 
@@ -400,7 +397,8 @@ See [Tests Documentation](tests/README.md) for detailed information on writing a
 - **[ETL](src/etl/README.md)** – Extract, Transform, Load operations. Why web scraping is the only way to retrieve internet data.
 - **[API](src/api/README.md)** – REST API (Fastify); routes, controllers, services, schemas. Tool functions for RAG.
 - **[RAG](src/rag/README.md)** – RAG logic using LangChain. Tool-based database access pattern.
-- **[RAG (docs)](docs/rag.md)** – RAG usage (POST `/api/rag/test`), request flow diagram, and how to change the LLM (Ollama env, adding providers).
+- **[RAG (docs)](docs/rag.md)** – RAG usage (GET `/api/rag/health`, POST `/api/rag/test`, POST `/api/rag/chat`), request flow diagram, and how to change the LLM (Ollama/OpenAI via .env).
+- **[API endpoints](docs/API/README.md)** – Full list of endpoints with per-route docs (health, RAG health, RAG chat, user CRUD).
 - **[Channels](src/channels/README.md)** – WhatsApp and Discord communication implementations.
 
 ### Development

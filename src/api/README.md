@@ -32,6 +32,13 @@ The API provides a unified interface for:
 
 **Note**: Database models are in `src/db_operations/models/`, not in this folder. Services import models from there.
 
+## Public endpoints (no auth)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | /api/health | Server health check |
+| GET | /api/rag/health | RAG/LLM reachability (Ollama or OpenAI). See [docs/API/endpoints/rag-health.md](../../docs/API/endpoints/rag-health.md). |
+
 ## Protected endpoints (require JWT)
 
 | Method | Path | Description |

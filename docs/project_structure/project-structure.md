@@ -132,6 +132,7 @@ flowchart TB
   subgraph utils_detail [utils/]
     utils_index[index.ts]
     utils_db_ping[dbPing.ts]
+    utils_rag_ping[ragPing.ts]
     utils_file_storage[fileStorage.ts]
   end
 
@@ -186,9 +187,9 @@ sequenceDiagram
 
 ---
 
-## 4. RAG request flow (POST /api/rag/test)
+## 4. RAG request flow (POST /api/rag/test or POST /api/rag/chat)
 
-When a client calls the RAG test endpoint, the request flows through the API into the chat chain and Ollama.
+When a client calls the RAG test endpoint (JSON) or the RAG chat endpoint (multipart, optional PDF), the request flows through the API into the chat chain and the configured LLM (Ollama or OpenAI via `getChatModel()`).
 
 ```mermaid
 sequenceDiagram
@@ -197,14 +198,14 @@ sequenceDiagram
   participant Controller as rag.controller
   participant Service as rag.service
   participant Chain as chat.chain
-  participant LLM as llms/ollama
+  participant LLM as llms (Ollama/OpenAI)
 
-  Client->>Route: POST /api/rag/test body: { message }
-  Route->>Controller: testRag(body, userId)
-  Controller->>Service: runRagChat(body)
-  Service->>Service: Zod parse body
-  Service->>Chain: runChatChain(message)
-  Chain->>LLM: getOllamaChat().invoke(message)
+  Client->>Route: POST /api/rag/test or /api/rag/chat (message [+ PDF])
+  Route->>Controller: testRag(body) or chatRag(payload, userId)
+  Controller->>Service: runRagChat(body) or runRagChatWithPdf(payload)
+  Service->>Service: Parse body / multipart
+  Service->>Chain: runChatChain(message [, attachment])
+  Chain->>LLM: getChatModel().invoke(message)
   LLM->>Chain: AIMessage content
   Chain->>Service: reply string
   Service->>Controller: { reply, timestamp }
@@ -212,4 +213,25 @@ sequenceDiagram
   Route->>Client: 200 + { reply, timestamp }
 ```
 
-**See**: [RAG documentation](../rag.md) for usage, env vars, and how to change the LLM.
+**See**: [RAG documentation](../rag.md) for usage, env vars, GET /api/rag/health, and how to change the LLM.
+
+---
+
+## 5. Startup sequence (DB + RAG checks)
+
+On startup, the server loads `.env`, then runs the database and RAG connectivity checks before registering routes and listening.
+
+```mermaid
+sequenceDiagram
+  participant Server as server.ts
+  participant Dotenv as dotenv
+  participant DBPing as utils/dbPing
+  participant RAGPing as utils/ragPing
+
+  Server->>Dotenv: config(.env)
+  Server->>DBPing: displayDatabaseStatus()
+  DBPing->>DBPing: checkDatabaseStatus()
+  Server->>RAGPing: displayRagStatus()
+  RAGPing->>RAGPing: checkRagStatus() (Ollama or OpenAI)
+  Server->>Server: Register routes, listen
+```

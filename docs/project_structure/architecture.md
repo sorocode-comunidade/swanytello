@@ -95,12 +95,16 @@ Swanytello is a **monolithic application** that combines multiple communication 
 
 ### 3. RAG (`src/rag/`)
 
-**Purpose**: Retrieval-Augmented Generation logic using LangChain (tools, chains, llms). Consumed by the API (e.g. POST `/api/rag/test`) and by channels when a user message needs an AI reply.
+**Purpose**: Retrieval-Augmented Generation logic using LangChain (tools, chains, llms). Consumed by the API and by channels when a user message needs an AI reply.
 
 **Current implementation**:
-- **LLM**: Ollama or OpenAI via `src/rag/llms/` (`ollama.llm.ts`, `openai.llm.ts`); selected by `RAG_LLM_PROVIDER` (env: `OLLAMA_*` or `OPENAI_*`).
-- **Chain**: `src/rag/chains/chat.chain.ts` — `runChatChain(message)` invokes the configured chat model (Ollama or OpenAI) and returns the reply text.
-- **API**: POST `/api/rag/test` (JWT) accepts `{ message }`, calls the chat chain, returns `{ reply, timestamp }`. See [RAG documentation](../rag.md) for usage and flow.
+- **LLM**: Ollama or OpenAI via `src/rag/llms/` (`ollama.llm.ts`, `openai.llm.ts`). Provider is selected by `RAG_LLM_PROVIDER` or, if unset, by presence of `OPENAI_API_KEY` (then OpenAI); otherwise Ollama. Env is loaded at startup from `.env` (see [RAG documentation](../rag.md)).
+- **Chain**: `src/rag/chains/chat.chain.ts` — `runChatChain(message, attachment?)` invokes the configured chat model and returns the reply text. Optional `attachment` (e.g. PDF) is reserved for future tools (e.g. tag extraction).
+- **API**:
+  - **GET `/api/rag/health`** (public) — Checks that the configured LLM (Ollama or OpenAI) is reachable. Implemented in `src/utils/ragPing.ts`; same check runs at startup (`displayRagStatus()`).
+  - **POST `/api/rag/test`** (JWT) — JSON body `{ message }`; returns `{ reply, timestamp }`.
+  - **POST `/api/rag/chat`** (JWT) — Multipart: `message` (required), `pdf` (optional). For message + PDF flows; returns `{ reply, timestamp }`.
+- **Startup**: `server.ts` loads `.env` then runs `displayDatabaseStatus()` and `displayRagStatus()` before registering routes. See [Project structure (visual)](project-structure.md) for the startup sequence diagram.
 
 **Why this architecture?**
 
@@ -125,14 +129,18 @@ Swanytello is a **monolithic application** that combines multiple communication 
 
 **Purpose**: REST API built with Fastify. Entry point for external systems and internal modules.
 
+**Routes**:
+- **Public** (no JWT): `GET /api/health`, `GET /api/rag/health` (RAG/LLM reachability).
+- **Protected** (JWT): User CRUD (`/api/user`), RAG chat (`POST /api/rag/test`, `POST /api/rag/chat`). See [API documentation](../API/README.md) for the full endpoint list.
+
 **Why this architecture?**
 
 1. **Unified Interface**: All database operations and business logic are exposed through a consistent REST API
-2. **Access Control**: The API layer enforces authentication and authorization
+2. **Access Control**: The API layer enforces authentication and authorization (except for health endpoints)
 3. **Tool Functions**: Provides tool functions for RAG agents to access database operations safely
 4. **Service Layer**: Business logic lives in services, which use `db_operations` for data access
 
-**See**: [API README](../../src/api/README.md)
+**See**: [API README](../../src/api/README.md), [API endpoints](../API/README.md)
 
 ---
 

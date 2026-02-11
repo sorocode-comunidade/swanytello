@@ -16,6 +16,40 @@ const PDF_MIME = "application/pdf";
 const PDF_FIELD = "pdf";
 const MESSAGE_FIELD = "message";
 
+/** Returns a user-friendly message for LLM/network failures (Ollama down, OpenAI unreachable, etc.) */
+function getLLMErrorMessage(error: unknown): string {
+  const msg = error instanceof Error ? error.message : String(error);
+  const cause = error instanceof Error && error.cause instanceof Error ? error.cause.message : "";
+  const combined = `${msg} ${cause}`.toLowerCase();
+  if (combined.includes("econnrefused") && combined.includes("11434")) {
+    return "Ollama is not running. Start Ollama (e.g. on port 11434) or set OPENAI_API_KEY in .env to use OpenAI.";
+  }
+  // Key rejected by OpenAI (401 / invalid / expired)
+  if (
+    combined.includes("401") ||
+    combined.includes("invalid_api_key") ||
+    combined.includes("incorrect api key") ||
+    combined.includes("invalid api key") ||
+    combined.includes("api key")
+  ) {
+    return (
+      "OpenAI rejected the API key (invalid, expired, or revoked). " +
+      "Check OPENAI_API_KEY in .env: use a valid key from platform.openai.com, no spaces around '=', key on a single line. " +
+      "Call GET /api/rag/health to verify key status."
+    );
+  }
+  if (combined.includes("fetch failed") || combined.includes("econnrefused") || combined.includes("network")) {
+    return "LLM service is unreachable. Check that your configured provider (Ollama or OpenAI) is running and reachable. Call GET /api/rag/health to verify.";
+  }
+  if (combined.includes("openai")) {
+    return (
+      "OpenAI API error. Check OPENAI_API_KEY in .env and your account at platform.openai.com. " +
+      "Call GET /api/rag/health to verify connection."
+    );
+  }
+  return "LLM service temporarily unavailable. Please try again or check your RAG provider configuration. Call GET /api/rag/health to verify.";
+}
+
 export default async function ragRoutes(fastifyInstance: FastifyInstance) {
   fastifyInstance.post(
     "/rag/test",
@@ -30,6 +64,18 @@ export default async function ragRoutes(fastifyInstance: FastifyInstance) {
           return reply.code(400).send({
             error: "Validation error",
             details: error.issues,
+          });
+        }
+        const err = error instanceof Error ? error : new Error(String(error));
+        const causeMsg = err.cause instanceof Error ? err.cause.message : "";
+        if (
+          err.message.includes("fetch failed") ||
+          /econnrefused|fetch failed|network|unreachable|openai|ollama|api key/i.test(err.message + " " + causeMsg)
+        ) {
+          return reply.code(503).send({
+            statusCode: 503,
+            error: "Service Unavailable",
+            message: getLLMErrorMessage(error),
           });
         }
         throw error;
@@ -102,6 +148,18 @@ export default async function ragRoutes(fastifyInstance: FastifyInstance) {
           return reply.code(400).send({
             error: "Validation error",
             details: error.issues,
+          });
+        }
+        const err = error instanceof Error ? error : new Error(String(error));
+        const causeMsg = err.cause instanceof Error ? err.cause.message : "";
+        if (
+          err.message.includes("fetch failed") ||
+          /econnrefused|fetch failed|network|unreachable|openai|ollama|api key/i.test(err.message + " " + causeMsg)
+        ) {
+          return reply.code(503).send({
+            statusCode: 503,
+            error: "Service Unavailable",
+            message: getLLMErrorMessage(error),
           });
         }
         throw error;

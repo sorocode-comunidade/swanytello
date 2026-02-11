@@ -118,6 +118,7 @@ flowchart TB
   subgraph utils_content [utils/]
     utils_index[index.ts]
     utils_db_ping[dbPing.ts]
+    utils_rag_ping[ragPing.ts]
     utils_file_storage[fileStorage.ts]
   end
 
@@ -148,23 +149,37 @@ flowchart TB
   docker --> docker_content
   tests --> tests_content
 
-%% --- 3. RAG request flow (POST /api/rag/test) ---
+%% --- 3. RAG request flow (POST /api/rag/test or /api/rag/chat) ---
 sequenceDiagram
   participant Client
   participant Route as rag.routes
   participant Controller as rag.controller
   participant Service as rag.service
   participant Chain as chat.chain
-  participant LLM as llms/ollama
+  participant LLM as llms (Ollama/OpenAI)
 
-  Client->>Route: POST /api/rag/test body: { message }
-  Route->>Controller: testRag(body, userId)
-  Controller->>Service: runRagChat(body)
-  Service->>Service: Zod parse body
-  Service->>Chain: runChatChain(message)
-  Chain->>LLM: getOllamaChat().invoke(message)
+  Client->>Route: POST /api/rag/test or /api/rag/chat (message [+ PDF])
+  Route->>Controller: testRag(body) or chatRag(payload, userId)
+  Controller->>Service: runRagChat(body) or runRagChatWithPdf(payload)
+  Service->>Service: Parse body / multipart
+  Service->>Chain: runChatChain(message [, attachment])
+  Chain->>LLM: getChatModel().invoke(message)
   LLM->>Chain: AIMessage content
   Chain->>Service: reply string
   Service->>Controller: { reply, timestamp }
   Controller->>Route: result
   Route->>Client: 200 + { reply, timestamp }
+
+%% --- 4. Startup checks (DB + RAG) ---
+sequenceDiagram
+  participant Server as server.ts
+  participant Dotenv as dotenv
+  participant DBPing as utils/dbPing
+  participant RAGPing as utils/ragPing
+
+  Server->>Dotenv: config(.env)
+  Server->>DBPing: displayDatabaseStatus()
+  DBPing->>DBPing: checkDatabaseStatus()
+  Server->>RAGPing: displayRagStatus()
+  RAGPing->>RAGPing: checkRagStatus() (Ollama or OpenAI)
+  Server->>Server: Register routes, listen

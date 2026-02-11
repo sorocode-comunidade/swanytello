@@ -13,12 +13,13 @@ Provider modules use the naming pattern **`{provider}.llm.ts`** (e.g. `ollama.ll
 
 ### Provider selection
 
-Set **RAG_LLM_PROVIDER** in `.env` to choose the chat model (default: `ollama`):
+`getChatModel()` (used by the chain) picks the provider as follows:
 
-- **`ollama`** – Local Ollama (OLLAMA_BASE_URL, OLLAMA_MODEL). Ollama must be running.
-- **`openai`** – OpenAI API (OPENAI_API_KEY required, OPENAI_MODEL optional).
+1. If **RAG_LLM_PROVIDER** is set in `.env`, that value is used (`openai` or `ollama`).
+2. If **RAG_LLM_PROVIDER** is not set and **OPENAI_API_KEY** is set, **OpenAI** is used.
+3. Otherwise **Ollama** is used (default).
 
-The chain uses `getChatModel()` from this folder so no code change is needed when switching.
+So you can use OpenAI by setting only **OPENAI_API_KEY** (and optionally **OPENAI_MODEL**); no need to set `RAG_LLM_PROVIDER=openai` unless you want to force it. Ensure `.env` is loaded at app startup (e.g. `import "dotenv/config"` in `server.ts`).
 
 ### Ollama
 
@@ -27,7 +28,7 @@ The chain uses `getChatModel()` from this folder so no code change is needed whe
 
 ### OpenAI
 
-- **OPENAI_API_KEY** – Required when `RAG_LLM_PROVIDER=openai`.
+- **OPENAI_API_KEY** – Required when using OpenAI (either `RAG_LLM_PROVIDER=openai` or unset with this key present).
 - **OPENAI_MODEL** – Optional. Default `gpt-4o-mini`.
 
 ## See Also

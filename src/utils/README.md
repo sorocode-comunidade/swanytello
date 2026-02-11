@@ -5,6 +5,7 @@ Shared utilities used across the application.
 | Module | Purpose |
 |--------|---------|
 | **dbPing.ts** | Database connection and Docker container status checks (e.g. at startup). |
+| **ragPing.ts** | RAG/LLM reachability: checks configured provider (Ollama or OpenAI) at startup and via GET /api/rag/health. |
 | **fileStorage.ts** | File upload and storage: path resolution, validation (type/size), save/delete, and safe filenames. |
 
 - **Imports**: Prefer `from "../utils/fileStorage.js"` or `from "../utils/index.js"` (see [Understanding `index.ts` Files](../../docs/libs/index-files.md)).

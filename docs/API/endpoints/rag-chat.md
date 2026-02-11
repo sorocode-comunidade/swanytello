@@ -130,9 +130,25 @@ Missing or invalid `Authorization` header (when auth is enabled):
 
 ---
 
-### 502 / 503
+### 503 Service Unavailable – LLM unreachable
 
-LLM or network failure. Response body depends on server configuration.
+When the configured LLM is unreachable (e.g. Ollama not running, OpenAI API key missing/invalid, or network error), the API returns **503** with a short, actionable message instead of a generic 500:
+
+```json
+{
+  "statusCode": 503,
+  "error": "Service Unavailable",
+  "message": "Ollama is not running. Start Ollama (e.g. on port 11434) or set RAG_LLM_PROVIDER=openai and OPENAI_API_KEY in .env to use OpenAI."
+}
+```
+
+Other possible messages (depending on the failure):
+
+- *"OpenAI API error. Check OPENAI_API_KEY in .env and your account access."*
+- *"LLM service is unreachable. Check that your configured provider (Ollama or OpenAI) is running and reachable."*
+- *"LLM service temporarily unavailable. Please try again or check your RAG provider configuration."*
+
+Ensure `.env` is loaded at startup and that either Ollama is running (if using Ollama) or `OPENAI_API_KEY` is set (to use OpenAI). If only `OPENAI_API_KEY` is set and `RAG_LLM_PROVIDER` is not set, OpenAI is used automatically. See [RAG module – How to change the LLM](../../rag.md#how-to-change-the-llm).
 
 ---
 

@@ -1,4 +1,5 @@
 export { checkDatabaseStatus, displayDatabaseStatus } from "./dbPing.js";
+export { checkRagStatus, displayRagStatus, type RagStatus } from "./ragPing.js";
 export {
   ensureUploadDirectory,
   generateUniqueFileName,
