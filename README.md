@@ -214,6 +214,13 @@ sequenceDiagram
    ```
    Wait for PostgreSQL to be ready (should show "healthy").
 
+   **Optional – RAG with local LLM (Ollama):** If you want to use Ollama instead of OpenAI for RAG, start the Ollama container and pull a model:
+   ```bash
+   docker compose -f docker/docker-compose.yml up -d ollama
+   docker exec -it swanytello-ollama ollama run llama3.2
+   ```
+   See [docker/ollama_docker/README.md](docker/ollama_docker/README.md).
+
 2. Copy `.env.example` to `.env` and set `DATABASE_URL`:
    ```bash
    DATABASE_URL="postgresql://swanytello:swanytello_password@localhost:5432/swanytello?schema=public"
@@ -277,17 +284,27 @@ docker inspect swanytello-postgres --format '{{.State.Health.Status}}'
 docker compose -f docker/docker-compose.yml ps
 # Or with alias: dcp ps
 
-# Start PostgreSQL (if not already running)
+# Start PostgreSQL (required for app)
 docker compose -f docker/docker-compose.yml up -d postgres
 # Or with alias: dcp up -d postgres
 
-# Stop PostgreSQL
-docker compose -f docker/docker-compose.yml stop postgres
-# Or with alias: dcp stop postgres
+# Start Ollama (optional; for RAG with local LLM)
+docker compose -f docker/docker-compose.yml up -d ollama
+# Or with alias: dcp up -d ollama
 
-# View PostgreSQL logs
+# Start both
+docker compose -f docker/docker-compose.yml up -d
+# Or: dcp up -d
+
+# Stop services
+docker compose -f docker/docker-compose.yml stop postgres
+docker compose -f docker/docker-compose.yml stop ollama
+# Or: dcp stop postgres; dcp stop ollama
+
+# View logs
 docker compose -f docker/docker-compose.yml logs -f postgres
-# Or with alias: dcp logs -f postgres
+docker compose -f docker/docker-compose.yml logs -f ollama
+# Or with alias: dcp logs -f postgres; dcp logs -f ollama
 
 # Get PostgreSQL connection information
 # For .env file (Prisma format):
@@ -333,6 +350,12 @@ source ~/.bashrc
 | `npm run test:run` | Run tests once |
 | `npm run test:watch` | Run tests in watch mode |
 | `npm run test:coverage` | Run tests with coverage report |
+| `npm run dev-token` | Print a JWT for Postman when AUTH_STATUS=on |
+| `npm run docker:up` | Start PostgreSQL and Ollama containers |
+| `npm run docker:up:postgres` | Start PostgreSQL only |
+| `npm run docker:up:ollama` | Start Ollama only (RAG local LLM) |
+| `npm run docker:down` | Stop and remove Docker containers |
+| `npm run docker:ps` | Show Docker Compose service status |
 
 ---
 
@@ -356,8 +379,10 @@ See [Tests Documentation](tests/README.md) for detailed information on writing a
 ## Project structure
 
 ```
-├── docker/           # Docker configuration files
+├── docker/           # Docker configuration (PostgreSQL + Ollama)
 │   ├── docker-compose.yml
+│   ├── postgres_docker/   # PostgreSQL service docs
+│   ├── ollama_docker/     # Ollama (RAG LLM) service docs
 │   └── .dockerignore
 ├── guardrails/       # Guidelines for AI dev agents (e.g. Cursor); RAG guardrails elsewhere
 ├── prisma/           # Schema, migrations

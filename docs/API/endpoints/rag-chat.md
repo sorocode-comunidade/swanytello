@@ -138,7 +138,7 @@ When the configured LLM is unreachable (e.g. Ollama not running, OpenAI API key 
 {
   "statusCode": 503,
   "error": "Service Unavailable",
-  "message": "Ollama is not running. Start Ollama (e.g. on port 11434) or set RAG_LLM_PROVIDER=openai and OPENAI_API_KEY in .env to use OpenAI."
+  "message": "Ollama is not running. Start with: npm run docker:up:ollama (or docker compose -f docker/docker-compose.yml up -d ollama). Or set OPENAI_API_KEY to use OpenAI."
 }
 ```
 

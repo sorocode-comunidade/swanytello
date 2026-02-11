@@ -93,7 +93,7 @@ When the configured LLM is unreachable (e.g. Ollama not running, OpenAI API key 
 {
   "statusCode": 503,
   "error": "Service Unavailable",
-  "message": "Ollama is not running. Start Ollama (e.g. on port 11434) or set RAG_LLM_PROVIDER=openai and OPENAI_API_KEY in .env to use OpenAI."
+  "message": "Ollama is not running. Start with: npm run docker:up:ollama (or docker compose -f docker/docker-compose.yml up -d ollama). Or set OPENAI_API_KEY to use OpenAI."
 }
 ```
 
@@ -103,7 +103,7 @@ Other possible messages (depending on the failure):
 - *"LLM service is unreachable. Check that your configured provider (Ollama or OpenAI) is running and reachable."*
 - *"LLM service temporarily unavailable. Please try again or check your RAG provider configuration."*
 
-Ensure `.env` is loaded at startup and that either Ollama is running (if using Ollama) or `OPENAI_API_KEY` is set (to use OpenAI). If only `OPENAI_API_KEY` is set and `RAG_LLM_PROVIDER` is not set, OpenAI is used automatically.
+Ensure `.env` is loaded at startup and that either Ollama is running (e.g. `npm run docker:up:ollama`; see [docker/ollama_docker/README.md](../../../docker/ollama_docker/README.md)) or `OPENAI_API_KEY` is set (to use OpenAI). If only `OPENAI_API_KEY` is set and `RAG_LLM_PROVIDER` is not set, OpenAI is used automatically.
 
 ---
 

@@ -139,6 +139,8 @@ flowchart TB
   subgraph docker_detail [docker/]
     compose[docker-compose.yml]
     dockerignore[.dockerignore]
+    postgres_docker[postgres_docker/]
+    ollama_docker[ollama_docker/]
   end
 
   subgraph tests_detail [tests/]

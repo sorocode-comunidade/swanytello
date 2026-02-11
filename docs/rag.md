@@ -119,7 +119,7 @@ Full request/response details, error cases, and examples: **[API Endpoints – R
 ### Prerequisites
 
 - **Environment**: `.env` is loaded at startup (`dotenv/config` in `server.ts`). Set your provider and keys there.
-- **Ollama**: used when `RAG_LLM_PROVIDER=ollama` (default when `OPENAI_API_KEY` is not set). Ollama must be running (e.g. `http://localhost:11434`). Install and start Ollama, then e.g. `ollama pull llama3.2`.
+- **Ollama**: used when `RAG_LLM_PROVIDER=ollama` (default when `OPENAI_API_KEY` is not set). Ollama must be running at `http://localhost:11434`. You can run it via **Docker** (recommended): `docker compose -f docker/docker-compose.yml up -d ollama`, then e.g. `docker exec -it swanytello-ollama ollama run llama3.2`. See [docker/ollama_docker/README.md](../docker/ollama_docker/README.md).
 - **OpenAI**: used when `RAG_LLM_PROVIDER=openai` **or** when `RAG_LLM_PROVIDER` is unset and `OPENAI_API_KEY` is set in `.env`. No local server needed; set `OPENAI_API_KEY` (and optionally `OPENAI_MODEL`).
 
 ---

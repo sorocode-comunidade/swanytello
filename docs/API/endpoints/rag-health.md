@@ -10,7 +10,7 @@
 
 Checks that the configured RAG/LLM provider (Ollama or OpenAI) is reachable and valid. Use this before calling POST `/api/rag/test` or POST `/api/rag/chat` so you know the RAG pipeline is ready.
 
-- **Ollama**: Requests `OLLAMA_BASE_URL/api/tags` to verify the service is up.
+- **Ollama**: Checks whether the Ollama Docker container (`swanytello-ollama`) is running, then requests `OLLAMA_BASE_URL/api/tags` to verify the API is up. You know in advance if Docker is running before using the API.
 - **OpenAI**: Verifies `OPENAI_API_KEY` is set and calls the OpenAI API to validate the key.
 
 Provider is chosen the same way as for chat: `RAG_LLM_PROVIDER` if set, else OpenAI if `OPENAI_API_KEY` is set, else Ollama.
@@ -39,6 +39,7 @@ Provider is chosen the same way as for chat: `RAG_LLM_PROVIDER` if set, else Ope
 
 ### 200 OK – RAG reachable
 
+**OpenAI**:
 ```json
 {
   "status": "ok",
@@ -47,16 +48,28 @@ Provider is chosen the same way as for chat: `RAG_LLM_PROVIDER` if set, else Ope
 }
 ```
 
+**Ollama** (includes `containerRunning` so you know the Docker container is up):
+```json
+{
+  "status": "ok",
+  "provider": "ollama",
+  "containerRunning": true,
+  "timestamp": "2025-02-11T12:00:00.000Z"
+}
+```
+
 | Field | Type | Description |
 |--------|------|-------------|
 | `status` | string | `"ok"` when the configured provider is reachable. |
 | `provider` | string | `"openai"` or `"ollama"`. |
+| `containerRunning` | boolean | *(Ollama only)* Whether the `swanytello-ollama` Docker container is running. |
 | `timestamp` | string | ISO 8601 timestamp. |
 
 ---
 
 ### 503 Service Unavailable – RAG not reachable
 
+**OpenAI** (example):
 ```json
 {
   "statusCode": 503,
@@ -67,10 +80,22 @@ Provider is chosen the same way as for chat: `RAG_LLM_PROVIDER` if set, else Ope
 }
 ```
 
+**Ollama** (includes `containerRunning` so you know if the container is down before trying the API):
+```json
+{
+  "statusCode": 503,
+  "status": "unavailable",
+  "provider": "ollama",
+  "containerRunning": false,
+  "message": "Ollama not reachable at http://localhost:11434. Start with: npm run docker:up:ollama. Or set OPENAI_API_KEY to use OpenAI.",
+  "timestamp": "2025-02-11T12:00:00.000Z"
+}
+```
+
 Other possible messages:
 
 - *"OpenAI API key is invalid or expired. Check OPENAI_API_KEY in .env and your account."*
-- *"Ollama not reachable at http://localhost:11434. Start Ollama or set OPENAI_API_KEY to use OpenAI."*
+- *"Ollama not reachable at http://localhost:11434. Start with: npm run docker:up:ollama. Or set OPENAI_API_KEY to use OpenAI."*
 
 ---
 
