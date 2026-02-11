@@ -98,8 +98,8 @@ Swanytello is a **monolithic application** that combines multiple communication 
 **Purpose**: Retrieval-Augmented Generation logic using LangChain (tools, chains, llms). Consumed by the API (e.g. POST `/api/rag/test`) and by channels when a user message needs an AI reply.
 
 **Current implementation**:
-- **LLM**: Ollama via `src/rag/llms/ollama.ts` (env: `OLLAMA_BASE_URL`, `OLLAMA_MODEL`).
-- **Chain**: `src/rag/chains/chat.chain.ts` — `runChatChain(message)` invokes the Ollama chat model and returns the reply text.
+- **LLM**: Ollama or OpenAI via `src/rag/llms/` (`ollama.llm.ts`, `openai.llm.ts`); selected by `RAG_LLM_PROVIDER` (env: `OLLAMA_*` or `OPENAI_*`).
+- **Chain**: `src/rag/chains/chat.chain.ts` — `runChatChain(message)` invokes the configured chat model (Ollama or OpenAI) and returns the reply text.
 - **API**: POST `/api/rag/test` (JWT) accepts `{ message }`, calls the chat chain, returns `{ reply, timestamp }`. See [RAG documentation](../rag.md) for usage and flow.
 
 **Why this architecture?**

@@ -59,7 +59,7 @@ User Message → Channel → RAG Agent
 ## Changing the LLM
 
 - **Ollama**: Set `OLLAMA_BASE_URL` and `OLLAMA_MODEL` in `.env`; no code change.
-- **Other providers (OpenAI, Claude)**: Add a new module in `src/rag/llms/` (e.g. `openai.ts`) that exports a LangChain-compatible chat model, then use it in `src/rag/chains/chat.chain.ts` (or switch by env, e.g. `RAG_LLM_PROVIDER`). Document new env vars in [llms/README.md](llms/README.md) and `.env.example`.
+- **Other providers (OpenAI, Claude)**: Add a new module in `src/rag/llms/` (e.g. `openai.llm.ts`) that exports a LangChain-compatible chat model, then wire it in `getChatModel()` in `src/rag/llms/index.ts` (e.g. `RAG_LLM_PROVIDER=openai`). Document new env vars in [llms/README.md](llms/README.md) and `.env.example`.
 - Step-by-step: **[RAG documentation – How to change the LLM](../../docs/rag.md#how-to-change-the-llm)**.
 
 ## See Also

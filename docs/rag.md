@@ -45,14 +45,14 @@ sequenceDiagram
   participant Controller as rag.controller
   participant Service as rag.service
   participant Chain as chat.chain
-  participant LLM as llms/ollama
+  participant LLM as llms (Ollama/OpenAI)
 
   Client->>Route: POST /api/rag/test body: { message }
   Route->>Controller: testRag(body, userId)
   Controller->>Service: runRagChat(body)
   Service->>Service: Zod parse body
   Service->>Chain: runChatChain(message)
-  Chain->>LLM: getOllamaChat().invoke(message)
+  Chain->>LLM: getChatModel().invoke(message)
   LLM->>Chain: AIMessage content
   Chain->>Service: reply string
   Service->>Controller: { reply, timestamp }
@@ -99,43 +99,31 @@ curl -X POST http://localhost:3000/api/rag/test \
 
 ### Prerequisites
 
-- **Ollama** must be running when using the default LLM (e.g. at `http://localhost:11434`). Install and start Ollama locally, and pull a model (e.g. `ollama pull llama3.2`).
+- **Ollama** (default): when `RAG_LLM_PROVIDER` is unset or `ollama`, Ollama must be running (e.g. `http://localhost:11434`). Install and start Ollama, then e.g. `ollama pull llama3.2`.
+- **OpenAI**: when `RAG_LLM_PROVIDER=openai`, set `OPENAI_API_KEY` in `.env`. No local server needed.
 
 ---
 
 ## How to change the LLM
 
-### Option 1: Configure Ollama (current default)
+### Switch provider via .env (recommended)
 
-The default chain uses **Ollama** via `src/rag/llms/ollama.ts`. Configure it with environment variables:
+Set **RAG_LLM_PROVIDER** in `.env` to choose the chat model. The chain uses `getChatModel()` from `src/rag/llms/` and needs no code change.
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| **OLLAMA_BASE_URL** | `http://localhost:11434` | Ollama server URL. |
-| **OLLAMA_MODEL** | `llama3.2` | Model name (e.g. `llama3.2`, `mistral`, `llama3.1:8b`). |
+| Value | Provider | Required env |
+|-------|----------|----------------|
+| `ollama` (default) | Local Ollama | Optional: **OLLAMA_BASE_URL**, **OLLAMA_MODEL** |
+| `openai` | OpenAI API | **OPENAI_API_KEY** (required). Optional: **OPENAI_MODEL** |
 
-Set these in `.env` or your environment. No code change required.
+**Ollama** – `OLLAMA_BASE_URL` (default `http://localhost:11434`), `OLLAMA_MODEL` (default `llama3.2`).
 
-### Option 2: Add a new LLM provider (e.g. OpenAI, Claude)
+**OpenAI** – `OPENAI_API_KEY` required; `OPENAI_MODEL` (default `gpt-4o-mini`).
 
-1. **Implement the provider in `src/rag/llms/`**
-   - Add a new file (e.g. `openai.ts` or `claude.ts`).
-   - Create a LangChain-compatible chat model (e.g. `ChatOpenAI`, `ChatAnthropic`) using env for API keys and model name.
-   - Export a factory or singleton (e.g. `getOpenAIChat()`).
+### Add another provider (e.g. Claude)
 
-2. **Use it in the chain**
-   - In `src/rag/chains/chat.chain.ts`, import the new LLM instead of (or in addition to) `getOllamaChat()`.
-   - You can switch by env: e.g. `RAG_LLM_PROVIDER=ollama|openai|claude` and call the appropriate getter in the chain.
-
-3. **Document env vars**
-   - Add the new provider’s env vars to `.env.example` and to [src/rag/llms/README.md](../src/rag/llms/README.md).
-
-### Option 3: Switch chain to another provider in code
-
-To use a different provider without adding a generic “provider” env:
-
-- In `chat.chain.ts`, replace `getOllamaChat()` with the other getter (e.g. `getOpenAIChat()`).
-- Ensure the chosen provider’s env vars (API keys, base URL, model) are set.
+1. Add a new file in `src/rag/llms/` (e.g. `claude.llm.ts`) with a `getClaudeChat()` that reads env and returns a LangChain chat model.
+2. In `src/rag/llms/index.ts`, extend `getChatModel()` to support e.g. `RAG_LLM_PROVIDER=claude` and call the new getter.
+3. Document the new env vars in `.env.example` and [src/rag/llms/README.md](../src/rag/llms/README.md).
 
 ---
 
