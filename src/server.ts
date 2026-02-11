@@ -25,7 +25,7 @@ async function startApplication() {
       "⚠️  Warning: Database connection failed. The application will start but may not function correctly."
     );
     console.warn(
-      "   Make sure PostgreSQL is running: docker compose -f docker/docker-compose.yml up -d postgres\n"
+      "   Make sure PostgreSQL is running: npm run docker:up:postgres (or: docker compose -f docker/docker-compose.yml up -d postgres)\n"
     );
   }
 

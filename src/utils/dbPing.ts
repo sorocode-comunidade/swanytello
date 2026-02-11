@@ -112,7 +112,7 @@ export async function displayDatabaseStatus(): Promise<boolean> {
   } else {
     console.log("❌ Docker container: Not running");
     console.log(
-      "   💡 Start PostgreSQL with: docker compose -f docker/docker-compose.yml up -d postgres"
+      "   💡 Start PostgreSQL with: npm run docker:up:postgres (or: docker compose -f docker/docker-compose.yml up -d postgres)"
     );
   }
 

@@ -70,7 +70,7 @@ Provider is chosen the same way as for chat: `RAG_LLM_PROVIDER` if set, else Ope
 Other possible messages:
 
 - *"OpenAI API key is invalid or expired. Check OPENAI_API_KEY in .env and your account."*
-- *"Ollama not reachable at http://localhost:11434. Start Ollama or set OPENAI_API_KEY to use OpenAI."*
+- *"Ollama not reachable at http://localhost:11434. Start with: npm run docker:up:ollama. Or set OPENAI_API_KEY to use OpenAI."*
 
 ---
 

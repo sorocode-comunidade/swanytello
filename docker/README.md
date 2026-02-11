@@ -1,62 +1,97 @@
 # Docker Configuration
 
-This folder contains Docker-related configuration files for the Swanytello project.
+This folder contains Docker-related configuration for the Swanytello project. All Docker services are defined in one Compose file; service-specific docs live in subfolders.
 
-## Files
+---
 
-- **`docker-compose.yml`** – Docker Compose configuration for PostgreSQL service
-- **`.dockerignore`** – Patterns to exclude from Docker builds
+## Layout
 
-## Usage
+| Path | Purpose |
+|------|---------|
+| **`docker-compose.yml`** | Compose file for **PostgreSQL** and **Ollama**. Single project name `swanytello`. |
+| **`postgres_docker/`** | PostgreSQL service docs and quick reference. See [postgres_docker/README.md](postgres_docker/README.md). |
+| **`ollama_docker/`** | Ollama (LLM) service docs and quick reference. See [ollama_docker/README.md](ollama_docker/README.md). |
+| **`.dockerignore`** | Patterns to exclude from Docker builds. |
+| **`.env.example`** | Example env vars for Docker/Compose (optional). |
 
-**💡 Tip**: Create an alias to avoid typing the full path every time:
+---
+
+## Services
+
+| Service | Container name | Port (host) | Purpose |
+|---------|----------------|-------------|---------|
+| **postgres** | `swanytello-postgres` | 5432 | Database (required for the app). |
+| **ollama** | `swanytello-ollama` | 11434 | Local LLM for RAG when not using OpenAI. |
+
+---
+
+## Alias
+
+**Tip**: Create an alias so you don’t need the full path every time:
+
 ```bash
 alias dcp='docker compose -f docker/docker-compose.yml'
 ```
 
-All Docker Compose commands should reference this folder. Examples show both full command and alias:
+Run Compose from the **project root**.
+
+---
+
+## Common commands
 
 ```bash
-# Check if PostgreSQL is already running (do this first!)
-docker compose -f docker/docker-compose.yml ps
-# Or with alias: dcp ps
+# Start both services
+dcp up -d
 
-# Start PostgreSQL (only if not already running)
-docker compose -f docker/docker-compose.yml up -d postgres
-# Or with alias: dcp up -d postgres
+# Start only PostgreSQL (required for app)
+dcp up -d postgres
 
-# View logs
-docker compose -f docker/docker-compose.yml logs -f postgres
-# Or with alias: dcp logs -f postgres
+# Start only Ollama (for RAG with local LLM)
+dcp up -d ollama
 
-# Stop PostgreSQL
-docker compose -f docker/docker-compose.yml stop postgres
-# Or with alias: dcp stop postgres
+# Status
+dcp ps
 
-# Remove container (if you get "name already in use" error)
-docker compose -f docker/docker-compose.yml down
-# Or with alias: dcp down
+# Logs
+dcp logs -f postgres
+dcp logs -f ollama
+
+# Stop
+dcp stop postgres
+dcp stop ollama
+# Or stop all:
+dcp down
+
+# Remove containers and volumes (⚠️ deletes data)
+dcp down -v
 ```
 
-**Important**: Always run Compose commands from the **project root** (e.g. `~/projects/sorocode_community/swanytello`), or use the `-f docker/docker-compose.yml` path. The compose file sets a fixed project name (`swanytello`) so that `dcp ps`, `dcp stop`, and `dcp up` always see the same container no matter where you run them.
+---
 
-### If "container name already in use" or Compose says no container exists
+## Startup order for the app
 
-This happens when a container named `swanytello-postgres` already exists but was created with a different Compose project (e.g. run from another directory). One-time fix:
+1. Start **PostgreSQL**: `dcp up -d postgres` (required for the app).
+2. Optionally start **Ollama**: `dcp up -d ollama` (if using RAG with Ollama and not OpenAI).
+3. Configure `.env` (e.g. `DATABASE_URL`, and for Ollama: leave `OPENAI_API_KEY` unset or set `RAG_LLM_PROVIDER=ollama`).
+4. Run the app: `npm run dev`.
+
+---
+
+## If "container name already in use"
+
+If a container named `swanytello-postgres` or `swanytello-ollama` already exists from another Compose project:
 
 ```bash
-# From project root - stop and remove the existing container (data is in a volume and will persist)
-docker stop swanytello-postgres
-docker rm swanytello-postgres
-
-# Start again with Compose (it will create a new container with the correct project)
-docker compose -f docker/docker-compose.yml up -d postgres
-# Or: dcp up -d postgres
+docker stop swanytello-postgres swanytello-ollama
+docker rm swanytello-postgres swanytello-ollama
+dcp up -d
 ```
 
-After that, `dcp ps`, `dcp stop postgres`, and `dcp up -d postgres` will work consistently.
+Data in Docker volumes is kept unless you run `dcp down -v`.
 
-## See Also
+---
 
-- [Docker Setup Documentation](../docs/infrastructure/docker.md) – Complete Docker setup guide
-- [Getting Started](../README.md#getting-started) – Project setup instructions
+## See also
+
+- [Infrastructure: Docker](../docs/infrastructure/docker.md) – Full Docker setup and troubleshooting
+- [Getting started](../README.md#getting-started) – Project setup

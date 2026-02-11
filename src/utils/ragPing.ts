@@ -147,7 +147,7 @@ export async function displayRagStatus(): Promise<boolean> {
   console.log("❌ RAG (Ollama): Not reachable");
   if (status.error) console.log(`   Error: ${status.error}`);
   console.log(
-    "   💡 Start Ollama (e.g. port 11434) or set OPENAI_API_KEY in .env to use OpenAI.\n"
+    "   💡 Start Ollama: npm run docker:up:ollama (or: docker compose -f docker/docker-compose.yml up -d ollama). Or set OPENAI_API_KEY to use OpenAI.\n"
   );
   return false;
 }

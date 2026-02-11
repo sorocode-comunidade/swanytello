@@ -22,7 +22,7 @@ function getLLMErrorMessage(error: unknown): string {
   const cause = error instanceof Error && error.cause instanceof Error ? error.cause.message : "";
   const combined = `${msg} ${cause}`.toLowerCase();
   if (combined.includes("econnrefused") && combined.includes("11434")) {
-    return "Ollama is not running. Start Ollama (e.g. on port 11434) or set OPENAI_API_KEY in .env to use OpenAI.";
+    return "Ollama is not running. Start with: npm run docker:up:ollama (or docker compose -f docker/docker-compose.yml up -d ollama). Or set OPENAI_API_KEY to use OpenAI.";
   }
   // Key rejected by OpenAI (401 / invalid / expired)
   if (
