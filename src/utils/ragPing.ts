@@ -13,11 +13,38 @@ function normalizeOpenAIKey(value: string | undefined): string {
   return value?.replace(/\r\n|\r|\n/g, "").trim() ?? "";
 }
 
+const OLLAMA_CONTAINER_NAME = "swanytello-ollama";
+
 export interface RagStatus {
   provider: RagProvider;
   connected: boolean;
   keySet?: boolean;
+  /** When provider is ollama: whether the Docker container is running (so we know in advance if we can use it). */
+  containerRunning?: boolean;
   error?: string;
+}
+
+/**
+ * Check if the Ollama Docker container (swanytello-ollama) is running.
+ * Same pattern as dbPing for Postgres: we know in advance if Docker is up before pinging the API.
+ */
+async function checkOllamaContainerStatus(): Promise<{ running: boolean }> {
+  try {
+    const { exec } = await import("child_process");
+    const { promisify } = await import("util");
+    const execAsync = promisify(exec);
+    try {
+      const { stdout } = await execAsync(
+        `docker ps --filter "name=${OLLAMA_CONTAINER_NAME}" --format "{{.Names}}:{{.Status}}"`
+      );
+      const isRunning = stdout.trim().includes(OLLAMA_CONTAINER_NAME);
+      return { running: isRunning };
+    } catch {
+      return { running: false };
+    }
+  } catch {
+    return { running: false };
+  }
 }
 
 /**
@@ -39,7 +66,7 @@ async function pingOllama(): Promise<{ connected: boolean; error?: string }> {
     return {
       connected: false,
       error: msg.includes("ECONNREFUSED")
-        ? `Ollama not reachable at ${baseUrl}. Start Ollama or set OPENAI_API_KEY to use OpenAI.`
+        ? `Ollama not reachable at ${baseUrl}. Start Ollama (npm run docker:up:ollama) or set OPENAI_API_KEY to use OpenAI.`
         : msg,
     };
   }
@@ -91,6 +118,7 @@ async function pingOpenAI(): Promise<{ connected: boolean; keySet: boolean; erro
 
 /**
  * Check RAG/LLM status for the configured provider.
+ * For Ollama: checks Docker container status first, then pings the API (same idea as Postgres ping).
  */
 export async function checkRagStatus(): Promise<RagStatus> {
   const provider = getRagProvider();
@@ -105,11 +133,13 @@ export async function checkRagStatus(): Promise<RagStatus> {
     };
   }
 
-  const result = await pingOllama();
+  const containerStatus = await checkOllamaContainerStatus();
+  const apiResult = await pingOllama();
   return {
     provider: "ollama",
-    connected: result.connected,
-    error: result.error,
+    connected: apiResult.connected,
+    containerRunning: containerStatus.running,
+    error: apiResult.error,
   };
 }
 
@@ -139,15 +169,27 @@ export async function displayRagStatus(): Promise<boolean> {
     return false;
   }
 
+  // Ollama: show container status first (same as DB ping), then API connection
+  if (status.containerRunning) {
+    console.log("✅ Ollama Docker container: Running");
+  } else {
+    console.log("❌ Ollama Docker container: Not running");
+    console.log(
+      "   💡 Start with: npm run docker:up:ollama (or: docker compose -f docker/docker-compose.yml up -d ollama)"
+    );
+    console.log("   Or set OPENAI_API_KEY in .env to use OpenAI instead.\n");
+    return false;
+  }
+
   if (status.connected) {
-    console.log("✅ RAG (Ollama): Connected");
+    console.log("✅ RAG (Ollama): API reachable");
     console.log("   🎉 RAG ready!\n");
     return true;
   }
-  console.log("❌ RAG (Ollama): Not reachable");
+  console.log("❌ RAG (Ollama): Container running but API not reachable");
   if (status.error) console.log(`   Error: ${status.error}`);
   console.log(
-    "   💡 Start Ollama: npm run docker:up:ollama (or: docker compose -f docker/docker-compose.yml up -d ollama). Or set OPENAI_API_KEY to use OpenAI.\n"
+    "   💡 Check OLLAMA_BASE_URL in .env (default http://localhost:11434) or pull a model: docker exec -it swanytello-ollama ollama run llama3.2\n"
   );
   return false;
 }
