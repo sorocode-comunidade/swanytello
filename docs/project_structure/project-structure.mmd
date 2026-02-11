@@ -115,6 +115,12 @@ flowchart TB
     load_folder[load/]
   end
 
+  subgraph utils_content [utils/]
+    utils_index[index.ts]
+    utils_db_ping[dbPing.ts]
+    utils_file_storage[fileStorage.ts]
+  end
+
   subgraph docker_content [docker/]
     compose[docker-compose.yml]
     dockerignore[.dockerignore]
@@ -138,5 +144,27 @@ flowchart TB
   channels --> channels_content
   db_ops --> db_ops_content
   etl --> etl_content
+  utils --> utils_content
   docker --> docker_content
   tests --> tests_content
+
+%% --- 3. RAG request flow (POST /api/rag/test) ---
+sequenceDiagram
+  participant Client
+  participant Route as rag.routes
+  participant Controller as rag.controller
+  participant Service as rag.service
+  participant Chain as chat.chain
+  participant LLM as llms/ollama
+
+  Client->>Route: POST /api/rag/test body: { message }
+  Route->>Controller: testRag(body, userId)
+  Controller->>Service: runRagChat(body)
+  Service->>Service: Zod parse body
+  Service->>Chain: runChatChain(message)
+  Chain->>LLM: getOllamaChat().invoke(message)
+  LLM->>Chain: AIMessage content
+  Chain->>Service: reply string
+  Service->>Controller: { reply, timestamp }
+  Controller->>Route: result
+  Route->>Client: 200 + { reply, timestamp }

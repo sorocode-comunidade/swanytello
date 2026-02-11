@@ -95,7 +95,12 @@ Swanytello is a **monolithic application** that combines multiple communication 
 
 ### 3. RAG (`src/rag/`)
 
-**Purpose**: Retrieval-Augmented Generation logic using LangChain.
+**Purpose**: Retrieval-Augmented Generation logic using LangChain (tools, chains, llms). Consumed by the API (e.g. POST `/api/rag/test`) and by channels when a user message needs an AI reply.
+
+**Current implementation**:
+- **LLM**: Ollama or OpenAI via `src/rag/llms/` (`ollama.llm.ts`, `openai.llm.ts`); selected by `RAG_LLM_PROVIDER` (env: `OLLAMA_*` or `OPENAI_*`).
+- **Chain**: `src/rag/chains/chat.chain.ts` — `runChatChain(message)` invokes the configured chat model (Ollama or OpenAI) and returns the reply text.
+- **API**: POST `/api/rag/test` (JWT) accepts `{ message }`, calls the chat chain, returns `{ reply, timestamp }`. See [RAG documentation](../rag.md) for usage and flow.
 
 **Why this architecture?**
 
@@ -112,7 +117,7 @@ Swanytello is a **monolithic application** that combines multiple communication 
 
 3. **Channel Integration**: RAG receives requests from channels and returns responses, but never directly interacts with channels.
 
-**See**: [RAG README](../../src/rag/README.md)
+**See**: [RAG README](../../src/rag/README.md), [RAG documentation](../rag.md) (usage, changing the LLM, Mermaid flow).
 
 ---
 

@@ -59,6 +59,8 @@ tests/
 │   └── buildTestApp.ts        # Fastify app for API tests (JWT + routes)
 ├── api/
 │   └── rag.test.ts            # RAG API endpoint tests (POST /api/rag/test)
+├── utils/
+│   └── fileStorage.test.ts    # File storage helpers (paths, validation, save/delete)
 └── db_operations/
     ├── open_position.test.ts  # OpenPosition CRUD tests
     └── tag_analisys.test.ts   # TagAnalisys CRUD tests
@@ -133,6 +135,17 @@ describe("My Tests", () => {
 - ✅ POST `/api/rag/test` returns 401 when token is invalid
 
 API tests use `tests/helpers/buildTestApp.ts` to build a Fastify instance with JWT and protected routes, then `app.inject()` for requests. No database or running server required.
+
+### Utils (fileStorage)
+
+- ✅ `getFileExtension`, `sanitizeFileName`, `generateUniqueFileName`
+- ✅ `validateFileType` (MIME + extension), `validateFileSize`
+- ✅ `getFilePath`, `getFullFilePath`
+- ✅ `ensureUploadDirectory`, `saveFile` (buffer and stream), `readFile`
+- ✅ `deleteFile`, `deleteDirectory` (ENOENT no throw)
+- ✅ `fileExists`, exported constants
+
+Utils tests use a temp directory under `os.tmpdir()` and clean up in `afterAll`. No database or env required.
 
 ---
 

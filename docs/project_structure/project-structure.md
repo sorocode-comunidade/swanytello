@@ -129,6 +129,12 @@ flowchart TB
     load[load/]
   end
 
+  subgraph utils_detail [utils/]
+    utils_index[index.ts]
+    utils_db_ping[dbPing.ts]
+    utils_file_storage[fileStorage.ts]
+  end
+
   subgraph docker_detail [docker/]
     compose[docker-compose.yml]
     dockerignore[.dockerignore]
@@ -151,6 +157,7 @@ flowchart TB
   channels --> channels_detail
   db_ops --> db_ops_detail
   etl --> etl_detail
+  utils --> utils_detail
   docker --> docker_detail
   tests --> tests_detail
 ```
@@ -176,3 +183,33 @@ sequenceDiagram
   API-->>Channel: Result
   Channel->>User: Reply
 ```
+
+---
+
+## 4. RAG request flow (POST /api/rag/test)
+
+When a client calls the RAG test endpoint, the request flows through the API into the chat chain and Ollama.
+
+```mermaid
+sequenceDiagram
+  participant Client
+  participant Route as rag.routes
+  participant Controller as rag.controller
+  participant Service as rag.service
+  participant Chain as chat.chain
+  participant LLM as llms/ollama
+
+  Client->>Route: POST /api/rag/test body: { message }
+  Route->>Controller: testRag(body, userId)
+  Controller->>Service: runRagChat(body)
+  Service->>Service: Zod parse body
+  Service->>Chain: runChatChain(message)
+  Chain->>LLM: getOllamaChat().invoke(message)
+  LLM->>Chain: AIMessage content
+  Chain->>Service: reply string
+  Service->>Controller: { reply, timestamp }
+  Controller->>Route: result
+  Route->>Client: 200 + { reply, timestamp }
+```
+
+**See**: [RAG documentation](../rag.md) for usage, env vars, and how to change the LLM.

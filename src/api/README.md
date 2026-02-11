@@ -40,7 +40,7 @@ The API provides a unified interface for:
 | POST /api/user | Create user | |
 | PUT /api/user/:id | Update user | |
 | DELETE /api/user/:id | Delete user | |
-| **POST /api/rag/test** | **RAG test endpoint** | Placeholder for testing RAG implementation. Returns `{ ok, message, timestamp }`. Requires `Authorization: Bearer <token>`. See [tests/api/rag.test.ts](../../tests/api/rag.test.ts) for usage. |
+| **POST /api/rag/test** | **RAG test endpoint** | Body: `{ "message": "string" }`. Runs the chat chain (Ollama) and returns `{ reply, timestamp }`. Requires `Authorization: Bearer <token>`. Ollama must be running when using this endpoint. See [tests/api/rag.test.ts](../../tests/api/rag.test.ts) for usage. |
 
 ## Access Patterns
 
