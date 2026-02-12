@@ -18,6 +18,10 @@ This folder holds **data transformation functions** that clean, format, normaliz
 - Transformation functions should be idempotent when possible (same input produces same output).
 - Use TypeScript types from `types.ts` for transformed data structures.
 
+## Implemented
+
+- **linkedinToOpenPosition.ts** – `transformLinkedInJobsToOpenPositions(extracted)` receives the result from the LinkedIn scraper (extract) and returns `CreateOpenPositionInput[]` for the open_position table. Validates with the DB schema; invalid entries are skipped. Use this output in the load phase to insert into the database.
+
 ## Suggested structure
 
 Add when implementing:

@@ -85,11 +85,14 @@ Swanytello is a **monolithic application** that combines multiple communication 
    - RAG processing (ETL only stores data; RAG consumes it)
 
 **Components**:
-- **`extract/`** – Web scrapers and data extraction (the only way to get internet data)
-- **`transform/`** – Data standardization, cleaning, and formatting
-- **`load/`** – Database storage and indexing
+- **`extract/`** – Web scrapers and data extraction (e.g. LinkedIn jobs via `findLinkedInJobs()`)
+- **`transform/`** – Data standardization, cleaning, and formatting (e.g. `transformLinkedInJobsToOpenPositions()` → `CreateOpenPositionInput[]`)
+- **`load/`** – Database storage (e.g. `loadOpenPositions()` persists to `open_position`, skipping duplicates by link)
+- **`process/`** – ETL orchestration and scheduling: `runLinkedInEtlProcess()` runs extract → transform → load; `startEtlScheduler()` runs it **on startup** and **every 12 hours** (called from `server.ts` after listen)
 
-**See**: [ETL README](../../src/etl/README.md)
+**Implemented pipeline**: LinkedIn job search (extract) → transform to open_position schema → load into database. Only one ETL run at a time (guard in `etl.process.ts`).
+
+**See**: [ETL README](../../src/etl/README.md), [Project structure (visual)](project-structure.md) (ETL and startup diagrams).
 
 ---
 

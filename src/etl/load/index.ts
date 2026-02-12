@@ -1,3 +1,5 @@
 // Load module - Data publishing operations (database storage, API delivery, etc.)
-// Add loader exports here when implemented.
-export { };
+export {
+  loadOpenPositions,
+  type LoadOpenPositionsResult,
+} from "./openPosition.load.js";

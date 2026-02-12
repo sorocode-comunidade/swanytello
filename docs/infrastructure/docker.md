@@ -71,7 +71,7 @@ alias dcp='docker compose -f docker/docker-compose.yml'
    npm run dev
    ```
    
-   The application will automatically check the database connection on startup:
+   The application will automatically check the database connection on startup. After the server is listening, the **ETL process** runs once (LinkedIn jobs → open_position) and then every 12 hours:
    ```
    🔍 Checking database connection...
    
@@ -80,9 +80,9 @@ alias dcp='docker compose -f docker/docker-compose.yml'
       🎉 Ready to start application!
    
    🚀 Server listening at http://0.0.0.0:3000
+   [ETL] Done: extracted=… transformed=… created=… skipped=…
    ```
-   
-   If the database is not connected, you'll see a warning with helpful instructions.
+   If the database is not connected, you'll see a warning with helpful instructions. See [Project structure – ETL and startup](../project_structure/project-structure.md) for diagrams.
 
 ### Startup Order
 

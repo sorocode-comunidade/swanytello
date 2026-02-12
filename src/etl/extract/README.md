@@ -15,9 +15,11 @@ This folder holds **data extraction operations** that fetch online data as part 
 - Output format should be raw extracted data that will be processed by the Transform phase.
 - Extractors should focus on data retrieval only; no transformation or storage logic here.
 
-## Suggested structure
+## Implemented
 
-Add when implementing:
+- **linkedin.scrapper.ts** – Fetches public LinkedIn job search results (keywords=Desenvolvedor, location=Sorocaba). Returns a list of `LinkedInJob` (title, company, link, optional location). Use `findLinkedInJobs()` from this module; output is raw data for the Transform phase.
+
+## Suggested structure (when adding more sources)
 
 - **sources/** or per-source folders – One extractor per site or data source (e.g. `linkedin/`, `github/`, `api/`).
 - **config.ts** – URLs, rate limits, selectors, env vars.

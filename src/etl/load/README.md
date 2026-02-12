@@ -30,6 +30,10 @@ Add when implementing:
 - **types.ts** – Shared types for load operations and output formats.
 - **utils/** – Shared loading utilities and helpers (retry logic, batching, etc.).
 
+## Implemented
+
+- **openPosition.load.ts** – `loadOpenPositions(data: CreateOpenPositionInput[])` persists records to the `open_position` table via `db_operations`. Skips records whose `link` already exists (deduplication for periodic ETL runs). Returns `{ created, skipped }`. Used by `etl/process/etl.process.ts`.
+
 ## Usage
 
 Load operations receive transformed data from `transform/` and persist or deliver it to the appropriate destination. **RAG** in `src/rag` will consume this data from the database or indices.

@@ -47,6 +47,29 @@ export async function createOpenPosition(
 }
 
 /**
+ * Get an open position by link (for ETL deduplication)
+ * @param link - Job URL
+ * @returns OpenPosition if found, null otherwise
+ */
+export async function getOpenPositionByLink(
+  link: string
+): Promise<OpenPosition | null> {
+  const result = await prisma.openPosition.findFirst({
+    where: { link },
+  });
+  if (!result) return null;
+  return {
+    id: result.id,
+    title: result.title,
+    link: result.link,
+    companyName: result.companyName,
+    region: result.region,
+    createdAt: result.createdAt,
+    updatedAt: result.updatedAt,
+  };
+}
+
+/**
  * Get an open position by ID
  * @param id - UUID of the open position
  * @returns OpenPosition if found, null otherwise

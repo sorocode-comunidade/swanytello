@@ -38,6 +38,9 @@ flowchart TB
       Extract[Extract]
       Transform[Transform]
       Load[Load]
+      Process[Process / Scheduler]
+      Extract --> Transform --> Load
+      Process --> Extract
     end
 
     subgraph db_ops [Database Operations]
@@ -127,6 +130,7 @@ flowchart TB
     extract[extract/]
     transform[transform/]
     load[load/]
+    process[process/]
   end
 
   subgraph utils_detail [utils/]
@@ -219,9 +223,29 @@ sequenceDiagram
 
 ---
 
-## 5. Startup sequence (DB + RAG checks)
+## 5. ETL process (LinkedIn jobs → open_position)
 
-On startup, the server loads `.env`, then runs the database and RAG connectivity checks before registering routes and listening.
+The ETL process runs **on startup** (once the server is listening) and **every 12 hours**. It extracts LinkedIn job listings, transforms them into `open_position` records, and loads them into the database (skipping duplicates by link).
+
+```mermaid
+flowchart LR
+  subgraph etl_run [ETL run]
+    E_Extract[extract: findLinkedInJobs]
+    E_Transform[transform: linkedinToOpenPosition]
+    E_Load[load: loadOpenPositions]
+    E_Extract --> E_Transform --> E_Load
+  end
+  E_Load --> DB[(open_position table)]
+  Scheduler[startEtlScheduler] --> E_Extract
+```
+
+**See**: [ETL README](../../src/etl/README.md) and [Architecture](architecture.md) (ETL section).
+
+---
+
+## 6. Startup sequence (DB + RAG checks and ETL scheduler)
+
+On startup, the server loads `.env`, runs the database and RAG connectivity checks, registers routes, listens, then starts the ETL scheduler (run once, then every 12h).
 
 ```mermaid
 sequenceDiagram
@@ -229,6 +253,7 @@ sequenceDiagram
   participant Dotenv as dotenv
   participant DBPing as utils/dbPing
   participant RAGPing as utils/ragPing
+  participant ETL as etl/process
 
   Server->>Dotenv: config(.env)
   Server->>DBPing: displayDatabaseStatus()
@@ -236,4 +261,6 @@ sequenceDiagram
   Server->>RAGPing: displayRagStatus()
   RAGPing->>RAGPing: checkRagStatus() (Ollama or OpenAI)
   Server->>Server: Register routes, listen
+  Server->>ETL: startEtlScheduler()
+  ETL->>ETL: run once (startup), then every 12h
 ```

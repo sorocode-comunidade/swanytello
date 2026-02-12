@@ -29,6 +29,9 @@ flowchart TB
       Extract[Extract]
       Transform[Transform]
       Load[Load]
+      Process[Process / Scheduler]
+      Extract --> Transform --> Load
+      Process --> Extract
     end
 
     subgraph db_ops [Database Operations]
@@ -113,6 +116,7 @@ flowchart TB
     extract_folder[extract/]
     transform_folder[transform/]
     load_folder[load/]
+    process_folder[process/]
   end
 
   subgraph utils_content [utils/]
@@ -172,12 +176,25 @@ sequenceDiagram
   Controller->>Route: result
   Route->>Client: 200 + { reply, timestamp }
 
-%% --- 4. Startup checks (DB + RAG) ---
+%% --- 4. ETL process (LinkedIn jobs → open_position) ---
+flowchart LR
+  subgraph etl_run [ETL run]
+    E_Extract[extract: findLinkedInJobs]
+    E_Transform[transform: linkedinToOpenPosition]
+    E_Load[load: loadOpenPositions]
+    E_Extract --> E_Transform --> E_Load
+  end
+  E_Load --> DB[(open_position table)]
+  Scheduler[startEtlScheduler] --> E_Extract
+  Note[On startup + every 12h]
+
+%% --- 5. Startup checks (DB + RAG) and ETL scheduler ---
 sequenceDiagram
   participant Server as server.ts
   participant Dotenv as dotenv
   participant DBPing as utils/dbPing
   participant RAGPing as utils/ragPing
+  participant ETL as etl/process
 
   Server->>Dotenv: config(.env)
   Server->>DBPing: displayDatabaseStatus()
@@ -185,3 +202,5 @@ sequenceDiagram
   Server->>RAGPing: displayRagStatus()
   RAGPing->>RAGPing: checkRagStatus() (Ollama or OpenAI)
   Server->>Server: Register routes, listen
+  Server->>ETL: startEtlScheduler()
+  ETL->>ETL: run once (startup), then every 12h

@@ -59,6 +59,7 @@ dcp logs -f ollama
 # Stop
 dcp stop postgres
 dcp stop ollama
+
 # Or stop all:
 dcp down
 

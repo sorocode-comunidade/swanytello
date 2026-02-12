@@ -1,3 +1,7 @@
 // Extract module - Web scrapers and data extraction
-// Add web scraper exports here when implemented.
-export { };
+export {
+  findLinkedInJobs,
+  LINKEDIN_JOBS_URL,
+  LINKEDIN_HEADERS,
+  type LinkedInJob,
+} from "./linkedin.scrapper.js";

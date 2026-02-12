@@ -147,6 +147,7 @@ flowchart TB
     extract[extract/]
     transform[transform/]
     load[load/]
+    process[process/]
   end
 
   subgraph docker_detail [docker/]
@@ -243,13 +244,14 @@ sequenceDiagram
    npm run dev
    ```
    
-   The application loads `.env`, then checks the database and RAG/LLM connection on startup:
+   The application loads `.env`, then checks the database and RAG/LLM connection on startup. After the server is listening, the ETL process runs once (LinkedIn jobs → open_position) and then every 12 hours:
    ```
    🔍 Checking database connection...
    ✅ Database connection: Connected
    🔍 Checking RAG/LLM connection...
    ✅ RAG (OpenAI): API key valid and reachable   (or: RAG (Ollama): Connected)
    🚀 Server listening at http://0.0.0.0:3000
+   [ETL] Done: extracted=… transformed=… created=… skipped=…
    ```
    If the database or RAG is not connected, you'll see a warning. For RAG, set `OPENAI_API_KEY` in `.env` to use OpenAI, or start Ollama for local LLM. Call **GET /api/rag/health** to verify RAG status.
 
@@ -396,7 +398,8 @@ See [Tests Documentation](tests/README.md) for detailed information on writing a
 │   ├── channels/     # WhatsApp and Discord
 │   │   ├── whatsapp/
 │   │   └── discord/
-│   ├── etl/          # Extract, Transform, Load (extract/, transform/, load/)
+│   ├── etl/          # Extract, Transform, Load (extract/, transform/, load/, process/)
+│   │   └── process/  # ETL orchestration: runs on startup and every 12h
 │   ├── db_operations/ # Database models and Prisma operations
 │   ├── log/          # Logging utilities
 │   ├── types/        # TypeScript types

@@ -1,3 +1,2 @@
 // Transform module - Data transformation, cleaning, and preparation
-// Add transformation function exports here when implemented.
-export { };
+export { transformLinkedInJobsToOpenPositions } from "./linkedinToOpenPosition.js";
