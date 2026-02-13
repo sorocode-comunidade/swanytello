@@ -9,7 +9,7 @@ This document describes the RAG module in Swanytello: structure, usage, how to c
 RAG logic lives in **`src/rag/`** and uses **LangChain** for chains and LLM integrations. It is consumed by:
 
 - The **REST API** for testing and driving RAG from clients:
-  - **GET `/api/rag/health`** (public) – Checks that the configured LLM (Ollama or OpenAI) is reachable. Same check runs at startup.
+  - **GET `/api/rag/health`** (public) – Checks that the configured LLM (Ollama Cloud or OpenAI) is reachable. Same check runs at startup.
   - **POST `/api/rag/test`** – JSON body with `message` only.
   - **POST `/api/rag/chat`** – Multipart form with `message` and optional **PDF** attachment (for future tag-extraction tooling).
 - **Channels** (WhatsApp, Discord), which can call into RAG when a user message needs an AI response.
@@ -26,12 +26,12 @@ src/rag/
 ├── README.md
 ├── tools/       # Agent tools (API-backed; no direct DB)
 ├── chains/      # LangChain chains (orchestration, prompts, tool use)
-└── llms/        # LLM integrations (Ollama, OpenAI, Claude, etc.)
+└── llms/        # LLM integrations (Ollama Cloud, OpenAI, etc.)
 ```
 
 | Folder | Purpose |
 |--------|---------|
-| **llms/** | Provider-specific chat models. Config via env. Export a LangChain-compatible instance or factory (e.g. `getOllamaChat()`). |
+| **llms/** | Provider-specific chat models. Config via env. Export a chat model with `invoke()` (e.g. `getOllamaCloudChat()`). |
 | **tools/** | Tools the agent can call (e.g. query data via API). No direct `db_operations` imports. |
 | **chains/** | Chains that compose LLMs, prompts, and optional tools. Entry point for “user message → reply” (e.g. `runChatChain`). |
 
@@ -48,7 +48,7 @@ sequenceDiagram
   participant Controller as rag.controller
   participant Service as rag.service
   participant Chain as chat.chain
-  participant LLM as llms (Ollama/OpenAI)
+  participant LLM as llms (Ollama Cloud / OpenAI)
 
   Client->>Route: POST /api/rag/test or /api/rag/chat (message [+ PDF])
   Route->>Controller: testRag(body) or chatRag(payload, userId)
@@ -112,14 +112,14 @@ curl -X POST http://localhost:3000/api/rag/chat \
 }
 ```
 
-**LLM unavailable (503)** – When the configured LLM is unreachable (e.g. Ollama not running, OpenAI API key invalid or network error), the API returns **503 Service Unavailable** with a short, actionable message instead of a generic 500. See [API endpoint docs](API/endpoints/rag-test.md#503-service-unavailable--llm-unreachable) for the response body.
+**LLM unavailable (503)** – When the configured LLM is unreachable (e.g. Ollama Cloud/API down, OpenAI API key invalid or network error), the API returns **503 Service Unavailable** with a short, actionable message instead of a generic 500. See [API endpoint docs](API/endpoints/rag-test.md#503-service-unavailable--llm-unreachable) for the response body.
 
 Full request/response details, error cases, and examples: **[API Endpoints – RAG](API/endpoints/rag-test.md)** and **[API Endpoints – RAG Chat](API/endpoints/rag-chat.md)**.
 
 ### Prerequisites
 
-- **Environment**: `.env` is loaded at startup (`dotenv/config` in `server.ts`). Set your provider and keys there.
-- **Ollama**: used when `RAG_LLM_PROVIDER=ollama` (default when `OPENAI_API_KEY` is not set). Ollama must be running at `http://localhost:11434`. You can run it via **Docker** (recommended): `docker compose -f docker/docker-compose.yml up -d ollama`, then e.g. `docker exec -it swanytello-ollama ollama run llama3.2`. See [docker/ollama_docker/README.md](../docker/ollama_docker/README.md).
+- **Environment**: `.env` is loaded at startup (`dotenv/config` in `server.ts`). Set your provider and keys there. **Default LLM** is **Ollama Cloud** (no local heavy LLM to run); override only if you want OpenAI (see [How to change the LLM](#how-to-change-the-llm)).
+- **Ollama Cloud** (default): used when `RAG_LLM_PROVIDER` is unset and `OPENAI_API_KEY` is not set. No local server; optional `OLLAMA_CLOUD_HOST`, `OLLAMA_CLOUD_MODEL`, `OLLAMA_API_KEY` in `.env`. See [src/rag/llms/README.md](../src/rag/llms/README.md).
 - **OpenAI**: used when `RAG_LLM_PROVIDER=openai` **or** when `RAG_LLM_PROVIDER` is unset and `OPENAI_API_KEY` is set in `.env`. No local server needed; set `OPENAI_API_KEY` (and optionally `OPENAI_MODEL`).
 
 ---
@@ -128,20 +128,23 @@ Full request/response details, error cases, and examples: **[API Endpoints – R
 
 ### Switch provider via .env (recommended)
 
-The chain uses `getChatModel()` from `src/rag/llms/` and needs no code change. Provider is chosen as follows:
+The chain uses `getChatModel()` from `src/rag/llms/` and needs no code change. **Ollama Cloud is the project default** (lightweight; no local LLM to run). Change it only if you want OpenAI by setting `.env` as below.
 
-1. If **RAG_LLM_PROVIDER** is set in `.env`, that value is used (`openai` or `ollama`).
+Provider is chosen as follows:
+
+1. If **RAG_LLM_PROVIDER** is set in `.env`, that value is used (`openai` or `ollama-cloud`).
 2. If **RAG_LLM_PROVIDER** is not set and **OPENAI_API_KEY** is set, **OpenAI** is used.
-3. Otherwise **Ollama** is used (default).
+3. Otherwise **Ollama Cloud** is used (default for the project).
 
-So you can use OpenAI by either setting `RAG_LLM_PROVIDER=openai` or by only setting `OPENAI_API_KEY` (no need to set `RAG_LLM_PROVIDER`).
+So you can use OpenAI by either setting `RAG_LLM_PROVIDER=openai` or by only setting `OPENAI_API_KEY`. Leave both unset to use Ollama Cloud (default).
 
 | Value / condition | Provider | Required env |
 |-------------------|----------|----------------|
-| `ollama` or unset and no OPENAI_API_KEY | Local Ollama | Optional: **OLLAMA_BASE_URL**, **OLLAMA_MODEL** |
+| unset and no OPENAI_API_KEY | **Ollama Cloud** (default) | Optional: **OLLAMA_CLOUD_HOST**, **OLLAMA_CLOUD_MODEL**, **OLLAMA_API_KEY** |
+| `ollama-cloud` | Ollama Cloud | Optional: **OLLAMA_CLOUD_HOST**, **OLLAMA_CLOUD_MODEL**, **OLLAMA_API_KEY** |
 | `openai` or unset with OPENAI_API_KEY | OpenAI API | **OPENAI_API_KEY** (required). Optional: **OPENAI_MODEL** |
 
-**Ollama** – `OLLAMA_BASE_URL` (default `http://localhost:11434`), `OLLAMA_MODEL` (default `llama3.2`).
+**Ollama Cloud (default)** – `OLLAMA_CLOUD_HOST` (default `https://api.ollama.com`), `OLLAMA_CLOUD_MODEL` (default `glm-4.7-flash`), optional `OLLAMA_API_KEY`.
 
 **OpenAI** – `OPENAI_API_KEY` required; `OPENAI_MODEL` (default `gpt-4o-mini`).
 

@@ -8,12 +8,12 @@
 
 ## Description
 
-Checks that the configured RAG/LLM provider (Ollama or OpenAI) is reachable and valid. Use this before calling POST `/api/rag/test` or POST `/api/rag/chat` so you know the RAG pipeline is ready.
+Checks that the configured RAG/LLM provider (Ollama Cloud or OpenAI) is reachable and valid. Use this before calling POST `/api/rag/test` or POST `/api/rag/chat` so you know the RAG pipeline is ready.
 
-- **Ollama**: Checks whether the Ollama Docker container (`swanytello-ollama`) is running, then requests `OLLAMA_BASE_URL/api/tags` to verify the API is up. You know in advance if Docker is running before using the API.
+- **Ollama Cloud** (default): Requests `OLLAMA_CLOUD_HOST/api/tags` with optional `OLLAMA_API_KEY` to verify the cloud API is up.
 - **OpenAI**: Verifies `OPENAI_API_KEY` is set and calls the OpenAI API to validate the key.
 
-Provider is chosen the same way as for chat: `RAG_LLM_PROVIDER` if set, else OpenAI if `OPENAI_API_KEY` is set, else Ollama.
+Provider is chosen the same way as for chat: `RAG_LLM_PROVIDER` if set, else OpenAI if `OPENAI_API_KEY` is set, else **Ollama Cloud** (default).
 
 ---
 
@@ -21,7 +21,7 @@ Provider is chosen the same way as for chat: `RAG_LLM_PROVIDER` if set, else Ope
 
 - **Startup / ops** – Confirm RAG is working before sending chat requests.
 - **Monitoring** – Use as a readiness probe for the RAG service.
-- **Debugging** – See which provider is configured and why it might be failing (e.g. key not set, Ollama not running).
+- **Debugging** – See which provider is configured and why it might be failing (e.g. key not set, Ollama Cloud unreachable).
 
 ---
 
@@ -48,12 +48,11 @@ Provider is chosen the same way as for chat: `RAG_LLM_PROVIDER` if set, else Ope
 }
 ```
 
-**Ollama** (includes `containerRunning` so you know the Docker container is up):
+**Ollama Cloud** (default):
 ```json
 {
   "status": "ok",
-  "provider": "ollama",
-  "containerRunning": true,
+  "provider": "ollama-cloud",
   "timestamp": "2025-02-11T12:00:00.000Z"
 }
 ```
@@ -61,8 +60,7 @@ Provider is chosen the same way as for chat: `RAG_LLM_PROVIDER` if set, else Ope
 | Field | Type | Description |
 |--------|------|-------------|
 | `status` | string | `"ok"` when the configured provider is reachable. |
-| `provider` | string | `"openai"` or `"ollama"`. |
-| `containerRunning` | boolean | *(Ollama only)* Whether the `swanytello-ollama` Docker container is running. |
+| `provider` | string | `"openai"` or `"ollama-cloud"` (default). |
 | `timestamp` | string | ISO 8601 timestamp. |
 
 ---
@@ -80,14 +78,13 @@ Provider is chosen the same way as for chat: `RAG_LLM_PROVIDER` if set, else Ope
 }
 ```
 
-**Ollama** (includes `containerRunning` so you know if the container is down before trying the API):
+**Ollama Cloud** (example):
 ```json
 {
   "statusCode": 503,
   "status": "unavailable",
-  "provider": "ollama",
-  "containerRunning": false,
-  "message": "Ollama not reachable at http://localhost:11434. Start with: npm run docker:up:ollama. Or set OPENAI_API_KEY to use OpenAI.",
+  "provider": "ollama-cloud",
+  "message": "Ollama Cloud unreachable at … Check OLLAMA_CLOUD_HOST and OLLAMA_API_KEY.",
   "timestamp": "2025-02-11T12:00:00.000Z"
 }
 ```
@@ -95,7 +92,7 @@ Provider is chosen the same way as for chat: `RAG_LLM_PROVIDER` if set, else Ope
 Other possible messages:
 
 - *"OpenAI API key is invalid or expired. Check OPENAI_API_KEY in .env and your account."*
-- *"Ollama not reachable at http://localhost:11434. Start with: npm run docker:up:ollama. Or set OPENAI_API_KEY to use OpenAI."*
+- *"Ollama Cloud unreachable at … Check OLLAMA_CLOUD_HOST and OLLAMA_API_KEY."* (when using default provider)
 
 ---
 

@@ -44,22 +44,23 @@ User Message → Channel → RAG Agent
 |--------|---------|
 | **tools/** | Tool definitions for the agent (API-backed, no direct DB access). |
 | **chains/** | LangChain chains and agent orchestration (retrieval, generation, tool use). |
-| **llms/** | LLM integrations: OpenAI, Claude, Ollama, etc. |
+| **llms/** | LLM integrations: Ollama Cloud (default), OpenAI, etc. |
 
-- **llms/** – Implement provider-specific chat models (env-based config, LangChain-compatible).
+- **llms/** – Implement provider-specific chat models (env-based config; Ollama Cloud default, no local heavy LLM).
 - **tools/** – Define tools the agent can call; they use the API, not `db_operations`.
 - **chains/** – Compose LLMs, tools, and retrieval into the RAG pipeline.
 
 ## Usage
 
 - **Endpoint**: POST `/api/rag/test` (JWT required). Body: `{ "message": "..." }` (1–16384 chars). Response: `{ reply, timestamp }`.
-- **Env (Ollama)**: `OLLAMA_BASE_URL` (default `http://localhost:11434`), `OLLAMA_MODEL` (default `llama3.2`). Ollama must be running.
+- **Env**: Default is **Ollama Cloud** (optional `OLLAMA_CLOUD_HOST`, `OLLAMA_CLOUD_MODEL`, `OLLAMA_API_KEY`). Set `OPENAI_API_KEY` to use OpenAI.
 - Full details, examples, and request-flow diagram: **[RAG documentation](../../docs/rag.md)**.
 
 ## Changing the LLM
 
-- **Ollama**: Set `OLLAMA_BASE_URL` and `OLLAMA_MODEL` in `.env`; no code change.
-- **Other providers (OpenAI, Claude)**: Add a new module in `src/rag/llms/` (e.g. `openai.llm.ts`) that exports a LangChain-compatible chat model, then wire it in `getChatModel()` in `src/rag/llms/index.ts` (e.g. `RAG_LLM_PROVIDER=openai`). Document new env vars in [llms/README.md](llms/README.md) and `.env.example`.
+- **Ollama Cloud** (default): Optional `OLLAMA_CLOUD_HOST`, `OLLAMA_CLOUD_MODEL`, `OLLAMA_API_KEY` in `.env`.
+- **OpenAI**: Set `OPENAI_API_KEY` (and optionally `RAG_LLM_PROVIDER=openai`).
+- **Other providers**: Add a new module in `src/rag/llms/`, wire it in `getChatModel()` in `src/rag/llms/index.ts`, and document env vars in [llms/README.md](llms/README.md) and `.env.example`.
 - Step-by-step: **[RAG documentation – How to change the LLM](../../docs/rag.md#how-to-change-the-llm)**.
 
 ## See Also

@@ -1,30 +1,32 @@
 # RAG LLMs
 
-This folder holds **LLM (Large Language Model) integrations** used by RAG. Each provider (OpenAI, Claude, Ollama, etc.) is implemented here so chains in `../chains/` can use a unified interface and switch providers via configuration.
+This folder holds **LLM (Large Language Model) integrations** used by RAG. Providers are Ollama Cloud (default) and OpenAI; configuration is via environment variables.
 
 ## Purpose
 
+- **Ollama Cloud** – Default. Integration with Ollama Cloud via the official `ollama` package (`ollama.chat({ model, messages })`). No local server; lightweight for all machines.
 - **OpenAI** – Integration with OpenAI API (GPT-4, etc.).
-- **Claude** – Integration with Anthropic Claude API.
-- **Ollama** – Integration with local Ollama (e.g. Llama, Mistral) for development or self-hosted use.
 - Other providers can be added following the same pattern.
 
-Provider modules use the naming pattern **`{provider}.llm.ts`** (e.g. `ollama.llm.ts`, `openai.llm.ts`). Each should expose a LangChain-compatible chat model or a factory that returns one; configuration (API keys, base URLs, model names) comes from environment variables.
+Provider modules use the naming pattern **`{provider}.llm.ts`** (e.g. `ollama-cloud.llm.ts`, `openai.llm.ts`). Each exposes a chat model or factory with an `invoke(message)` interface; configuration comes from environment variables.
 
-### Provider selection
+### Provider selection (default: Ollama Cloud)
+
+**Ollama Cloud is the main default** so users don’t need to run a heavy local LLM. Override by setting `.env` (e.g. `OPENAI_API_KEY=...` for OpenAI).
 
 `getChatModel()` (used by the chain) picks the provider as follows:
 
-1. If **RAG_LLM_PROVIDER** is set in `.env`, that value is used (`openai` or `ollama`).
+1. If **RAG_LLM_PROVIDER** is set in `.env`, that value is used (`openai` or `ollama-cloud`).
 2. If **RAG_LLM_PROVIDER** is not set and **OPENAI_API_KEY** is set, **OpenAI** is used.
-3. Otherwise **Ollama** is used (default).
+3. Otherwise **Ollama Cloud** is used (default).
 
-So you can use OpenAI by setting only **OPENAI_API_KEY** (and optionally **OPENAI_MODEL**); no need to set `RAG_LLM_PROVIDER=openai` unless you want to force it. Ensure `.env` is loaded at app startup (e.g. `import "dotenv/config"` in `server.ts`).
+So you can use OpenAI by setting only **OPENAI_API_KEY** (and optionally **OPENAI_MODEL**). Ensure `.env` is loaded at app startup (e.g. `import "dotenv/config"` in `server.ts`).
 
-### Ollama
+### Ollama Cloud (default)
 
-- **OLLAMA_BASE_URL** – Optional. Default `http://localhost:11434`.
-- **OLLAMA_MODEL** – Optional. Default `llama3.2`.
+- **OLLAMA_CLOUD_HOST** – Optional. Default `https://api.ollama.com`.
+- **OLLAMA_CLOUD_MODEL** – Optional. Default `glm-4.7-flash`. Override in `.env` only if you want a different model.
+- **OLLAMA_API_KEY** – Optional. API key for Ollama Cloud (Bearer token in `Authorization` header).
 
 ### OpenAI
 

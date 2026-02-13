@@ -253,36 +253,22 @@ docker exec swanytello-postgres pg_isready -U swanytello
 
 ---
 
-## RAG / Ollama not reachable
+## RAG / LLM not reachable
 
-**Symptoms**: POST /api/rag/test or /api/rag/chat returns 503; GET /api/rag/health returns "Ollama not reachable" or similar.
+**Symptoms**: POST /api/rag/test or /api/rag/chat returns 503; GET /api/rag/health returns an error for the configured provider.
 
-**If you use Ollama (local LLM) for RAG**:
+**Default provider is Ollama Cloud.** Override via `.env` by setting `OPENAI_API_KEY` (and optionally `RAG_LLM_PROVIDER=openai`) to use OpenAI instead.
 
-1. **Start the Ollama container**:
-   ```bash
-   npm run docker:up:ollama
-   # Or: docker compose -f docker/docker-compose.yml up -d ollama
-   ```
+### If you use Ollama Cloud (default)
 
-2. **Pull a model** (first time or new model):
-   ```bash
-   docker exec -it swanytello-ollama ollama run llama3.2
-   ```
-   See [docker/ollama_docker/README.md](../../docker/ollama_docker/README.md).
-
-3. **Check RAG health**:
-   ```bash
-   curl -s http://localhost:3000/api/rag/health
-   ```
-   Should return `"status": "ok"`, `"provider": "ollama"`.
-
-4. **If you prefer OpenAI**: Set `OPENAI_API_KEY` in `.env` (and optionally `RAG_LLM_PROVIDER=openai`). Then you don't need the Ollama container.
+1. **Check env**: Ensure `OLLAMA_CLOUD_HOST` and, if required, `OLLAMA_API_KEY` are set in `.env`. Default host is `https://api.ollama.com`.
+2. **Check RAG health**: `curl -s http://localhost:3000/api/rag/health` — should return `"status": "ok"`, `"provider": "ollama-cloud"` when reachable.
+3. **To use OpenAI instead**: Set `OPENAI_API_KEY` in `.env` (and optionally `RAG_LLM_PROVIDER=openai`).
 
 ---
 
 ## See Also
 
-- [Docker Setup](docker.md) – PostgreSQL and Ollama setup
+- [Docker Setup](docker.md) – PostgreSQL setup
 - [Prisma Guide](../libs/prisma.md) – Prisma workflow and commands
 - [Database Operations](../../src/db_operations/README.md) – Database operations documentation

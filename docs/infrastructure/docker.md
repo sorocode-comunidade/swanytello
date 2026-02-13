@@ -8,14 +8,13 @@ This document explains how to use Docker Compose with Swanytello.
 
 The project includes Docker configuration in the `docker/` folder:
 
-- **`docker/docker-compose.yml`** – Defines **PostgreSQL** (database) and **Ollama** (local LLM for RAG).
+- **`docker/docker-compose.yml`** – Defines **PostgreSQL** (database). RAG uses **Ollama Cloud** (default) or **OpenAI**—no local Ollama container.
 - **`docker/postgres_docker/`** – PostgreSQL-specific docs. See [postgres_docker/README.md](../../docker/postgres_docker/README.md).
-- **`docker/ollama_docker/`** – Ollama-specific docs. See [ollama_docker/README.md](../../docker/ollama_docker/README.md).
 - **`docker/.dockerignore`** – Docker build ignore patterns.
 
-The application runs on your host; PostgreSQL and Ollama run in Docker containers.
+The application runs on your host; PostgreSQL runs in a Docker container.
 
-**⚠️ Critical**: **PostgreSQL** must be running before `npm run dev`. **Ollama** is optional and only needed when using RAG with the local LLM (no OpenAI).
+**⚠️ Critical**: **PostgreSQL** must be running before `npm run dev`.
 
 ---
 
@@ -88,11 +87,10 @@ alias dcp='docker compose -f docker/docker-compose.yml'
 
 Always follow this order:
 1. ✅ Start PostgreSQL: `docker compose -f docker/docker-compose.yml up -d postgres`
-2. ✅ (Optional) Start Ollama for RAG: `docker compose -f docker/docker-compose.yml up -d ollama` — only if using local LLM without OpenAI.
-3. ✅ Wait for PostgreSQL to be healthy
-4. ✅ Configure `.env` file
-5. ✅ Run Prisma migrations
-6. ✅ Start application: `npm run dev`
+2. ✅ Wait for PostgreSQL to be healthy
+3. ✅ Configure `.env` file
+4. ✅ Run Prisma migrations
+5. ✅ Start application: `npm run dev`
 
 ---
 
@@ -118,20 +116,11 @@ The `docker/docker-compose.yml` file is compatible with Docker Compose v2 and do
 - **Default credentials**: User `swanytello`, Password `swanytello_password`, Database `swanytello`
 - **Docs**: [docker/postgres_docker/README.md](../../docker/postgres_docker/README.md)
 
-### Ollama (RAG local LLM)
-
-- **Image**: [ollama/ollama](https://hub.docker.com/r/ollama/ollama)
-- **Container name**: `swanytello-ollama`
-- **Port**: `11434` (configurable via `OLLAMA_PORT`)
-- **Purpose**: Local LLM for RAG when not using OpenAI. Pull models with `docker exec -it swanytello-ollama ollama run llama3` (see [ollama_docker/README.md](../../docker/ollama_docker/README.md)).
-- **Docs**: [docker/ollama_docker/README.md](../../docker/ollama_docker/README.md)
-
 ### Environment Variables
 
 You can customize PostgreSQL settings by setting these environment variables before running `docker compose -f docker/docker-compose.yml up`:
 
 - **PostgreSQL**: `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `POSTGRES_PORT` (default `5432`)
-- **Ollama**: `OLLAMA_PORT` (default `11434`)
 
 **Example**:
 ```bash
@@ -152,24 +141,19 @@ After creating the alias, you can use shorter commands. Examples are shown with 
 
 ### Start Services
 ```bash
-# Start both PostgreSQL and Ollama
-docker compose -f docker/docker-compose.yml up -d
-# Or with alias: dcp up -d
-
-# Start only PostgreSQL (required for app)
+# Start PostgreSQL (required for app)
 docker compose -f docker/docker-compose.yml up -d postgres
-# Or: dcp up -d postgres
+# Or with alias: dcp up -d postgres
 
-# Start only Ollama (for RAG with local LLM)
-docker compose -f docker/docker-compose.yml up -d ollama
-# Or: dcp up -d ollama
+# Or start all defined services (postgres only)
+docker compose -f docker/docker-compose.yml up -d
+# Or: dcp up -d
 ```
 
 ### Stop Services
 ```bash
 docker compose -f docker/docker-compose.yml stop postgres
-docker compose -f docker/docker-compose.yml stop ollama
-# Or: dcp stop postgres; dcp stop ollama
+# Or: dcp stop postgres
 
 # Stop and remove all project containers
 docker compose -f docker/docker-compose.yml down
@@ -179,8 +163,7 @@ docker compose -f docker/docker-compose.yml down
 ### View Logs
 ```bash
 docker compose -f docker/docker-compose.yml logs -f postgres
-docker compose -f docker/docker-compose.yml logs -f ollama
-# Or with alias: dcp logs -f postgres; dcp logs -f ollama
+# Or with alias: dcp logs -f postgres
 ```
 
 ### Check Status

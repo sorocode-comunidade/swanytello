@@ -25,15 +25,14 @@
     "dev-token": "node -r dotenv/config scripts/dev-token.mjs",
     "docker:up": "docker compose -f docker/docker-compose.yml up -d",
     "docker:up:postgres": "docker compose -f docker/docker-compose.yml up -d postgres",
-    "docker:up:ollama": "docker compose -f docker/docker-compose.yml up -d ollama",
     "docker:down": "docker compose -f docker/docker-compose.yml down",
     "docker:ps": "docker compose -f docker/docker-compose.yml ps"
   },
   "dependencies": {
     "@fastify/jwt": "^9.0.1",
+    "ollama": "^0.6.3",
     "@fastify/multipart": "^9.4.0",
     "@langchain/core": "^1.1.19",
-    "@langchain/ollama": "^1.2.0",
     "@langchain/openai": "^1.2.7",
     "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "^7.0.0",

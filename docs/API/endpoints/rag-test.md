@@ -16,7 +16,7 @@ For sending a message **with an optional PDF** (e.g. for future tag extraction),
 
 ## Use cases
 
-- **Testing RAG** – Verify that the chat chain and LLM (Ollama/OpenAI) are working.
+- **Testing RAG** – Verify that the chat chain and LLM (Ollama Cloud default, local Ollama, or OpenAI) are working.
 - **Simple Q&A** – User sends a text question and receives an AI reply.
 - **Integration checks** – Confirm auth and request/response shape.
 
@@ -87,23 +87,23 @@ Missing or invalid `Authorization` header (when auth is enabled):
 
 ### 503 Service Unavailable – LLM unreachable
 
-When the configured LLM is unreachable (e.g. Ollama not running, OpenAI API key missing/invalid, or network error), the API returns **503** with a short, actionable message instead of a generic 500:
+When the configured LLM is unreachable (e.g. Ollama Cloud/API down, local Ollama not running, OpenAI API key missing/invalid, or network error), the API returns **503** with a short, actionable message instead of a generic 500.
 
+Example (default = Ollama Cloud):
 ```json
 {
   "statusCode": 503,
   "error": "Service Unavailable",
-  "message": "Ollama is not running. Start with: npm run docker:up:ollama (or docker compose -f docker/docker-compose.yml up -d ollama). Or set OPENAI_API_KEY to use OpenAI."
+  "message": "Ollama Cloud unreachable at … Check OLLAMA_CLOUD_HOST and OLLAMA_API_KEY."
 }
 ```
 
-Other possible messages (depending on the failure):
+Other possible messages (depending on provider and failure):
 
 - *"OpenAI API error. Check OPENAI_API_KEY in .env and your account access."*
-- *"LLM service is unreachable. Check that your configured provider (Ollama or OpenAI) is running and reachable."*
-- *"LLM service temporarily unavailable. Please try again or check your RAG provider configuration."*
+- *"LLM service is unreachable. Check that your configured provider (Ollama Cloud or OpenAI) is running and reachable."*
 
-Ensure `.env` is loaded at startup and that either Ollama is running (e.g. `npm run docker:up:ollama`; see [docker/ollama_docker/README.md](../../../docker/ollama_docker/README.md)) or `OPENAI_API_KEY` is set (to use OpenAI). If only `OPENAI_API_KEY` is set and `RAG_LLM_PROVIDER` is not set, OpenAI is used automatically.
+**Default LLM is Ollama Cloud**; override via `.env` by setting `OPENAI_API_KEY` (and optionally `RAG_LLM_PROVIDER=openai`) for OpenAI. See [RAG module – How to change the LLM](../../rag.md#how-to-change-the-llm).
 
 ---
 

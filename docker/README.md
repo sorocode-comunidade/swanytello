@@ -1,6 +1,6 @@
 # Docker Configuration
 
-This folder contains Docker-related configuration for the Swanytello project. All Docker services are defined in one Compose file; service-specific docs live in subfolders.
+This folder contains Docker-related configuration for the Swanytello project. The Compose file defines **PostgreSQL** only. RAG uses **Ollama Cloud** (default) or **OpenAI**—no local Ollama container (too heavy for many machines).
 
 ---
 
@@ -8,9 +8,8 @@ This folder contains Docker-related configuration for the Swanytello project. Al
 
 | Path | Purpose |
 |------|---------|
-| **`docker-compose.yml`** | Compose file for **PostgreSQL** and **Ollama**. Single project name `swanytello`. |
+| **`docker-compose.yml`** | Compose file for **PostgreSQL**. Single project name `swanytello`. |
 | **`postgres_docker/`** | PostgreSQL service docs and quick reference. See [postgres_docker/README.md](postgres_docker/README.md). |
-| **`ollama_docker/`** | Ollama (LLM) service docs and quick reference. See [ollama_docker/README.md](ollama_docker/README.md). |
 | **`.dockerignore`** | Patterns to exclude from Docker builds. |
 | **`.env.example`** | Example env vars for Docker/Compose (optional). |
 
@@ -21,13 +20,12 @@ This folder contains Docker-related configuration for the Swanytello project. Al
 | Service | Container name | Port (host) | Purpose |
 |---------|----------------|-------------|---------|
 | **postgres** | `swanytello-postgres` | 5432 | Database (required for the app). |
-| **ollama** | `swanytello-ollama` | 11434 | Local LLM for RAG when not using OpenAI. |
 
 ---
 
 ## Alias
 
-**Tip**: Create an alias so you don’t need the full path every time:
+**Tip**: Create an alias so you don't need the full path every time:
 
 ```bash
 alias dcp='docker compose -f docker/docker-compose.yml'
@@ -40,25 +38,20 @@ Run Compose from the **project root**.
 ## Common commands
 
 ```bash
-# Start both services
-dcp up -d
-
-# Start only PostgreSQL (required for app)
+# Start PostgreSQL (required for app)
 dcp up -d postgres
 
-# Start only Ollama (for RAG with local LLM)
-dcp up -d ollama
+# Or start all defined services (postgres only)
+dcp up -d
 
 # Status
 dcp ps
 
 # Logs
 dcp logs -f postgres
-dcp logs -f ollama
 
 # Stop
 dcp stop postgres
-dcp stop ollama
 
 # Or stop all:
 dcp down
@@ -72,20 +65,19 @@ dcp down -v
 ## Startup order for the app
 
 1. Start **PostgreSQL**: `dcp up -d postgres` (required for the app).
-2. Optionally start **Ollama**: `dcp up -d ollama` (if using RAG with Ollama and not OpenAI).
-3. Configure `.env` (e.g. `DATABASE_URL`, and for Ollama: leave `OPENAI_API_KEY` unset or set `RAG_LLM_PROVIDER=ollama`).
-4. Run the app: `npm run dev`.
+2. Configure `.env` (e.g. `DATABASE_URL`; for RAG, default is Ollama Cloud—set `OPENAI_API_KEY` only if you want OpenAI).
+3. Run the app: `npm run dev`.
 
 ---
 
 ## If "container name already in use"
 
-If a container named `swanytello-postgres` or `swanytello-ollama` already exists from another Compose project:
+If a container named `swanytello-postgres` already exists from another Compose project:
 
 ```bash
-docker stop swanytello-postgres swanytello-ollama
-docker rm swanytello-postgres swanytello-ollama
-dcp up -d
+docker stop swanytello-postgres
+docker rm swanytello-postgres
+dcp up -d postgres
 ```
 
 Data in Docker volumes is kept unless you run `dcp down -v`.

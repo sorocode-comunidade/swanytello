@@ -58,7 +58,11 @@ tests/
 │   ├── testDb.ts              # Database test utilities
 │   └── buildTestApp.ts        # Fastify app for API tests (JWT + routes)
 ├── api/
-│   └── rag.test.ts            # RAG API endpoint tests (POST /api/rag/test)
+│   └── rag.test.ts            # RAG API endpoint tests (POST /api/rag/test, /api/rag/chat)
+├── rag/
+│   └── llms/
+│       ├── ollama-cloud.llm.test.ts  # Ollama Cloud LLM (getOllamaCloudChat, invoke)
+│       └── index.test.ts              # Provider selection (getRagProvider, getChatModel, default ollama-cloud)
 ├── utils/
 │   └── fileStorage.test.ts    # File storage helpers (paths, validation, save/delete)
 └── db_operations/
@@ -133,8 +137,14 @@ describe("My Tests", () => {
 - ✅ POST `/api/rag/test` returns 200 and stub body when authenticated (JWT)
 - ✅ POST `/api/rag/test` returns 401 when no `Authorization` header
 - ✅ POST `/api/rag/test` returns 401 when token is invalid
+- ✅ POST `/api/rag/chat` multipart message and validation
 
 API tests use `tests/helpers/buildTestApp.ts` to build a Fastify instance with JWT and protected routes, then `app.inject()` for requests. No database or running server required.
+
+### RAG LLM Tests (`tests/rag/llms/`)
+
+- ✅ **ollama-cloud.llm**: `getOllamaCloudChat()` returns object with `invoke`; `invoke(message)` calls client.chat with model and messages and returns `{ content }` from response (mocked `ollama` package).
+- ✅ **index**: `getRagProvider()` default (no env) returns `ollama-cloud`; respects `RAG_LLM_PROVIDER` and `OPENAI_API_KEY`. `getChatModel()` returns model with `invoke` when default.
 
 ### Utils (fileStorage)
 

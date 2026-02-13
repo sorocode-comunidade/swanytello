@@ -144,7 +144,6 @@ flowchart TB
     compose[docker-compose.yml]
     dockerignore[.dockerignore]
     postgres_docker[postgres_docker/]
-    ollama_docker[ollama_docker/]
   end
 
   subgraph tests_detail [tests/]
@@ -195,7 +194,7 @@ sequenceDiagram
 
 ## 4. RAG request flow (POST /api/rag/test or POST /api/rag/chat)
 
-When a client calls the RAG test endpoint (JSON) or the RAG chat endpoint (multipart, optional PDF), the request flows through the API into the chat chain and the configured LLM (Ollama or OpenAI via `getChatModel()`).
+When a client calls the RAG test endpoint (JSON) or the RAG chat endpoint (multipart, optional PDF), the request flows through the API into the chat chain and the configured LLM (Ollama Cloud default or OpenAI via `getChatModel()`).
 
 ```mermaid
 sequenceDiagram
@@ -204,7 +203,7 @@ sequenceDiagram
   participant Controller as rag.controller
   participant Service as rag.service
   participant Chain as chat.chain
-  participant LLM as llms (Ollama/OpenAI)
+  participant LLM as llms (Ollama Cloud / OpenAI)
 
   Client->>Route: POST /api/rag/test or /api/rag/chat (message [+ PDF])
   Route->>Controller: testRag(body) or chatRag(payload, userId)
@@ -259,7 +258,7 @@ sequenceDiagram
   Server->>DBPing: displayDatabaseStatus()
   DBPing->>DBPing: checkDatabaseStatus()
   Server->>RAGPing: displayRagStatus()
-  RAGPing->>RAGPing: checkRagStatus() (Ollama or OpenAI)
+  RAGPing->>RAGPing: checkRagStatus() (Ollama Cloud / OpenAI)
   Server->>Server: Register routes, listen
   Server->>ETL: startEtlScheduler()
   ETL->>ETL: run once (startup), then every 12h

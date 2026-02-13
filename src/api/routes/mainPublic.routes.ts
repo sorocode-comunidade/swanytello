@@ -11,18 +11,13 @@ export default async function mainPublicRoutes(
     });
   });
 
-  /** RAG/LLM health: verify configured provider (Ollama or OpenAI) is reachable. No auth required. For Ollama, includes container status so you know in advance if Docker is running. */
+  /** RAG/LLM health: verify configured provider (Ollama Cloud or OpenAI) is reachable. No auth required. */
   fastifyInstance.get("/rag/health", async (_request, reply) => {
     const status = await checkRagStatus();
-    const payload =
-      status.provider === "ollama" && status.containerRunning !== undefined
-        ? { containerRunning: status.containerRunning }
-        : {};
     if (status.connected) {
       return reply.send({
         status: "ok",
         provider: status.provider,
-        ...payload,
         timestamp: new Date().toISOString(),
       });
     }
@@ -30,7 +25,6 @@ export default async function mainPublicRoutes(
       statusCode: 503,
       status: "unavailable",
       provider: status.provider,
-      ...payload,
       message: status.error ?? "RAG/LLM unreachable",
       timestamp: new Date().toISOString(),
     });

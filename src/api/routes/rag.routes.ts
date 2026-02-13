@@ -16,14 +16,11 @@ const PDF_MIME = "application/pdf";
 const PDF_FIELD = "pdf";
 const MESSAGE_FIELD = "message";
 
-/** Returns a user-friendly message for LLM/network failures (Ollama down, OpenAI unreachable, etc.) */
+/** Returns a user-friendly message for LLM/network failures (Ollama Cloud down, OpenAI unreachable, etc.) */
 function getLLMErrorMessage(error: unknown): string {
   const msg = error instanceof Error ? error.message : String(error);
   const cause = error instanceof Error && error.cause instanceof Error ? error.cause.message : "";
   const combined = `${msg} ${cause}`.toLowerCase();
-  if (combined.includes("econnrefused") && combined.includes("11434")) {
-    return "Ollama is not running. Start with: npm run docker:up:ollama (or docker compose -f docker/docker-compose.yml up -d ollama). Or set OPENAI_API_KEY to use OpenAI.";
-  }
   // Key rejected by OpenAI (401 / invalid / expired)
   if (
     combined.includes("401") ||
@@ -42,7 +39,7 @@ function getLLMErrorMessage(error: unknown): string {
     return "OpenAI rate limit exceeded. Wait a moment and retry, or check your usage at platform.openai.com.";
   }
   if (combined.includes("fetch failed") || combined.includes("econnrefused") || combined.includes("network")) {
-    return "LLM service is unreachable. Check that your configured provider (Ollama or OpenAI) is running and reachable. Call GET /api/rag/health to verify.";
+    return "LLM service is unreachable. Check that your configured provider (Ollama Cloud or OpenAI) is running and reachable. Call GET /api/rag/health to verify.";
   }
   if (combined.includes("model") && (combined.includes("not found") || combined.includes("does not exist") || combined.includes("invalid"))) {
     return "OpenAI model not available. Set OPENAI_MODEL in .env to a model your account can use (e.g. gpt-4o-mini, gpt-4o). Check platform.openai.com.";

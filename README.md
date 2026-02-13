@@ -215,12 +215,7 @@ sequenceDiagram
    ```
    Wait for PostgreSQL to be ready (should show "healthy").
 
-   **Optional – RAG with local LLM (Ollama):** If you want to use Ollama instead of OpenAI for RAG, start the Ollama container and pull a model:
-   ```bash
-   docker compose -f docker/docker-compose.yml up -d ollama
-   docker exec -it swanytello-ollama ollama run llama3.2
-   ```
-   See [docker/ollama_docker/README.md](docker/ollama_docker/README.md).
+   **RAG default is Ollama Cloud** (no local LLM to run—lightweight for all machines). Set `OPENAI_API_KEY` in `.env` only if you want OpenAI instead.
 
 2. Copy `.env.example` to `.env` and set `DATABASE_URL`:
    ```bash
@@ -249,11 +244,11 @@ sequenceDiagram
    🔍 Checking database connection...
    ✅ Database connection: Connected
    🔍 Checking RAG/LLM connection...
-   ✅ RAG (OpenAI): API key valid and reachable   (or: RAG (Ollama): Connected)
+   ✅ RAG (Ollama Cloud): API reachable   (or OpenAI depending on .env)
    🚀 Server listening at http://0.0.0.0:3000
    [ETL] Done: extracted=… transformed=… created=… skipped=…
    ```
-   If the database or RAG is not connected, you'll see a warning. For RAG, set `OPENAI_API_KEY` in `.env` to use OpenAI, or start Ollama for local LLM. Call **GET /api/rag/health** to verify RAG status.
+   **Default RAG LLM is Ollama Cloud.** Override in `.env` by setting `OPENAI_API_KEY` to use OpenAI. Call **GET /api/rag/health** to verify RAG status.
 
 ### Option 2: Local PostgreSQL
 
@@ -290,23 +285,13 @@ docker compose -f docker/docker-compose.yml ps
 docker compose -f docker/docker-compose.yml up -d postgres
 # Or with alias: dcp up -d postgres
 
-# Start Ollama (optional; for RAG with local LLM)
-docker compose -f docker/docker-compose.yml up -d ollama
-# Or with alias: dcp up -d ollama
-
-# Start both
-docker compose -f docker/docker-compose.yml up -d
-# Or: dcp up -d
-
 # Stop services
 docker compose -f docker/docker-compose.yml stop postgres
-docker compose -f docker/docker-compose.yml stop ollama
-# Or: dcp stop postgres; dcp stop ollama
+# Or: dcp stop postgres
 
 # View logs
 docker compose -f docker/docker-compose.yml logs -f postgres
-docker compose -f docker/docker-compose.yml logs -f ollama
-# Or with alias: dcp logs -f postgres; dcp logs -f ollama
+# Or with alias: dcp logs -f postgres
 
 # Get PostgreSQL connection information
 # For .env file (Prisma format):
@@ -353,9 +338,8 @@ source ~/.bashrc
 | `npm run test:watch` | Run tests in watch mode |
 | `npm run test:coverage` | Run tests with coverage report |
 | `npm run dev-token` | Print a JWT for Postman when AUTH_STATUS=on |
-| `npm run docker:up` | Start PostgreSQL and Ollama containers |
+| `npm run docker:up` | Start PostgreSQL container |
 | `npm run docker:up:postgres` | Start PostgreSQL only |
-| `npm run docker:up:ollama` | Start Ollama only (RAG local LLM) |
 | `npm run docker:down` | Stop and remove Docker containers |
 | `npm run docker:ps` | Show Docker Compose service status |
 
@@ -381,10 +365,9 @@ See [Tests Documentation](tests/README.md) for detailed information on writing a
 ## Project structure
 
 ```
-├── docker/           # Docker configuration (PostgreSQL + Ollama)
+├── docker/           # Docker configuration (PostgreSQL)
 │   ├── docker-compose.yml
 │   ├── postgres_docker/   # PostgreSQL service docs
-│   ├── ollama_docker/     # Ollama (RAG LLM) service docs
 │   └── .dockerignore
 ├── guardrails/       # Guidelines for AI dev agents (e.g. Cursor); RAG guardrails elsewhere
 ├── prisma/           # Schema, migrations
@@ -425,7 +408,7 @@ See [Tests Documentation](tests/README.md) for detailed information on writing a
 - **[ETL](src/etl/README.md)** – Extract, Transform, Load operations. Why web scraping is the only way to retrieve internet data.
 - **[API](src/api/README.md)** – REST API (Fastify); routes, controllers, services, schemas. Tool functions for RAG.
 - **[RAG](src/rag/README.md)** – RAG logic using LangChain. Tool-based database access pattern.
-- **[RAG (docs)](docs/rag.md)** – RAG usage (GET `/api/rag/health`, POST `/api/rag/test`, POST `/api/rag/chat`), request flow diagram, and how to change the LLM (Ollama/OpenAI via .env).
+- **[RAG (docs)](docs/rag.md)** – RAG usage (GET `/api/rag/health`, POST `/api/rag/test`, POST `/api/rag/chat`), request flow diagram, and how to change the LLM (Ollama Cloud / OpenAI via .env).
 - **[API endpoints](docs/API/README.md)** – Full list of endpoints with per-route docs (health, RAG health, RAG chat, user CRUD).
 - **[Channels](src/channels/README.md)** – WhatsApp and Discord communication implementations.
 

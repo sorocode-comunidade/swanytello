@@ -101,10 +101,10 @@ Swanytello is a **monolithic application** that combines multiple communication 
 **Purpose**: Retrieval-Augmented Generation logic using LangChain (tools, chains, llms). Consumed by the API and by channels when a user message needs an AI reply.
 
 **Current implementation**:
-- **LLM**: Ollama or OpenAI via `src/rag/llms/` (`ollama.llm.ts`, `openai.llm.ts`). Provider is selected by `RAG_LLM_PROVIDER` or, if unset, by presence of `OPENAI_API_KEY` (then OpenAI); otherwise Ollama. Env is loaded at startup from `.env` (see [RAG documentation](../rag.md)).
+- **LLM**: Ollama Cloud (default) or OpenAI via `src/rag/llms/` (`ollama-cloud.llm.ts`, `openai.llm.ts`). Provider is selected by `RAG_LLM_PROVIDER` or, if unset, by presence of `OPENAI_API_KEY` (then OpenAI); otherwise Ollama Cloud. Env is loaded at startup from `.env` (see [RAG documentation](../rag.md)).
 - **Chain**: `src/rag/chains/chat.chain.ts` — `runChatChain(message, attachment?)` invokes the configured chat model and returns the reply text. Optional `attachment` (e.g. PDF) is reserved for future tools (e.g. tag extraction).
 - **API**:
-  - **GET `/api/rag/health`** (public) — Checks that the configured LLM (Ollama or OpenAI) is reachable. Implemented in `src/utils/ragPing.ts`; same check runs at startup (`displayRagStatus()`).
+  - **GET `/api/rag/health`** (public) — Checks that the configured LLM (Ollama Cloud or OpenAI) is reachable. Implemented in `src/utils/ragPing.ts`; same check runs at startup (`displayRagStatus()`).
   - **POST `/api/rag/test`** (JWT) — JSON body `{ message }`; returns `{ reply, timestamp }`.
   - **POST `/api/rag/chat`** (JWT) — Multipart: `message` (required), `pdf` (optional). For message + PDF flows; returns `{ reply, timestamp }`.
 - **Startup**: `server.ts` loads `.env` then runs `displayDatabaseStatus()` and `displayRagStatus()` before registering routes. See [Project structure (visual)](project-structure.md) for the startup sequence diagram.
