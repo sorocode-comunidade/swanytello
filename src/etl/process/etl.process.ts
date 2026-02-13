@@ -6,6 +6,7 @@
 import { findLinkedInJobs } from "../extract/index.js";
 import { transformLinkedInJobsToOpenPositions } from "../transform/index.js";
 import { loadOpenPositions } from "../load/index.js";
+import { setLastRetrieved } from "../lastRetrievedStore.js";
 
 const ETL_INTERVAL_MS = 12 * 60 * 60 * 1000; // 12 hours
 
@@ -52,6 +53,15 @@ export async function runLinkedInEtlProcess(): Promise<EtlProcessResult> {
     const loadResult = await loadOpenPositions(transformed);
     result.created = loadResult.created;
     result.skipped = loadResult.skipped;
+
+    setLastRetrieved({
+      retrievedAt: new Date().toISOString(),
+      extracted: result.extracted,
+      transformed: result.transformed,
+      created: result.created,
+      skipped: result.skipped,
+      positions: transformed,
+    });
 
     return result;
   } catch (err) {

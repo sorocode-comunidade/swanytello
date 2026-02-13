@@ -11,6 +11,7 @@ dist/
 *.swo
 uploads/
 generated/
+auth_info_baileys/
 docker/.env
 coverage/
 .nyc_output/

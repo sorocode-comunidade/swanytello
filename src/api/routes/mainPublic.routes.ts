@@ -1,9 +1,13 @@
 import type { FastifyInstance } from "fastify";
 import { checkRagStatus } from "../../utils/ragPing.js";
+import openPositionsRoutes from "./openPositions.routes.js";
+import whatsappRoutes from "./whatsapp.routes.js";
 
 export default async function mainPublicRoutes(
   fastifyInstance: FastifyInstance
 ) {
+  fastifyInstance.register(openPositionsRoutes);
+  fastifyInstance.register(whatsappRoutes);
   fastifyInstance.get("/health", async (_request, reply) => {
     return reply.send({
       status: "ok",

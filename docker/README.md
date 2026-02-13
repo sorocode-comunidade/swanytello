@@ -1,6 +1,6 @@
 # Docker Configuration
 
-This folder contains Docker-related configuration for the Swanytello project. The Compose file defines **PostgreSQL** only. RAG uses **Ollama Cloud** (default) or **OpenAI**—no local Ollama container (too heavy for many machines).
+This folder contains Docker-related configuration for the Swanytello project. The Compose file defines **PostgreSQL** only.
 
 ---
 
@@ -65,7 +65,7 @@ dcp down -v
 ## Startup order for the app
 
 1. Start **PostgreSQL**: `dcp up -d postgres` (required for the app).
-2. Configure `.env` (e.g. `DATABASE_URL`; for RAG, default is Ollama Cloud—set `OPENAI_API_KEY` only if you want OpenAI).
+2. Configure `.env` (e.g. `DATABASE_URL`).
 3. Run the app: `npm run dev`.
 
 ---

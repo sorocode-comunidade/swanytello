@@ -18,6 +18,8 @@ One file per endpoint (or per resource). Each document includes:
 | RAG health | [rag-health.md](rag-health.md) | `GET /api/rag/health` – RAG/LLM reachability (Ollama or OpenAI) |
 | RAG test | [rag-test.md](rag-test.md) | `POST /api/rag/test` – Chat with JSON message only |
 | RAG chat | [rag-chat.md](rag-chat.md) | `POST /api/rag/chat` – Chat with optional PDF attachment |
+| Open positions (last retrieved) | [open-positions-last-retrieved.md](open-positions-last-retrieved.md) | `GET /api/open-positions/last-retrieved` – Last ETL batch of open positions |
+| WhatsApp send open positions | [whatsapp-send-open-positions.md](whatsapp-send-open-positions.md) | `POST /api/whatsapp/send-open-positions` – Send last positions to WhatsApp (Baileys) |
 | User | [user.md](user.md) | `GET/POST /api/user`, `PUT/DELETE /api/user/:id` – User CRUD |
 
 ---

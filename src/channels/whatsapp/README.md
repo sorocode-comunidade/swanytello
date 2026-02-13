@@ -1,33 +1,40 @@
 # WhatsApp channel
 
-This folder implements **WhatsApp** communication: receiving and sending messages, and optional webhooks for incoming events.
+This folder implements **WhatsApp** communication using [Baileys](https://github.com/WhiskeySockets/Baileys) (socket-based WhatsApp Web API). It sends the last retrieved open positions to a WhatsApp number or group; business logic and data come from the ETL last-retrieved store and the API.
 
 ## Role
 
-- Receive WhatsApp messages (e.g. via webhook or polling).
-- Send replies or proactive messages.
-- Optional: media, templates, or Business API features.
+- **Send** – Proactive messages (e.g. open positions list) to a JID (phone number or group).
+- **Session** – Baileys stores auth state in a directory; first run shows a QR code in the terminal to link WhatsApp.
+- **No direct DB** – Uses `getLastRetrieved()` from the ETL store and the REST API for data; does not access `db_operations` directly.
 
-## Suggested stack
+## Files (`.whatsapp` nomenclature)
 
-- **WhatsApp Business API (Cloud)** – Official API; use an HTTP client and webhook endpoint to receive events.
-- **Baileys** – Unofficial library for a session-based connection.
+All WhatsApp-specific modules use the `.whatsapp.ts` suffix so they are easy to spot and associate with this channel:
 
-Choose one based on product needs (official vs. unofficial, multi-device, etc.).
+| File | Purpose |
+|------|---------|
+| **config.whatsapp.ts** | Loads env: `WHATSAPP_AUTH_DIR`, `WHATSAPP_TARGET_JID`, `WHATSAPP_PRINT_QR`. |
+| **client.whatsapp.ts** | Baileys socket: `useMultiFileAuthState`, connect, reconnect, `sendTextMessage(jid, text)`. |
+| **sendOpenPositions.whatsapp.ts** | Reads last retrieved from ETL store, formats as text, sends via client to a JID. |
 
-## Environment variables (examples)
+The API route that calls this channel is in `src/api/routes/whatsapp.routes.ts` (POST `/api/whatsapp/send-open-positions`).
 
-- `WHATSAPP_TOKEN` – API or session token.
-- `WHATSAPP_PHONE_NUMBER_ID` – Business API phone number ID (if using Cloud API).
-- `WHATSAPP_WEBHOOK_VERIFY_TOKEN` – Token for webhook verification.
+## Environment variables
 
-## Suggested internal structure
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `WHATSAPP_AUTH_DIR` | Directory where Baileys stores auth state (creds + keys). | `auth_info_baileys` |
+| `WHATSAPP_TARGET_JID` | Default JID when request body does not provide `to`. | (empty) |
+| `WHATSAPP_PRINT_QR` | If not `"false"`, print QR code in terminal on first connect. | `true` |
 
-Add when implementing:
+## Flow
 
-- **client/** – WhatsApp client/session setup and connection.
-- **handlers/** – Logic for incoming messages (e.g. forward to RAG in `src/rag`, call `src/api`).
-- **webhooks/** – HTTP route(s) for webhook verification and incoming payloads.
-- **config.ts** – Load and expose env/config for this channel.
+1. **First run** – Start the server; when `POST /api/whatsapp/send-open-positions` is called (or any send), the client connects. If no session exists, a QR code is printed; scan with WhatsApp to link.
+2. **Send open positions** – Client uses `getLastRetrieved()` from the ETL store, formats positions as text, and calls `sendTextMessage(jid, text)`.
+3. **Reconnect** – On disconnect (except logout), the client reconnects automatically.
 
-Implementation will follow once the stack (Business API vs. Baileys) is chosen.
+## Docs
+
+- [POST /api/whatsapp/send-open-positions](../../../docs/API/endpoints/whatsapp-send-open-positions.md) – Request/response, env vars, examples.
+- [Channels README](../README.md) – How channels fit in the architecture.

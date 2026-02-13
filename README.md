@@ -410,6 +410,7 @@ See [Tests Documentation](tests/README.md) for detailed information on writing a
 - **[RAG](src/rag/README.md)** – RAG logic using LangChain. Tool-based database access pattern.
 - **[RAG (docs)](docs/rag.md)** – RAG usage (GET `/api/rag/health`, POST `/api/rag/test`, POST `/api/rag/chat`), request flow diagram, and how to change the LLM (Ollama Cloud / OpenAI via .env).
 - **[API endpoints](docs/API/README.md)** – Full list of endpoints with per-route docs (health, RAG health, RAG chat, user CRUD).
+- **Open positions & WhatsApp** – [GET /api/open-positions/last-retrieved](docs/API/endpoints/open-positions-last-retrieved.md) returns the last ETL batch of open positions. [POST /api/whatsapp/send-open-positions](docs/API/endpoints/whatsapp-send-open-positions.md) sends that batch to WhatsApp via Baileys; set `WHATSAPP_AUTH_DIR`, optionally `WHATSAPP_TARGET_JID`. First run shows a QR in the terminal to link the app. WhatsApp channel code lives under `src/channels/whatsapp/` (files use `.whatsapp.ts` suffix).
 - **[Channels](src/channels/README.md)** – WhatsApp and Discord communication implementations.
 
 ### Development

@@ -1,5 +1,5 @@
 # Fixed project name so Compose always finds the same container from any directory
-# Services: postgres (database). RAG uses Ollama Cloud (default) or OpenAI; no local Ollama container.
+# Services: postgres (database).
 name: swanytello
 
 services:

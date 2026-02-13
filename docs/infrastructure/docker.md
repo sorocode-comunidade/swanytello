@@ -8,7 +8,7 @@ This document explains how to use Docker Compose with Swanytello.
 
 The project includes Docker configuration in the `docker/` folder:
 
-- **`docker/docker-compose.yml`** – Defines **PostgreSQL** (database). RAG uses **Ollama Cloud** (default) or **OpenAI**—no local Ollama container.
+- **`docker/docker-compose.yml`** – Defines **PostgreSQL** (database).
 - **`docker/postgres_docker/`** – PostgreSQL-specific docs. See [postgres_docker/README.md](../../docker/postgres_docker/README.md).
 - **`docker/.dockerignore`** – Docker build ignore patterns.
 

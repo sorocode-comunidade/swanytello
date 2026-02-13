@@ -35,6 +35,8 @@ See **[endpoints/README.md](endpoints/README.md)** for the full list and links t
 | GET | [/api/rag/health](endpoints/rag-health.md) | No | RAG/LLM reachability (Ollama or OpenAI) |
 | POST | [/api/rag/test](endpoints/rag-test.md) | Yes | RAG chat (JSON body, message only) |
 | POST | [/api/rag/chat](endpoints/rag-chat.md) | Yes | RAG chat with optional PDF attachment |
+| GET | [/api/open-positions/last-retrieved](endpoints/open-positions-last-retrieved.md) | No | Last ETL batch of open positions |
+| POST | [/api/whatsapp/send-open-positions](endpoints/whatsapp-send-open-positions.md) | No | Send last positions to WhatsApp (Baileys) |
 | GET | [/api/user](endpoints/user.md) | Yes | List users or get user by id |
 | POST | [/api/user](endpoints/user.md) | Yes | Create user |
 | PUT | [/api/user/:id](endpoints/user.md) | Yes | Update user |
