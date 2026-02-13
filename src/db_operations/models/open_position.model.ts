@@ -169,6 +169,30 @@ export async function getAllOpenPositions(query: QueryOpenPositionInput): Promis
 }
 
 /**
+ * Get open positions created in the last N hours (for WhatsApp/testing).
+ * @param hours - Number of hours to look back (e.g. 12 for last 12h)
+ * @returns Open positions created since (now - hours), newest first
+ */
+export async function getOpenPositionsCreatedInLastHours(
+  hours: number
+): Promise<OpenPosition[]> {
+  const since = new Date(Date.now() - hours * 60 * 60 * 1000);
+  const data = await prisma.openPosition.findMany({
+    where: { createdAt: { gte: since } },
+    orderBy: { createdAt: "desc" },
+  });
+  return data.map((item) => ({
+    id: item.id,
+    title: item.title,
+    link: item.link,
+    companyName: item.companyName,
+    region: item.region,
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt,
+  }));
+}
+
+/**
  * Update an open position by ID
  * @param id - UUID of the open position
  * @param data - Update data (validated with updateOpenPositionSchema)

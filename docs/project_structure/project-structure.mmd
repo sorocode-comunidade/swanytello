@@ -203,3 +203,22 @@ sequenceDiagram
   Server->>Server: Register routes, listen
   Server->>ETL: startEtlScheduler()
   ETL->>ETL: run once (startup), then every 12h
+
+%% --- 6. WhatsApp send last 12h (POST /api/whatsapp/send-open-positions-last-12h) ---
+sequenceDiagram
+  participant Client
+  participant Route as whatsapp.routes
+  participant DB as db_operations
+  participant Channel as channels/whatsapp
+  participant Baileys as Baileys socket
+
+  Client->>Route: POST /api/whatsapp/send-open-positions-last-12h (body.to optional)
+  Route->>Route: toJid(body.to ?? WHATSAPP_TARGET_JID)
+  Route->>DB: getOpenPositionsCreatedInLastHours(12)
+  DB->>Route: OpenPosition[]
+  Route->>Channel: sendPositionsListToWhatsApp(jid, positions, "Last 12h open positions (DB)")
+  Channel->>Channel: format list + header
+  Channel->>Baileys: sendTextMessage(jid, text)
+  Baileys->>Channel: ok
+  Channel->>Route: { sent: true, message }
+  Route->>Client: 200 { ok, message }

@@ -1,6 +1,7 @@
 /**
  * WhatsApp client using Baileys (socket-based WhatsApp Web API).
  * Connects with QR or saved session; exposes sendMessage for outbound messages.
+ * QR is shown via connection.update (printQRInTerminal is deprecated in Baileys).
  * @module channels/whatsapp/client.whatsapp
  */
 
@@ -10,7 +11,13 @@ import makeWASocket, {
   type WASocket,
 } from "@whiskeysockets/baileys";
 import { Boom } from "@hapi/boom";
+import { createRequire } from "node:module";
 import { whatsappConfig } from "./config.whatsapp.js";
+
+// Baileys deprecated printQRInTerminal; we listen to connection.update and render the QR ourselves.
+// qrcode-terminal turns the QR string from Baileys into a scannable ASCII QR in the terminal (no browser needed).
+const require = createRequire(import.meta.url);
+const qrcodeTerminal = require("qrcode-terminal") as { generate: (input: string, opts?: { small?: boolean }) => void };
 
 let sock: WASocket | null = null;
 let connecting = false;
@@ -37,10 +44,13 @@ async function ensureConnected(): Promise<WASocket> {
 
     const socket = makeWASocket({
       auth: state,
-      printQRInTerminal: whatsappConfig.printQRInTerminal,
     });
 
     socket.ev.on("connection.update", (update) => {
+      if (update.qr != null && whatsappConfig.printQRInTerminal) {
+        console.log("\n[WhatsApp] Scan the QR code below with your phone:\n");
+        qrcodeTerminal.generate(update.qr, { small: true });
+      }
       const { connection, lastDisconnect } = update;
       if (connection === "close") {
         const statusCode = (lastDisconnect?.error as Boom)?.output?.statusCode;

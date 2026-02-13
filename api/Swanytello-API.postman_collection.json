@@ -1,0 +1,183 @@
+{
+  "info": {
+    "name": "Swanytello API",
+    "description": "REST API for Swanytello. Base URL: `{{base_url}}` (default http://localhost:3000).\n\n**Protected routes** (User, RAG test/chat) require `Authorization: Bearer {{token}}`. With AUTH_STATUS=OFF they may be bypassed; with AUTH_STATUS=ON use the dev-token script or login to get a JWT.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3000" },
+    { "key": "token", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Public",
+      "description": "No auth required.",
+      "item": [
+        {
+          "name": "Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/health", "host": ["{{base_url}}"], "path": ["api", "health"] },
+            "description": "Server liveness/readiness."
+          }
+        },
+        {
+          "name": "RAG Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/rag/health", "host": ["{{base_url}}"], "path": ["api", "rag", "health"] },
+            "description": "RAG/LLM reachability (Ollama Cloud or OpenAI)."
+          }
+        },
+        {
+          "name": "Open Positions - Last Retrieved",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/open-positions/last-retrieved", "host": ["{{base_url}}"], "path": ["api", "open-positions", "last-retrieved"] },
+            "description": "Last ETL batch of open positions (metadata + positions array). 404 if no run yet."
+          }
+        },
+        {
+          "name": "WhatsApp - Send Open Positions (ETL snapshot)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"to\": \"5511999999999\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/whatsapp/send-open-positions", "host": ["{{base_url}}"], "path": ["api", "whatsapp", "send-open-positions"] },
+            "description": "Sends last retrieved (ETL snapshot) to WhatsApp. Body.to optional if WHATSAPP_TARGET_JID is set."
+          }
+        },
+        {
+          "name": "WhatsApp - Send Open Positions Last 12h (DB)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"to\": \"5511999999999\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/whatsapp/send-open-positions-last-12h", "host": ["{{base_url}}"], "path": ["api", "whatsapp", "send-open-positions-last-12h"] },
+            "description": "Fetches last 12h positions from DB and sends to WhatsApp. For testing."
+          }
+        }
+      ]
+    },
+    {
+      "name": "RAG",
+      "description": "Requires Authorization: Bearer {{token}} when AUTH_STATUS=ON.",
+      "item": [
+        {
+          "name": "RAG Test",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Hello\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/rag/test", "host": ["{{base_url}}"], "path": ["api", "rag", "test"] },
+            "description": "RAG chat with JSON body (message only)."
+          }
+        },
+        {
+          "name": "RAG Chat",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "message", "value": "Hello", "type": "text", "description": "Required" },
+                { "key": "pdf", "type": "file", "src": [], "description": "Optional PDF attachment" }
+              ]
+            },
+            "url": { "raw": "{{base_url}}/api/rag/chat", "host": ["{{base_url}}"], "path": ["api", "rag", "chat"] },
+            "description": "RAG chat with multipart/form-data: message (required), pdf (optional)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "description": "CRUD. Requires Authorization: Bearer {{token}} when AUTH_STATUS=ON.",
+      "item": [
+        {
+          "name": "Get Users (or by id)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/user?id=",
+              "host": ["{{base_url}}"],
+              "path": ["api", "user"],
+              "query": [{ "key": "id", "value": "", "description": "Optional: user UUID" }]
+            },
+            "description": "GET all users or one user by id (query param)."
+          }
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"newuser\",\n  \"email\": \"newuser@example.com\",\n  \"password\": \"secret\",\n  \"name\": \"New User\",\n  \"role\": \"USER\",\n  \"active\": true\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/user", "host": ["{{base_url}}"], "path": ["api", "user"] },
+            "description": "Create user. role optional (default USER), active optional (default true)."
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"updated\",\n  \"name\": \"Updated Name\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/user/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "user", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            },
+            "description": "Update user by id. All body fields optional."
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/user/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "user", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            },
+            "description": "Delete user by id."
+          }
+        }
+      ]
+    }
+  ]
+}

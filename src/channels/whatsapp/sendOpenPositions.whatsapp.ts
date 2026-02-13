@@ -9,8 +9,15 @@ import { sendTextMessage } from "./client.whatsapp.js";
 
 const MAX_MESSAGE_LENGTH = 65000;
 
+export type PositionForMessage = {
+  title: string;
+  companyName: string;
+  region: string;
+  link: string;
+};
+
 function formatPositionsAsText(
-  positions: Array<{ title: string; companyName: string; region: string; link: string }>,
+  positions: PositionForMessage[],
   retrievedAt: string,
   created: number,
   skipped: number
@@ -22,14 +29,33 @@ function formatPositionsAsText(
     ``,
   ].join("\n");
 
-  const lines = positions.map((p, i) => {
-    return `${i + 1}. *${p.title}* @ ${p.companyName}\n   ${p.region}\n   ${p.link}`;
-  });
-
-  const body = lines.join("\n\n");
+  const body = formatPositionsBody(positions);
   const text = header + body;
   if (text.length <= MAX_MESSAGE_LENGTH) return text;
 
+  return header + body.slice(0, MAX_MESSAGE_LENGTH - header.length - 50) + "\n\n... (truncated)";
+}
+
+function formatPositionsBody(positions: PositionForMessage[]): string {
+  const lines = positions.map((p, i) => {
+    return `${i + 1}. *${p.title}* @ ${p.companyName}\n   ${p.region}\n   ${p.link}`;
+  });
+  return lines.join("\n\n");
+}
+
+function formatPositionsListWithLabel(
+  positions: PositionForMessage[],
+  label: string,
+  count: number
+): string {
+  const header = [
+    `📋 *${label}*`,
+    `Total: ${count} position(s) from DB`,
+    ``,
+  ].join("\n");
+  const body = formatPositionsBody(positions);
+  const text = header + body;
+  if (text.length <= MAX_MESSAGE_LENGTH) return text;
   return header + body.slice(0, MAX_MESSAGE_LENGTH - header.length - 50) + "\n\n... (truncated)";
 }
 
@@ -65,6 +91,35 @@ export async function sendOpenPositionsToWhatsApp(
     );
     await sendTextMessage(jid, text);
     return { sent: true, message: `Sent ${snapshot.positions.length} positions to ${jid}` };
+  } catch (err) {
+    const error = err instanceof Error ? err.message : String(err);
+    return { sent: false, error };
+  }
+}
+
+/**
+ * Sends a given list of positions (e.g. from DB) to the given WhatsApp JID.
+ * Used by the API for "last 12h" and other DB-backed sends.
+ *
+ * @param jid - WhatsApp ID (e.g. 5511999999999@s.whatsapp.net)
+ * @param positions - List of positions (title, link, companyName, region)
+ * @param label - Header label (e.g. "Last 12h open positions (DB)")
+ */
+export async function sendPositionsListToWhatsApp(
+  jid: string,
+  positions: PositionForMessage[],
+  label: string
+): Promise<SendOpenPositionsResult> {
+  if (positions.length === 0) {
+    return {
+      sent: false,
+      message: "No positions to send.",
+    };
+  }
+  try {
+    const text = formatPositionsListWithLabel(positions, label, positions.length);
+    await sendTextMessage(jid, text);
+    return { sent: true, message: `Sent ${positions.length} positions to ${jid}` };
   } catch (err) {
     const error = err instanceof Error ? err.message : String(err);
     return { sent: false, error };

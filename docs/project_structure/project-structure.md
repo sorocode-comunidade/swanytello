@@ -263,3 +263,29 @@ sequenceDiagram
   Server->>ETL: startEtlScheduler()
   ETL->>ETL: run once (startup), then every 12h
 ```
+
+---
+
+## 7. WhatsApp send last 12h (POST /api/whatsapp/send-open-positions-last-12h)
+
+The API fetches open positions created in the last 12 hours from the database, then asks the WhatsApp channel to format and send them via Baileys. Used for testing the WhatsApp implementation.
+
+```mermaid
+sequenceDiagram
+  participant Client
+  participant Route as whatsapp.routes
+  participant DB as db_operations
+  participant Channel as channels/whatsapp
+  participant Baileys as Baileys socket
+
+  Client->>Route: POST /api/whatsapp/send-open-positions-last-12h (body.to optional)
+  Route->>Route: toJid(body.to ?? WHATSAPP_TARGET_JID)
+  Route->>DB: getOpenPositionsCreatedInLastHours(12)
+  DB->>Route: OpenPosition[]
+  Route->>Channel: sendPositionsListToWhatsApp(jid, positions, "Last 12h open positions (DB)")
+  Channel->>Channel: format list + header
+  Channel->>Baileys: sendTextMessage(jid, text)
+  Baileys->>Channel: ok
+  Channel->>Route: { sent: true, message }
+  Route->>Client: 200 { ok, message }
+```

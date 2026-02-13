@@ -10,7 +10,7 @@
 
 Sends the **last retrieved open positions** (same data as `GET /api/open-positions/last-retrieved`) to a WhatsApp number or group via the Baileys client. The message is formatted as a readable list (title, company, region, link) with a short header (retrieved time, created/skipped counts).
 
-The WhatsApp channel uses [Baileys](https://github.com/WhiskeySockets/Baileys) (socket-based WhatsApp Web API). On first use, the server prints a QR code in the terminal; scan it with WhatsApp to link the device. Session is stored in `WHATSAPP_AUTH_DIR` (default `auth_info_baileys/`).
+The WhatsApp channel uses [Baileys](https://github.com/WhiskeySockets/Baileys) (socket-based WhatsApp Web API). On first use, when no session exists, the server prints a QR code in the terminal (via the **qrcode-terminal** package and Baileys’ `connection.update` event); scan it with WhatsApp to link the device. Session is stored in `WHATSAPP_AUTH_DIR` (default `auth_info_baileys/`). See [WhatsApp channel README](../../../src/channels/whatsapp/README.md) for why we use qrcode-terminal and how QR display works.
 
 ---
 

@@ -36,11 +36,18 @@ See **[endpoints/README.md](endpoints/README.md)** for the full list and links t
 | POST | [/api/rag/test](endpoints/rag-test.md) | Yes | RAG chat (JSON body, message only) |
 | POST | [/api/rag/chat](endpoints/rag-chat.md) | Yes | RAG chat with optional PDF attachment |
 | GET | [/api/open-positions/last-retrieved](endpoints/open-positions-last-retrieved.md) | No | Last ETL batch of open positions |
-| POST | [/api/whatsapp/send-open-positions](endpoints/whatsapp-send-open-positions.md) | No | Send last positions to WhatsApp (Baileys) |
+| POST | [/api/whatsapp/send-open-positions](endpoints/whatsapp-send-open-positions.md) | No | Send last ETL snapshot to WhatsApp (Baileys) |
+| POST | [/api/whatsapp/send-open-positions-last-12h](endpoints/whatsapp-send-open-positions-last-12h.md) | No | Send last 12h open positions from DB to WhatsApp (testing) |
 | GET | [/api/user](endpoints/user.md) | Yes | List users or get user by id |
 | POST | [/api/user](endpoints/user.md) | Yes | Create user |
 | PUT | [/api/user/:id](endpoints/user.md) | Yes | Update user |
 | DELETE | [/api/user/:id](endpoints/user.md) | Yes | Delete user |
+
+---
+
+## Postman
+
+- **[api/Swanytello-API.postman_collection.json](../../api/Swanytello-API.postman_collection.json)** – Import this file in Postman to get all endpoints. See [api/README.md](../../api/README.md) for how to use and set `base_url` / `token`.
 
 ---
 

@@ -15,10 +15,16 @@ All WhatsApp-specific modules use the `.whatsapp.ts` suffix so they are easy to 
 | File | Purpose |
 |------|---------|
 | **config.whatsapp.ts** | Loads env: `WHATSAPP_AUTH_DIR`, `WHATSAPP_TARGET_JID`, `WHATSAPP_PRINT_QR`. |
-| **client.whatsapp.ts** | Baileys socket: `useMultiFileAuthState`, connect, reconnect, `sendTextMessage(jid, text)`. |
-| **sendOpenPositions.whatsapp.ts** | Reads last retrieved from ETL store, formats as text, sends via client to a JID. |
+| **client.whatsapp.ts** | Baileys socket: `useMultiFileAuthState`, connect, reconnect, `sendTextMessage(jid, text)`. Listens to `connection.update` and prints QR via **qrcode-terminal** when no session exists (see below). |
+| **sendOpenPositions.whatsapp.ts** | `sendOpenPositionsToWhatsApp(jid)` – last ETL snapshot; `sendPositionsListToWhatsApp(jid, positions, label)` – send any list (e.g. from DB). |
 
-The API route that calls this channel is in `src/api/routes/whatsapp.routes.ts` (POST `/api/whatsapp/send-open-positions`).
+API routes in `src/api/routes/whatsapp.routes.ts`:
+- **POST /api/whatsapp/send-open-positions** – Sends last retrieved (ETL snapshot) to WhatsApp.
+- **POST /api/whatsapp/send-open-positions-last-12h** – Fetches last 12h positions from DB, sends to WhatsApp (for testing).
+
+## QR code display and qrcode-terminal
+
+Baileys deprecated the built-in `printQRInTerminal` option. We no longer pass it to the socket. Instead, the client listens to the **connection.update** event; when Baileys sends a `qr` string (first link or re-auth), we render it in the terminal using the **qrcode-terminal** package. That way you still get a scannable QR in the terminal without using the deprecated option, and without opening a browser. Set `WHATSAPP_PRINT_QR=false` in the environment to disable printing the QR (e.g. if you handle it elsewhere).
 
 ## Environment variables
 
@@ -26,15 +32,17 @@ The API route that calls this channel is in `src/api/routes/whatsapp.routes.ts` 
 |----------|-------------|---------|
 | `WHATSAPP_AUTH_DIR` | Directory where Baileys stores auth state (creds + keys). | `auth_info_baileys` |
 | `WHATSAPP_TARGET_JID` | Default JID when request body does not provide `to`. | (empty) |
-| `WHATSAPP_PRINT_QR` | If not `"false"`, print QR code in terminal on first connect. | `true` |
+| `WHATSAPP_PRINT_QR` | If not `"false"`, print QR in terminal via qrcode-terminal when Baileys sends a QR in `connection.update`. | `true` |
 
 ## Flow
 
-1. **First run** – Start the server; when `POST /api/whatsapp/send-open-positions` is called (or any send), the client connects. If no session exists, a QR code is printed; scan with WhatsApp to link.
-2. **Send open positions** – Client uses `getLastRetrieved()` from the ETL store, formats positions as text, and calls `sendTextMessage(jid, text)`.
-3. **Reconnect** – On disconnect (except logout), the client reconnects automatically.
+1. **First run** – When any send endpoint is called, the client connects. If no session exists, a QR code is printed; scan with WhatsApp to link.
+2. **Send open positions (ETL snapshot)** – `sendOpenPositionsToWhatsApp(jid)` uses `getLastRetrieved()` from the ETL store, formats and sends.
+3. **Send last 12h (DB)** – API calls `getOpenPositionsCreatedInLastHours(12)`, then `sendPositionsListToWhatsApp(jid, positions, label)` to format and send (for testing).
+4. **Reconnect** – On disconnect (except logout), the client reconnects automatically.
 
 ## Docs
 
-- [POST /api/whatsapp/send-open-positions](../../../docs/API/endpoints/whatsapp-send-open-positions.md) – Request/response, env vars, examples.
+- [POST /api/whatsapp/send-open-positions](../../../docs/API/endpoints/whatsapp-send-open-positions.md) – Send last ETL snapshot.
+- [POST /api/whatsapp/send-open-positions-last-12h](../../../docs/API/endpoints/whatsapp-send-open-positions-last-12h.md) – Send last 12h from DB (testing).
 - [Channels README](../README.md) – How channels fit in the architecture.
