@@ -23,6 +23,7 @@ vi.mock("../../src/channels/whatsapp/config.whatsapp.js", () => ({
   whatsappConfig: {
     authDir: "auth_info_baileys",
     targetJid: "",
+    groupId: "",
     printQRInTerminal: true,
   },
 }));
@@ -57,6 +58,18 @@ describe("WhatsApp API", () => {
       const body = response.json();
       expect(body).toHaveProperty("error", "Bad Request");
       expect(body.message).toContain("Missing target");
+      expect(mockSendOpenPositionsToWhatsApp).not.toHaveBeenCalled();
+    });
+
+    it("returns 400 when body.to is empty string and WHATSAPP_GROUP_ID is unset", async () => {
+      const response = await app.inject({
+        method: "POST",
+        url: "/api/whatsapp/send-open-positions",
+        headers: { "content-type": "application/json" },
+        payload: { to: "" },
+      });
+      expect(response.statusCode).toBe(400);
+      expect(response.json().message).toContain("WHATSAPP_GROUP_ID");
       expect(mockSendOpenPositionsToWhatsApp).not.toHaveBeenCalled();
     });
 

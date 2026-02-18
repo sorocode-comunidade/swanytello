@@ -33,6 +33,11 @@ curl -s -X POST http://localhost:3000/api/whatsapp/send-open-positions \
   -H "Content-Type: application/json" \
   -d '{"to": "5511999999999"}'
 
+# Send to group (set WHATSAPP_GROUP_ID in .env; body.to empty string)
+curl -s -X POST http://localhost:3000/api/whatsapp/send-open-positions \
+  -H "Content-Type: application/json" \
+  -d '{"to": ""}'
+
 # Or use WHATSAPP_TARGET_JID (empty body)
 curl -s -X POST http://localhost:3000/api/whatsapp/send-open-positions \
   -H "Content-Type: application/json" \
@@ -44,6 +49,11 @@ curl -s -X POST http://localhost:3000/api/whatsapp/send-open-positions \
 curl -s -X POST http://localhost:3000/api/whatsapp/send-open-positions-last-12h \
   -H "Content-Type: application/json" \
   -d '{"to": "5511999999999"}'
+
+# Send to group (body.to empty string → WHATSAPP_GROUP_ID)
+curl -s -X POST http://localhost:3000/api/whatsapp/send-open-positions-last-12h \
+  -H "Content-Type: application/json" \
+  -d '{"to": ""}'
 ```
 
 ---

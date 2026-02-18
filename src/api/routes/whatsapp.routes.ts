@@ -10,6 +10,12 @@ function toJid(phone: string): string {
   return digits.length ? `${digits}@s.whatsapp.net` : "";
 }
 
+/** Resolve target: empty string → WHATSAPP_GROUP_ID; missing → WHATSAPP_TARGET_JID; else body.to. */
+function resolveTo(bodyTo: string | undefined): string {
+  if (bodyTo === "") return whatsappConfig.groupId;
+  return bodyTo ?? whatsappConfig.targetJid;
+}
+
 export default async function whatsappRoutes(
   fastifyInstance: FastifyInstance
 ) {
@@ -21,14 +27,14 @@ export default async function whatsappRoutes(
   fastifyInstance.post<{
     Body?: { to?: string };
   }>("/whatsapp/send-open-positions", async (request, reply) => {
-    const to = request.body?.to ?? whatsappConfig.targetJid;
+    const to = resolveTo(request.body?.to);
     const jid = to ? toJid(to) : "";
     if (!jid) {
       return reply.code(400).send({
         statusCode: 400,
         error: "Bad Request",
         message:
-          "Missing target. Provide body.to (e.g. 5511999999999) or set WHATSAPP_TARGET_JID.",
+          "Missing target. Provide body.to (e.g. 5511999999999), or body.to=\"\" with WHATSAPP_GROUP_ID, or set WHATSAPP_TARGET_JID.",
       });
     }
 
@@ -52,14 +58,14 @@ export default async function whatsappRoutes(
   fastifyInstance.post<{
     Body?: { to?: string };
   }>("/whatsapp/send-open-positions-last-12h", async (request, reply) => {
-    const to = request.body?.to ?? whatsappConfig.targetJid;
+    const to = resolveTo(request.body?.to);
     const jid = to ? toJid(to) : "";
     if (!jid) {
       return reply.code(400).send({
         statusCode: 400,
         error: "Bad Request",
         message:
-          "Missing target. Provide body.to (e.g. 5511999999999) or set WHATSAPP_TARGET_JID.",
+          "Missing target. Provide body.to (e.g. 5511999999999), or body.to=\"\" with WHATSAPP_GROUP_ID, or set WHATSAPP_TARGET_JID.",
       });
     }
 

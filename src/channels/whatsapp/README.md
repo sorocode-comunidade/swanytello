@@ -14,7 +14,7 @@ All WhatsApp-specific modules use the `.whatsapp.ts` suffix so they are easy to 
 
 | File | Purpose |
 |------|---------|
-| **config.whatsapp.ts** | Loads env: `WHATSAPP_AUTH_DIR`, `WHATSAPP_TARGET_JID`, `WHATSAPP_PRINT_QR`. |
+| **config.whatsapp.ts** | Loads env: `WHATSAPP_AUTH_DIR`, `WHATSAPP_TARGET_JID`, `WHATSAPP_GROUP_ID`, `WHATSAPP_PRINT_QR`, `WHATSAPP_SEND_TIMEOUT_MS`. |
 | **client.whatsapp.ts** | Baileys socket: `useMultiFileAuthState`, connect, reconnect, `sendTextMessage(jid, text)`. Listens to `connection.update` and prints QR via **qrcode-terminal** when no session exists (see below). |
 | **sendOpenPositions.whatsapp.ts** | `sendOpenPositionsToWhatsApp(jid)` – last ETL snapshot; `sendPositionsListToWhatsApp(jid, positions, label)` – send any list (e.g. from DB). |
 
@@ -32,6 +32,7 @@ Baileys deprecated the built-in `printQRInTerminal` option. We no longer pass it
 |----------|-------------|---------|
 | `WHATSAPP_AUTH_DIR` | Directory where Baileys stores auth state (creds + keys). | `auth_info_baileys` |
 | `WHATSAPP_TARGET_JID` | Default JID when request body does not provide `to`. | (empty) |
+| `WHATSAPP_GROUP_ID` | JID used when body.to is explicitly empty string (e.g. group `123@g.us`). | (empty) |
 | `WHATSAPP_PRINT_QR` | If not `"false"`, print QR in terminal via qrcode-terminal when Baileys sends a QR in `connection.update`. | `true` |
 | `WHATSAPP_SEND_TIMEOUT_MS` | Max ms to wait for a send. After this the request returns 504 and the app keeps running (send may still complete in background). | `30000` (30s) |
 

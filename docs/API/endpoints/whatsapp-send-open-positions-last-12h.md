@@ -28,11 +28,11 @@ The message is formatted as a readable list (title, company, region, link) with 
 | Method | `POST` |
 | Path | `/api/whatsapp/send-open-positions-last-12h` |
 | Headers | `Content-Type: application/json` (optional body) |
-| Body | Optional: `{ "to": "5511999999999" }` |
+| Body | Optional: `{ "to": "5511999999999" }` or `{ "to": "" }` to use group |
 
 | Body field | Type | Required | Description |
 |------------|------|----------|-------------|
-| `to` | string | No | Target WhatsApp ID: digits only (e.g. `5511999999999`) or full JID. If omitted, uses env `WHATSAPP_TARGET_JID`. |
+| `to` | string | No | Target WhatsApp ID: digits only (e.g. `5511999999999`) or full JID. If **omitted**, uses env `WHATSAPP_TARGET_JID`. If **empty string** (`""`), uses env `WHATSAPP_GROUP_ID` (e.g. group JID like `120363123456789012@g.us`). |
 
 ---
 
@@ -51,7 +51,7 @@ Body:
 
 ### 400 Bad Request
 
-Returned when no target is provided and `WHATSAPP_TARGET_JID` is not set.
+Returned when no target can be resolved: body.to omitted and `WHATSAPP_TARGET_JID` not set, or body.to is empty string and `WHATSAPP_GROUP_ID` not set. Message: *"Missing target. Provide body.to (e.g. 5511999999999), or body.to=\"\" with WHATSAPP_GROUP_ID, or set WHATSAPP_TARGET_JID."*
 
 ### 503 Service Unavailable
 
@@ -60,6 +60,18 @@ Returned when sending via WhatsApp fails (e.g. not connected, network error), or
 ### 504 Gateway Timeout
 
 Returned when the WhatsApp connection times out.
+
+---
+
+## Environment variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `WHATSAPP_TARGET_JID` | Default target JID when `body.to` is omitted. | (empty) |
+| `WHATSAPP_GROUP_ID` | Target JID when `body.to` is explicitly `""` (e.g. group JID). | (empty) |
+| `WHATSAPP_SEND_TIMEOUT_MS` | Max ms to wait for send; after this the request returns 504. | `30000` |
+
+See [WhatsApp channel README](../../../src/channels/whatsapp/README.md) for full list (`WHATSAPP_AUTH_DIR`, `WHATSAPP_PRINT_QR`, etc.).
 
 ---
 
@@ -79,6 +91,11 @@ Returned when the WhatsApp connection times out.
 curl -s -X POST http://localhost:3000/api/whatsapp/send-open-positions-last-12h \
   -H "Content-Type: application/json" \
   -d '{"to": "5511999999999"}'
+
+# Send to group (body.to empty string → uses WHATSAPP_GROUP_ID)
+curl -s -X POST http://localhost:3000/api/whatsapp/send-open-positions-last-12h \
+  -H "Content-Type: application/json" \
+  -d '{"to": ""}'
 
 # Use WHATSAPP_TARGET_JID (no body)
 curl -s -X POST http://localhost:3000/api/whatsapp/send-open-positions-last-12h
