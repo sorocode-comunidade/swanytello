@@ -17,6 +17,7 @@
     "build": "tsc",
     "dev": "nodemon",
     "start": "tsx src/server.ts",
+    "start:prod": "node dist/server.js",
     "type-check": "tsc --noEmit",
     "test": "vitest",
     "test:run": "vitest run",

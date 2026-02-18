@@ -3,8 +3,13 @@ import fastifyJwt from "@fastify/jwt";
 import fastifyMultipart from "@fastify/multipart";
 import { DEFAULT_MAX_SIZE } from "../utils/fileStorage.js";
 
+const isProduction = process.env.NODE_ENV === "production";
+const logLevel = process.env.LOG_LEVEL ?? (isProduction ? "warn" : "info");
+
 const fastifyInstance = fastify({
-  logger: true,
+  logger: {
+    level: logLevel,
+  },
 });
 
 fastifyInstance.register(fastifyMultipart, {
