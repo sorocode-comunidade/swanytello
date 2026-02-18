@@ -25,6 +25,10 @@ One file per endpoint (or per resource). Each document includes:
 
 ---
 
+**Quick curl reference:** See [../curl-examples.md](../curl-examples.md) for copy-paste `curl` commands for all endpoints.
+
+---
+
 When adding a new endpoint:
 
 1. Create a new `.md` file in `docs/API/endpoints/` (e.g. `my-feature.md`).

@@ -33,6 +33,7 @@ Baileys deprecated the built-in `printQRInTerminal` option. We no longer pass it
 | `WHATSAPP_AUTH_DIR` | Directory where Baileys stores auth state (creds + keys). | `auth_info_baileys` |
 | `WHATSAPP_TARGET_JID` | Default JID when request body does not provide `to`. | (empty) |
 | `WHATSAPP_PRINT_QR` | If not `"false"`, print QR in terminal via qrcode-terminal when Baileys sends a QR in `connection.update`. | `true` |
+| `WHATSAPP_SEND_TIMEOUT_MS` | Max ms to wait for a send. After this the request returns 504 and the app keeps running (send may still complete in background). | `30000` (30s) |
 
 ## Changing the sender number (re-link)
 

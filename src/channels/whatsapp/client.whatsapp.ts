@@ -96,8 +96,30 @@ export async function connect(): Promise<WASocket> {
 }
 
 /**
+ * Wraps a promise in a timeout. If the promise does not settle within ms, rejects with an error (message contains "timeout" so API returns 504).
+ * The original operation may still complete in the background; we just stop waiting.
+ */
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error(`Send timeout: message not delivered within ${ms / 1000}s`));
+    }, ms);
+    promise
+      .then((value) => {
+        clearTimeout(timer);
+        resolve(value);
+      })
+      .catch((err) => {
+        clearTimeout(timer);
+        reject(err);
+      });
+  });
+}
+
+/**
  * Sends a text message to the given JID.
  * JID format: 5511999999999@s.whatsapp.net (no + or spaces).
+ * Abandons the wait after sendTimeoutMs (default 30s); the app keeps running and the caller gets a timeout error (504).
  *
  * @param jid - WhatsApp ID (e.g. 5511999999999@s.whatsapp.net or group id)
  * @param text - Plain text message
@@ -107,5 +129,8 @@ export async function sendTextMessage(
   text: string
 ): Promise<void> {
   const socket = await ensureConnected();
-  await socket.sendMessage(jid, { text });
+  await withTimeout(
+    socket.sendMessage(jid, { text }),
+    whatsappConfig.sendTimeoutMs
+  );
 }

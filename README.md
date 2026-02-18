@@ -409,7 +409,7 @@ See [Tests Documentation](tests/README.md) for detailed information on writing a
 - **[API](src/api/README.md)** – REST API (Fastify); routes, controllers, services, schemas. Tool functions for RAG.
 - **[RAG](src/rag/README.md)** – RAG logic using LangChain. Tool-based database access pattern.
 - **[RAG (docs)](docs/rag.md)** – RAG usage (GET `/api/rag/health`, POST `/api/rag/test`, POST `/api/rag/chat`), request flow diagram, and how to change the LLM (Ollama Cloud / OpenAI via .env).
-- **[API endpoints](docs/API/README.md)** – Full list of endpoints with per-route docs (health, RAG health, RAG chat, user CRUD).
+- **[API endpoints](docs/API/README.md)** – Full list of endpoints with per-route docs. **[Test via curl](docs/API/curl-examples.md)** – copy-paste commands for the terminal.
 - **Open positions & WhatsApp** – [GET /api/open-positions/last-retrieved](docs/API/endpoints/open-positions-last-retrieved.md) returns the last ETL batch. [POST /api/whatsapp/send-open-positions](docs/API/endpoints/whatsapp-send-open-positions.md) sends that snapshot to WhatsApp; [POST /api/whatsapp/send-open-positions-last-12h](docs/API/endpoints/whatsapp-send-open-positions-last-12h.md) sends **last 12h positions from the DB** (for testing WhatsApp). Set `WHATSAPP_AUTH_DIR`, optionally `WHATSAPP_TARGET_JID`. On first link, a QR code is printed in the terminal (via [qrcode-terminal](https://www.npmjs.com/package/qrcode-terminal); see [WhatsApp channel](src/channels/whatsapp/README.md)). Channel code: `src/channels/whatsapp/` (`.whatsapp.ts` suffix).
 - **[Channels](src/channels/README.md)** – WhatsApp and Discord communication implementations.
 

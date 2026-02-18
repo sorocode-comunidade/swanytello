@@ -45,6 +45,10 @@ See **[endpoints/README.md](endpoints/README.md)** for the full list and links t
 
 ---
 
+## Test via terminal (curl)
+
+- **[curl-examples.md](curl-examples.md)** – Copy-paste `curl` commands for all endpoints (public and protected). Use from the project root with the server running at `http://localhost:3000`.
+
 ## Postman
 
 - **[api/Swanytello-API.postman_collection.json](../../api/Swanytello-API.postman_collection.json)** – Import this file in Postman to get all endpoints. See [api/README.md](../../api/README.md) for how to use and set `base_url` / `token`.
