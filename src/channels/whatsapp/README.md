@@ -34,6 +34,22 @@ Baileys deprecated the built-in `printQRInTerminal` option. We no longer pass it
 | `WHATSAPP_TARGET_JID` | Default JID when request body does not provide `to`. | (empty) |
 | `WHATSAPP_PRINT_QR` | If not `"false"`, print QR in terminal via qrcode-terminal when Baileys sends a QR in `connection.update`. | `true` |
 
+## Changing the sender number (re-link)
+
+To link a **different** WhatsApp number (e.g. you changed the phone that should send the messages), remove the saved session so Baileys shows a new QR code:
+
+1. **Stop the app** (e.g. Ctrl+C).
+2. **Remove the auth directory** (from the project root). Default folder is `auth_info_baileys`; if you set `WHATSAPP_AUTH_DIR` in `.env`, use that folder name instead:
+
+   ```bash
+   rm -rf auth_info_baileys
+   ```
+
+3. **Start the app** and call a WhatsApp send endpoint. A new QR code will appear in the terminal.
+4. **Scan with the new phone**: WhatsApp → Linked devices → Link a device.
+
+After that, messages are sent from the newly linked number.
+
 ## Flow
 
 1. **First run** – When any send endpoint is called, the client connects. If no session exists, a QR code is printed; scan with WhatsApp to link.

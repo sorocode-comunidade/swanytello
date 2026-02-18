@@ -10,7 +10,7 @@
 
 Fetches **open positions created in the last 12 hours** from the database and sends them to a WhatsApp number or group via the Baileys client. Intended for **testing the WhatsApp implementation**: you get real data from the DB (positions inserted by the ETL in the last 12h) without depending on the in-memory “last retrieved” ETL snapshot.
 
-The message is formatted as a readable list (title, company, region, link) with a header like “Last 12h open positions (DB)”. If WhatsApp is not linked yet, a QR code is shown in the terminal on first send (see [WhatsApp channel README](../../../src/channels/whatsapp/README.md)).
+The message is formatted as a readable list (title, company, region, link) with a header like “Last 12h open positions (DB)”. If WhatsApp is not linked yet, a QR code is shown in the terminal on first send. To **change the sender number**, remove the auth folder and re-scan: `rm -rf auth_info_baileys` (see [WhatsApp channel README](../../../src/channels/whatsapp/README.md)).
 
 ---
 
