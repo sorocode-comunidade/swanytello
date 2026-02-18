@@ -15,6 +15,14 @@ const COMPANY_NAME_MAX = 200;
 const REGION_MAX = 200;
 const DEFAULT_REGION = "Não informada";
 
+/** Title substrings (uppercase) that indicate invalid/off-topic positions; such entries are filtered out at transform. */
+const EXCLUDED_TITLE_TERMS = ["IMOBOLIÁRIOS", "IMOBILIÁRIO", "VENDEDOR"];
+
+function isExcludedByTitle(title: string): boolean {
+  const upper = title.toUpperCase();
+  return EXCLUDED_TITLE_TERMS.some((term) => upper.includes(term));
+}
+
 function trimAndTruncate(value: string, max: number): string {
   return value.trim().slice(0, max);
 }
@@ -41,6 +49,7 @@ export function transformLinkedInJobsToOpenPositions(
       : DEFAULT_REGION;
 
     if (!title || !companyName || !link) continue;
+    if (isExcludedByTitle(title)) continue;
 
     const parsed = createOpenPositionSchema.safeParse({
       title,
