@@ -40,14 +40,14 @@ This folder holds **ETL operations** that fetch, process, and store data for the
 1. **Extract** (`extract/linkedin.scrapper.ts`): `findLinkedInJobs()` fetches public LinkedIn job search results (keywords=Desenvolvedor, location=Sorocaba). Returns `LinkedInJob[]` (title, company, link, location).
 2. **Transform** (`transform/linkedinToOpenPosition.ts`): `transformLinkedInJobsToOpenPositions(extracted)` validates and maps to `CreateOpenPositionInput[]` for the `open_position` table (trimming/truncation, default region).
 3. **Load** (`load/openPosition.load.ts`): `loadOpenPositions(data)` inserts each record using `db_operations`; skips records that already exist (same `link`) to avoid duplicates on repeated runs.
-4. **Process** (`process/etl.process.ts`): `runLinkedInEtlProcess()` runs the three phases; `startEtlScheduler()` runs it **on startup** (after the server is listening) and **every 12 hours**. Only one run at a time (guard). Called from `server.ts` after `listen`.
+4. **Process** (`process/etl.process.ts`): `runLinkedInEtlProcess()` runs the three phases. The app scheduler in `src/scheduler.ts` runs ETL **on startup** and **every 6 hours**, then sends new open positions (last 6h) to WhatsApp. Only one run at a time (guard).
 
 ## Structure
 
 - **`extract/`** – Data extraction operations (web scrapers, API calls, file reading). One subfolder or module per source or extractor type (e.g. by domain or by format).
 - **`transform/`** – Data transformation and cleaning logic (formatting, sanitization, normalization, preparation for storage).
 - **`load/`** – Data publishing operations (database storage, API delivery, file output, indexing).
-- **`process/`** – ETL orchestration and scheduling. Runs the full pipeline (extract → transform → load) on startup and every 12 hours.
+- **`process/`** – ETL orchestration. Runs the full pipeline (extract → transform → load). The app scheduler (`src/scheduler.ts`) runs it on startup and every 6 hours, then sends new positions to WhatsApp.
 
 ## Conventions
 

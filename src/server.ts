@@ -7,7 +7,7 @@ config({ path: path.resolve(process.cwd(), ".env") });
 import fastifyInstance from "./api/fastifyInstance.js";
 import mainPublicRoutes from "./api/routes/mainPublic.routes.js";
 import mainProtectedRoutes from "./api/routes/mainProtected.routes.js";
-import { startEtlScheduler } from "./etl/process/etl.process.js";
+import { startScheduledJobs } from "./scheduler.js";
 import { displayDatabaseStatus } from "./utils/dbPing.js";
 import { displayRagStatus } from "./utils/ragPing.js";
 
@@ -52,7 +52,7 @@ async function startApplication() {
       process.exit(1);
     }
     console.log(`🚀 Server listening at ${address}\n`);
-    startEtlScheduler(); // ETL on startup and every 12h
+    startScheduledJobs(); // ETL + WhatsApp send every 6h
   });
 }
 

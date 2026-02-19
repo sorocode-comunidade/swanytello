@@ -1,6 +1,6 @@
 /**
  * ETL process: runs extract → transform → load for LinkedIn open positions.
- * Intended to run on startup and every 12 hours. Only one run executes at a time.
+ * Intended to run on startup and every 6 hours. Only one run executes at a time.
  */
 
 import { findLinkedInJobs } from "../extract/index.js";
@@ -8,7 +8,8 @@ import { transformLinkedInJobsToOpenPositions } from "../transform/index.js";
 import { loadOpenPositions } from "../load/index.js";
 import { setLastRetrieved } from "../lastRetrievedStore.js";
 
-const ETL_INTERVAL_MS = 12 * 60 * 60 * 1000; // 12 hours
+/** Interval for scheduled ETL runs (used by app scheduler, not by this module). */
+export const ETL_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6 hours
 
 let isRunning = false;
 
@@ -73,26 +74,21 @@ export async function runLinkedInEtlProcess(): Promise<EtlProcessResult> {
 }
 
 /**
- * Starts the ETL scheduler: runs the process once immediately (non-blocking),
- * then every 12 hours. Call once from server startup.
+ * Runs the ETL process once (non-blocking). Used by the app scheduler for the 6h schedule.
+ * For backwards compatibility; the 6h interval is handled by the app scheduler.
  */
-export function startEtlScheduler(): void {
-  const run = () => {
-    runLinkedInEtlProcess()
-      .then((r) => {
-        if (r.error) {
-          console.warn("[ETL] Run failed:", r.error);
-        } else {
-          console.log(
-            `[ETL] Done: extracted=${r.extracted} transformed=${r.transformed} created=${r.created} skipped=${r.skipped}`
-          );
-        }
-      })
-      .catch((err) => {
-        console.warn("[ETL] Error:", err);
-      });
-  };
-
-  run(); // run on startup
-  setInterval(run, ETL_INTERVAL_MS);
+export function runEtlOnce(): void {
+  runLinkedInEtlProcess()
+    .then((r) => {
+      if (r.error) {
+        console.warn("[ETL] Run failed:", r.error);
+      } else {
+        console.log(
+          `[ETL] Done: extracted=${r.extracted} transformed=${r.transformed} created=${r.created} skipped=${r.skipped}`
+        );
+      }
+    })
+    .catch((err) => {
+      console.warn("[ETL] Error:", err);
+    });
 }

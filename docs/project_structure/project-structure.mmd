@@ -184,16 +184,16 @@ flowchart LR
     E_Extract --> E_Transform --> E_Load
   end
   E_Load --> DB[(open_position table)]
-  Scheduler[startEtlScheduler] --> E_Extract
-  Note[On startup + every 12h]
+  Scheduler[startScheduledJobs] --> E_Extract
+  Note[On startup + every 6h]
 
-%% --- 5. Startup checks (DB + RAG) and ETL scheduler ---
+%% --- 5. Startup checks (DB + RAG) and scheduler ---
 sequenceDiagram
   participant Server as server.ts
   participant Dotenv as dotenv
   participant DBPing as utils/dbPing
   participant RAGPing as utils/ragPing
-  participant ETL as etl/process
+  participant Scheduler as scheduler.ts
 
   Server->>Dotenv: config(.env)
   Server->>DBPing: displayDatabaseStatus()
@@ -201,8 +201,8 @@ sequenceDiagram
   Server->>RAGPing: displayRagStatus()
   RAGPing->>RAGPing: checkRagStatus() (Ollama Cloud / OpenAI)
   Server->>Server: Register routes, listen
-  Server->>ETL: startEtlScheduler()
-  ETL->>ETL: run once (startup), then every 12h
+  Server->>Scheduler: startScheduledJobs()
+  Scheduler->>Scheduler: run once (startup), then every 6h: ETL then WhatsApp
 
 %% --- 6. WhatsApp send last 12h (POST /api/whatsapp/send-open-positions-last-12h) ---
 sequenceDiagram

@@ -6,6 +6,7 @@ export * from "./transform/index.js";
 export * from "./load/index.js";
 export {
   runLinkedInEtlProcess,
-  startEtlScheduler,
+  runEtlOnce,
+  ETL_INTERVAL_MS,
   type EtlProcessResult,
 } from "./process/etl.process.js";

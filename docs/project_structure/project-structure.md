@@ -235,16 +235,16 @@ flowchart LR
     E_Extract --> E_Transform --> E_Load
   end
   E_Load --> DB[(open_position table)]
-  Scheduler[startEtlScheduler] --> E_Extract
+  Scheduler[startScheduledJobs] --> E_Extract
 ```
 
 **See**: [ETL README](../../src/etl/README.md) and [Architecture](architecture.md) (ETL section).
 
 ---
 
-## 6. Startup sequence (DB + RAG checks and ETL scheduler)
+## 6. Startup sequence (DB + RAG checks and scheduler)
 
-On startup, the server loads `.env`, runs the database and RAG connectivity checks, registers routes, listens, then starts the ETL scheduler (run once, then every 12h).
+On startup, the server loads `.env`, runs the database and RAG connectivity checks, registers routes, listens, then starts the scheduled jobs (ETL then WhatsApp send; run once, then every 6h).
 
 ```mermaid
 sequenceDiagram
@@ -252,7 +252,7 @@ sequenceDiagram
   participant Dotenv as dotenv
   participant DBPing as utils/dbPing
   participant RAGPing as utils/ragPing
-  participant ETL as etl/process
+  participant Scheduler as scheduler.ts
 
   Server->>Dotenv: config(.env)
   Server->>DBPing: displayDatabaseStatus()
@@ -260,8 +260,8 @@ sequenceDiagram
   Server->>RAGPing: displayRagStatus()
   RAGPing->>RAGPing: checkRagStatus() (Ollama Cloud / OpenAI)
   Server->>Server: Register routes, listen
-  Server->>ETL: startEtlScheduler()
-  ETL->>ETL: run once (startup), then every 12h
+  Server->>Scheduler: startScheduledJobs()
+  Scheduler->>Scheduler: run once (startup), then every 6h: ETL then WhatsApp
 ```
 
 ---

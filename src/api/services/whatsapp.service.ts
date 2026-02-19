@@ -12,6 +12,33 @@ import {
 const LAST_12H_LABEL = "Last 12h open positions (DB)";
 
 /**
+ * Fetches open positions created in the last N hours from the DB and sends them to the given WhatsApp JID.
+ * Used by the scheduled job (N=6) and by POST /api/whatsapp/send-open-positions-last-12h (N=12).
+ *
+ * @param jid - WhatsApp ID (e.g. 5511999999999@s.whatsapp.net or group JID)
+ * @param hours - Number of hours to look back (e.g. 6 or 12)
+ * @param label - Optional label for the message (default: "Last {hours}h open positions (DB)")
+ * @returns Result with sent flag and message or error
+ */
+export async function sendOpenPositionsLastHoursToWhatsApp(
+  jid: string,
+  hours: number,
+  label?: string
+): Promise<SendOpenPositionsResult> {
+  const positions = await getOpenPositionsCreatedInLastHours(hours);
+  const list = positions
+    .filter((p): p is NonNullable<typeof p> => p != null)
+    .map((p) => ({
+      title: p.title,
+      link: p.link,
+      companyName: p.companyName,
+      region: p.region,
+    }));
+  const messageLabel = label ?? `Last ${hours}h open positions (DB)`;
+  return sendPositionsListToWhatsApp(jid, list, messageLabel);
+}
+
+/**
  * Fetches open positions created in the last 12 hours from the DB and sends them to the given WhatsApp JID.
  * Used by POST /api/whatsapp/send-open-positions-last-12h.
  *
@@ -21,14 +48,5 @@ const LAST_12H_LABEL = "Last 12h open positions (DB)";
 export async function sendLast12hOpenPositionsToWhatsApp(
   jid: string
 ): Promise<SendOpenPositionsResult> {
-  const positions = await getOpenPositionsCreatedInLastHours(12);
-  const list = positions
-    .filter((p): p is NonNullable<typeof p> => p != null)
-    .map((p) => ({
-      title: p.title,
-      link: p.link,
-      companyName: p.companyName,
-      region: p.region,
-    }));
-  return sendPositionsListToWhatsApp(jid, list, LAST_12H_LABEL);
+  return sendOpenPositionsLastHoursToWhatsApp(jid, 12, LAST_12H_LABEL);
 }

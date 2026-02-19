@@ -5,17 +5,18 @@ This folder holds **ETL orchestration and scheduling**: running the full pipelin
 ## Purpose
 
 - **Orchestrate** the three ETL phases in order for a given pipeline (e.g. LinkedIn jobs → open_position).
-- **Schedule** runs so data is refreshed automatically: once on **startup** (after the server is listening) and then **every 12 hours**.
+- **Schedule** runs so data is refreshed automatically: once on **startup** (after the server is listening) and then **every 6 hours** (via the app scheduler in `src/scheduler.ts`).
 
 ## Implemented
 
 - **etl.process.ts**
   - **`runLinkedInEtlProcess()`** – Runs extract (`findLinkedInJobs`) → transform (`transformLinkedInJobsToOpenPositions`) → load (`loadOpenPositions`). Returns `{ extracted, transformed, created, skipped, error? }`. Only one run at a time (guard).
-  - **`startEtlScheduler()`** – Runs the process once immediately (non-blocking), then every 12 hours via `setInterval`. Called from `server.ts` after `listen`.
+  - **`runEtlOnce()`** – Runs the process once (non-blocking). Used by the app scheduler.
+  - **`ETL_INTERVAL_MS`** – Interval constant (6 hours). The actual 6h schedule is in `src/scheduler.ts`, which runs ETL then sends new open positions to WhatsApp.
 
 ## Usage
 
-The scheduler is started automatically when the application starts; no manual call is required. To change the interval, edit `ETL_INTERVAL_MS` in `etl.process.ts` (default: 12 hours).
+The app scheduler (`startScheduledJobs()` in `src/scheduler.ts`) is started from `server.ts` after listen. It runs ETL then WhatsApp send every 6 hours. To change the interval, edit `ETL_INTERVAL_MS` in `etl.process.ts` and use it in `scheduler.ts`.
 
 ## See also
 

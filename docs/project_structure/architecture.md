@@ -88,7 +88,7 @@ Swanytello is a **monolithic application** that combines multiple communication 
 - **`extract/`** – Web scrapers and data extraction (e.g. LinkedIn jobs via `findLinkedInJobs()`)
 - **`transform/`** – Data standardization, cleaning, and formatting (e.g. `transformLinkedInJobsToOpenPositions()` → `CreateOpenPositionInput[]`)
 - **`load/`** – Database storage (e.g. `loadOpenPositions()` persists to `open_position`, skipping duplicates by link)
-- **`process/`** – ETL orchestration and scheduling: `runLinkedInEtlProcess()` runs extract → transform → load; `startEtlScheduler()` runs it **on startup** and **every 12 hours** (called from `server.ts` after listen)
+- **`process/`** – ETL orchestration: `runLinkedInEtlProcess()` runs extract → transform → load. The app scheduler (`src/scheduler.ts`) runs ETL **on startup** and **every 6 hours**, then sends new open positions (last 6h) to WhatsApp (called from `server.ts` after listen)
 
 **Implemented pipeline**: LinkedIn job search (extract) → transform to open_position schema → load into database. Only one ETL run at a time (guard in `etl.process.ts`).
 
