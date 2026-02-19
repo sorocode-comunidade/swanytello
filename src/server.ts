@@ -1,3 +1,4 @@
+import "./log/terminal.js";
 import path from "node:path";
 import { config } from "dotenv";
 
