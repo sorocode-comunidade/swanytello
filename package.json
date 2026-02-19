@@ -14,7 +14,7 @@
   "type": "module",
   "main": "dist/server.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && mkdir -p dist/generated && cp -r generated/prisma dist/generated/",
     "dev": "nodemon",
     "start": "tsx src/server.ts",
     "start:prod": "node dist/server.js",
