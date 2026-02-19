@@ -9,6 +9,20 @@ import { sendTextMessage } from "./client.whatsapp.js";
 
 const MAX_MESSAGE_LENGTH = 65000;
 
+/** Messages sent when there are no open positions to send (alternate between them). */
+const NO_POSITIONS_MESSAGES = [
+  "Nenhuma vaga nova ao Sol por enquanto pessoal.",
+  "Não há vagas!",
+] as const;
+
+let noPositionsMessageIndex = 0;
+
+function getNextNoPositionsMessage(): string {
+  const msg = NO_POSITIONS_MESSAGES[noPositionsMessageIndex];
+  noPositionsMessageIndex = (noPositionsMessageIndex + 1) % NO_POSITIONS_MESSAGES.length;
+  return msg;
+}
+
 export type PositionForMessage = {
   title: string;
   companyName: string;
@@ -76,10 +90,14 @@ export async function sendOpenPositionsToWhatsApp(
 ): Promise<SendOpenPositionsResult> {
   const snapshot = getLastRetrieved();
   if (!snapshot || snapshot.positions.length === 0) {
-    return {
-      sent: false,
-      message: "No open positions available. Run ETL first (or wait for the next run).",
-    };
+    try {
+      const text = getNextNoPositionsMessage();
+      await sendTextMessage(jid, text);
+      return { sent: true, message: "Sent no-positions message." };
+    } catch (err) {
+      const error = err instanceof Error ? err.message : String(err);
+      return { sent: false, error };
+    }
   }
 
   try {
@@ -111,10 +129,14 @@ export async function sendPositionsListToWhatsApp(
   label: string
 ): Promise<SendOpenPositionsResult> {
   if (positions.length === 0) {
-    return {
-      sent: false,
-      message: "No positions to send.",
-    };
+    try {
+      const text = getNextNoPositionsMessage();
+      await sendTextMessage(jid, text);
+      return { sent: true, message: "Sent no-positions message." };
+    } catch (err) {
+      const error = err instanceof Error ? err.message : String(err);
+      return { sent: false, error };
+    }
   }
   try {
     const text = formatPositionsListWithLabel(positions, label, positions.length);
