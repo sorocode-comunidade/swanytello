@@ -23,17 +23,22 @@ let sock: WASocket | null = null;
 let connecting = false;
 
 /**
- * Ensures the socket is connected. If not, starts the connection (auth from config dir).
+ * Ensures the socket is connected and connection is open. If not, starts the connection (auth from config dir).
+ * Resolves only when connection === "open" so sendMessage() does not run before user/session is ready (avoids "reading 'id'" error).
  * On first run, a QR code is shown in the terminal (or set WHATSAPP_PRINT_QR=false).
  */
 async function ensureConnected(): Promise<WASocket> {
   if (sock) return sock;
   if (connecting) {
-    for (let i = 0; i < 30; i++) {
-      await new Promise((r) => setTimeout(r, 500));
+    // Wait for the in-progress connection to open or fail (so we can retry)
+    const waitMs = 90_000; // 90s when e.g. reconnect is waiting for QR
+    const stepMs = 500;
+    for (let elapsed = 0; elapsed < waitMs; elapsed += stepMs) {
+      await new Promise((r) => setTimeout(r, stepMs));
       if (sock) return sock;
+      if (!connecting) break; // other attempt failed; we'll try below
     }
-    throw new Error("WhatsApp connection timeout");
+    if (!sock && connecting) throw new Error("WhatsApp connection timeout");
   }
 
   connecting = true;
@@ -46,34 +51,42 @@ async function ensureConnected(): Promise<WASocket> {
       auth: state,
     });
 
-    socket.ev.on("connection.update", (update) => {
-      if (update.qr != null && whatsappConfig.printQRInTerminal) {
-        console.log("\n[WhatsApp] Scan the QR code below with your phone:\n");
-        qrcodeTerminal.generate(update.qr, { small: true });
-      }
-      const { connection, lastDisconnect } = update;
-      if (connection === "close") {
-        const statusCode = (lastDisconnect?.error as Boom)?.output?.statusCode;
-        const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
-        if (!shouldReconnect) {
-          sock = null;
+    const connectionOpen = new Promise<WASocket>((resolve, reject) => {
+      socket.ev.on("connection.update", (update) => {
+        if (update.qr != null && whatsappConfig.printQRInTerminal) {
+          console.log("\n[WhatsApp] Scan the QR code below with your phone:\n");
+          qrcodeTerminal.generate(update.qr, { small: true });
         }
-        if (statusCode === DisconnectReason.loggedOut) {
-          console.warn("[WhatsApp] Logged out. Scan QR again to reconnect.");
-        } else if (shouldReconnect) {
-          console.warn("[WhatsApp] Connection closed, reconnecting...");
-          sock = null;
-          ensureConnected().catch(console.error);
+        const { connection, lastDisconnect } = update;
+        if (connection === "close") {
+          const statusCode = (lastDisconnect?.error as Boom)?.output?.statusCode;
+          const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
+          if (!shouldReconnect) {
+            sock = null;
+          }
+          if (statusCode === DisconnectReason.loggedOut) {
+            console.warn("[WhatsApp] Logged out. Scan QR again to reconnect.");
+          } else if (shouldReconnect) {
+            console.warn("[WhatsApp] Connection closed, reconnecting...");
+            sock = null;
+            ensureConnected().catch(console.error);
+          }
+          if (connecting) {
+            sock = null;
+            reject(new Error("WhatsApp connection closed before open"));
+          }
+        } else if (connection === "open") {
+          console.log("[WhatsApp] Connected.");
+          sock = socket;
+          resolve(socket);
         }
-      } else if (connection === "open") {
-        console.log("[WhatsApp] Connected.");
-      }
+      });
     });
 
     socket.ev.on("creds.update", saveCreds);
 
-    sock = socket;
-    return socket;
+    const openSocket = await connectionOpen;
+    return openSocket;
   } finally {
     connecting = false;
   }

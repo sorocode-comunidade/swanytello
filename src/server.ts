@@ -8,6 +8,7 @@ config({ path: path.resolve(process.cwd(), ".env") });
 import fastifyInstance from "./api/fastifyInstance.js";
 import mainPublicRoutes from "./api/routes/mainPublic.routes.js";
 import mainProtectedRoutes from "./api/routes/mainProtected.routes.js";
+import { connectWhatsApp } from "./channels/index.js";
 import { startScheduledJobs } from "./scheduler.js";
 import { displayDatabaseStatus } from "./utils/dbPing.js";
 import { displayRagStatus } from "./utils/ragPing.js";
@@ -53,6 +54,8 @@ async function startApplication() {
       process.exit(1);
     }
     console.log(`🚀 Server listening at ${address}\n`);
+    // Start WhatsApp connection so QR code appears at startup when not logged in
+    connectWhatsApp().catch((err) => console.warn("[WhatsApp] Startup connection:", err?.message ?? err));
     startScheduledJobs(); // ETL + WhatsApp send every 6h
   });
 }

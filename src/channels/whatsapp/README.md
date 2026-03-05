@@ -52,6 +52,19 @@ To link a **different** WhatsApp number (e.g. you changed the phone that should 
 
 After that, messages are sent from the newly linked number.
 
+## Baileys v7 and auth (clear & re-pair)
+
+We use **Baileys v7** (`@whiskeysockets/baileys` ^7.x). v7 requires the auth state to support the `lid-mapping`, `device-list`, and `tctoken` keys ([migration guide](https://baileys.wiki/docs/migration/to-v7.0.0/)).
+
+- **We use `useMultiFileAuthState`** – it supports these keys; no custom auth backend is required. A **fresh auth directory** (after removing the old one) is enough.
+- If you see **"connection closed before open"**, **"Cannot read properties of undefined (reading 'id')"**, or unstable connections after upgrading to v7 (or with an old session), **clear auth and re-pair**:
+  1. Stop the app.
+  2. Remove the auth directory (default `auth_info_baileys`, or the value of `WHATSAPP_AUTH_DIR`):  
+     `rm -rf auth_info_baileys`
+  3. Start the app; a QR code is shown at startup (or on first send). Scan with WhatsApp to create a new v7-style session with the right keys.
+
+The client already waits for `connection === "open"` before sending and retries when the in-progress connection fails; those fixes handle timing and flaky connections but do not replace having a v7-compatible session.
+
 ## Flow
 
 1. **First run** – When any send endpoint is called, the client connects. If no session exists, a QR code is printed; scan with WhatsApp to link.
